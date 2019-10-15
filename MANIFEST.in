@@ -1,0 +1,10 @@
+recursive-include src/sagemaker *
+
+include VERSION
+include LICENSE
+include README.md
+
+prune tests
+
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
