@@ -1,0 +1,31 @@
+version: 0.1
+
+phases:
+  build:
+    commands:
+      - IGNORE_COVERAGE=-
+
+      # run integration tests
+      - start_time=`date +%s`
+      - |
+        if has-matching-changes "tests/" "src/*.py" "setup.py" "setup.cfg" "buildspec.yml"; then
+          python3 -u ci-scripts/queue_build.py
+        fi
+      - ./ci-scripts/displaytime.sh 'build queue' $start_time
+
+      - start_time=`date +%s`
+      - |
+        if has-matching-changes "tests/" "src/*.py" "setup.py" "setup.cfg" "buildspec.yml"; then
+          tox -e py36 -- tests/integ --boto-config '{"region_name": "us-east-2"}'
+        fi
+      - ./ci-scripts/displaytime.sh 'py36 tests/integ' $start_time
+
+  post_build:
+    finally:
+      - |
+        if [ -d "ci-lock" ]; then
+          FILENAME=$(ls ci-lock/ || true)
+          ACCOUNT=$(aws sts get-caller-identity --output text | awk '{print $1}')
+          S3_BUCKET_DIR=s3://sagemaker-us-west-2-${ACCOUNT}/ci-lock/
+          aws s3 rm ${S3_BUCKET_DIR}${FILENAME}
+        fi
