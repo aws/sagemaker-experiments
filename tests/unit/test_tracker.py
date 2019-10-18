@@ -85,7 +85,7 @@ def test_create_tracker_in_notebook(mock_uuid, mock_boto_client):
 
 
 @mock.patch.object(uuid, "uuid4")
-def test_create_tracker_in_notebook_no_source_arn(mock_uuid,mock_boto_client):
+def test_create_tracker_in_notebook_no_source_arn(mock_uuid, mock_boto_client):
     mock_uuid.return_value = "uuid"
     tracker = Tracker(display_name="PreProcessing", sagemaker_boto_client=mock_boto_client)
 
