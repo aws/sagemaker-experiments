@@ -38,7 +38,7 @@ def test_create_tracker_in_training_job(mock_boto_client):
         "TrialComponents": [
             {
                 "TrialComponentName": "abcd",
-                "TrialComponentArn": "arn:aws:sagemaker:test:1234:experiment-trial-component/abcd"
+                "TrialComponentArn": "arn:aws:sagemaker:test:1234:experiment-trial-component/abcd",
             }
         ]
     }

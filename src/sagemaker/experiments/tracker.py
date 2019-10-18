@@ -14,7 +14,6 @@
 from __future__ import absolute_import
 
 import os
-import sys
 import uuid
 import boto3
 
@@ -33,11 +32,11 @@ class Tracker(object):
         if self.source_arn and self._has_auto_created_trial_component(self.source_arn):
             try:
                 self.component_name = self._get_component_name(self.source_arn)
-            except:
-                # We do not want training job to fail if we cant find the auto-created component
-                e = sys.exc_info()
-                print("Unable to get the trial component name for "
-                      "source arn : {} due to : {}".format(self.source_arn, str(e)))
+            except Exception as e:  # pylint: disable=W0703
+                print(
+                    "Unable to get the trial component name for "
+                    "source arn : {} due to : {}".format(self.source_arn, str(e))
+                )
                 self.failed_mode = True
         else:
             if not display_name:
@@ -74,9 +73,8 @@ class Tracker(object):
         )
 
     def _get_component_name(self, source_arn):
-        response = self.sagemaker_boto_client.list_trial_components(
-            SourceArn=source_arn
-        )
+        """Placeholder docstring"""
+        response = self.sagemaker_boto_client.list_trial_components(SourceArn=source_arn)
         component_summaries = response.get("TrialComponents")
         # There should only be one trial component for a given source arn
         summary = component_summaries[0]
