@@ -69,14 +69,11 @@ def test_create_tracker_in_training_job_failed_mode(mock_boto_client):
 @mock.patch.object(uuid, "uuid4")
 def test_create_tracker_in_notebook(mock_uuid, mock_boto_client):
     mock_uuid.return_value = "uuid"
-    tracker = Tracker(
-        display_name="Training", sagemaker_boto_client=mock_boto_client
-    )
+    tracker = Tracker(display_name="Training", sagemaker_boto_client=mock_boto_client)
     assert tracker.component_name == "Training-uuid"
     assert not tracker.failed_mode
     mock_boto_client.create_trial_component.assert_called_once_with(
-        TrialComponentName=tracker.component_name,
-        DisplayName="Training",
+        TrialComponentName=tracker.component_name, DisplayName="Training"
     )
 
 
@@ -89,8 +86,7 @@ def test_create_tracker_in_notebook_no_source_arn(mock_uuid, mock_boto_client):
     assert tracker.component_name == "PreProcessing-uuid"
     assert not tracker.failed_mode
     mock_boto_client.create_trial_component.assert_called_once_with(
-        TrialComponentName=tracker.component_name,
-        DisplayName="PreProcessing",
+        TrialComponentName=tracker.component_name, DisplayName="PreProcessing"
     )
 
 

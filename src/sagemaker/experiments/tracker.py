@@ -47,8 +47,7 @@ class Tracker(object):
     def _create_trial_component(self, component_name, display_name):
         """Placeholder docstring"""
         self.sagemaker_boto_client.create_trial_component(
-            TrialComponentName=component_name,
-            DisplayName=display_name
+            TrialComponentName=component_name, DisplayName=display_name
         )
 
     @staticmethod
