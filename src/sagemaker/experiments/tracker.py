@@ -23,9 +23,9 @@ class Tracker(object):
     Create a tracker to log metrics and artifacts.
     """
 
-    def __init__(self, name=None, display_name=None, source_arn=None, sagemaker_boto_client=None):
+    def __init__(self, name=None, display_name=None, sagemaker_boto_client=None):
         self.sagemaker_boto_client = sagemaker_boto_client or self._default_sagemaker_boto_client()
-        self.source_arn = source_arn or self._resolve_source_arn()
+        self.source_arn = self._resolve_source_arn()
         self.failed_mode = False
         self.component_name = None
 
@@ -42,14 +42,13 @@ class Tracker(object):
             if not display_name:
                 raise ValueError("Please specify a valid display_name.")
             self.component_name = name if name else self._generate_component_name(display_name)
-            self._create_trial_component(self.component_name, display_name, self.source_arn)
+            self._create_trial_component(self.component_name, display_name)
 
-    def _create_trial_component(self, component_name, display_name, source_arn):
+    def _create_trial_component(self, component_name, display_name):
         """Placeholder docstring"""
         self.sagemaker_boto_client.create_trial_component(
             TrialComponentName=component_name,
-            DisplayName=display_name,
-            Source={"SourceArn": source_arn},
+            DisplayName=display_name
         )
 
     @staticmethod

@@ -68,19 +68,15 @@ def test_create_tracker_in_training_job_failed_mode(mock_boto_client):
 
 @mock.patch.object(uuid, "uuid4")
 def test_create_tracker_in_notebook(mock_uuid, mock_boto_client):
-    notebook_arn = "arn:aws:sagemaker:test:1234:notebook-instance/abcd"
     mock_uuid.return_value = "uuid"
     tracker = Tracker(
-        display_name="Training", source_arn=notebook_arn, sagemaker_boto_client=mock_boto_client
+        display_name="Training", sagemaker_boto_client=mock_boto_client
     )
-
-    assert tracker.source_arn == notebook_arn
     assert tracker.component_name == "Training-uuid"
     assert not tracker.failed_mode
     mock_boto_client.create_trial_component.assert_called_once_with(
         TrialComponentName=tracker.component_name,
         DisplayName="Training",
-        Source={"SourceArn": notebook_arn},
     )
 
 
@@ -95,7 +91,6 @@ def test_create_tracker_in_notebook_no_source_arn(mock_uuid, mock_boto_client):
     mock_boto_client.create_trial_component.assert_called_once_with(
         TrialComponentName=tracker.component_name,
         DisplayName="PreProcessing",
-        Source={"SourceArn": None},
     )
 
 
