@@ -15,6 +15,7 @@ from __future__ import absolute_import
 import os
 import pytest
 import mock
+import uuid
 
 from sagemaker.experiments.tracker import Tracker
 
@@ -65,14 +66,16 @@ def test_create_tracker_in_training_job_failed_mode(mock_boto_client):
     mock_boto_client.create_trial_component.assert_not_called()
 
 
-def test_create_tracker_in_notebook(mock_boto_client):
+@mock.patch.object(uuid, "uuid4")
+def test_create_tracker_in_notebook(mock_uuid, mock_boto_client):
     notebook_arn = "arn:aws:sagemaker:test:1234:notebook-instance/abcd"
+    mock_uuid.return_value = "uuid"
     tracker = Tracker(
         display_name="Training", source_arn=notebook_arn, sagemaker_boto_client=mock_boto_client
     )
 
     assert tracker.source_arn == notebook_arn
-    assert tracker.component_name.startswith("Training")
+    assert tracker.component_name == "Training-uuid"
     assert not tracker.failed_mode
     mock_boto_client.create_trial_component.assert_called_once_with(
         TrialComponentName=tracker.component_name,
@@ -81,11 +84,13 @@ def test_create_tracker_in_notebook(mock_boto_client):
     )
 
 
-def test_create_tracker_in_notebook_no_source_arn(mock_boto_client):
+@mock.patch.object(uuid, "uuid4")
+def test_create_tracker_in_notebook_no_source_arn(mock_uuid,mock_boto_client):
+    mock_uuid.return_value = "uuid"
     tracker = Tracker(display_name="PreProcessing", sagemaker_boto_client=mock_boto_client)
 
     assert not tracker.source_arn
-    assert tracker.component_name.startswith("PreProcessing")
+    assert tracker.component_name == "PreProcessing-uuid"
     assert not tracker.failed_mode
     mock_boto_client.create_trial_component.assert_called_once_with(
         TrialComponentName=tracker.component_name,
