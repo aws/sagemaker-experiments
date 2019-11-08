@@ -19,7 +19,7 @@ from smexperiments import _base_types
 def sagemaker_boto_client():
     return unittest.mock.Mock()
 
-"""
+
 def test_from_boto():
     obj = _base_types.ApiObject.from_boto(dict(A=10))
     assert obj.a == 10
@@ -27,7 +27,7 @@ def test_from_boto():
 
 def test_to_boto():
     assert dict(A=10) == _base_types.ApiObject.to_boto({'a': 10})
-"""
+
 
 def test_custom_type():
     class TestTypeA(_base_types.ApiObject):

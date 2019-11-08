@@ -35,7 +35,8 @@ class SageMakerFileMetricsWriter(object):
     def log_metric(self, metric_name, value, timestamp=None, iteration_number=None):
         self._write_metric_value(
             _RawMetricData(
-                metric_name=metric_name, value=value, timestamp=timestamp, iteration_number=iteration_number)
+                metric_name=metric_name, value=value, timestamp=timestamp, iteration_number=iteration_number,
+                record_type='File')
         )
 
     def close(self):

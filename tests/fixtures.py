@@ -241,8 +241,4 @@ def training_job_name(sagemaker_boto_client, training_role_arn, training_docker_
         },
 
     )
-    # private static final String TEST_METRIC_NAME = "test-metric";
-    #      private static final String TEST_METRIC_REGEX = "test-metric = (.*)";
-    #      private static final String TEST_METRIC_REGEX = "test-metric = (.*)";
-    #
     return training_job_name
