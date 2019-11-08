@@ -1,0 +1,10 @@
+recursive-include src/sagemaker-tracking *
+
+include VERSION
+include LICENSE.txt
+include README.rst
+
+prune tests
+
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
