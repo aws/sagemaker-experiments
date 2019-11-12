@@ -10,10 +10,32 @@
 # distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
+import enum
+import os
 import random
 import time
 
+import boto3
 import botocore
+
+
+TRAINING_JOB_ARN_ENV = 'TRAINING_JOB_ARN'
+TRAINING_JOB_NAME_ENV = 'TRAINING_JOB_NAME'
+
+
+def sagemaker_client():
+    if os.environ.get('SAGEMAKER_ENDPOINT', '').strip():
+        return boto_session().client('sagemaker-experiments', endpoint_url=os.environ.get('SAGEMAKER_ENDPOINT'))
+    else:
+        return boto_session().client('sagemaker-experiments')
+
+
+def boto_session():
+    if resolve_source_arn_from_environment():
+        region_name = resolve_source_arn_from_environment().split(':')[3]
+        return boto3.Session(region_name=region_name)
+    else:
+        return boto3.Session()
 
 
 def suffix():
@@ -55,3 +77,26 @@ def get_or_create_default_bucket(boto_session, default_bucket_prefix='sagemaker'
         else:
             raise
     return default_bucket
+
+
+class EnvironmentType(enum.Enum):
+    SageMakerTrainingJob = 1
+    SageMakerProcessingJob = 2
+
+
+def resolve_environment_type():
+    if TRAINING_JOB_ARN_ENV in os.environ:
+        return EnvironmentType.SageMakerTrainingJob
+    elif False:  # TODO
+        return EnvironmentType.SageMakerProcessingJob
+    else:
+        return None
+
+
+def resolve_source_arn_from_environment():
+    if resolve_environment_type() == EnvironmentType.SageMakerTrainingJob:
+        return os.environ.get(TRAINING_JOB_ARN_ENV)
+    elif resolve_environment_type() == EnvironmentType.SageMakerProcessingJob:
+        return None  # TODO
+    else:
+        return None

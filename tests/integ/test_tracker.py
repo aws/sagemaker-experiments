@@ -15,23 +15,6 @@ def test_load_trial_component_fails(sagemaker_boto_client):
         tracker.Tracker.load(sagemaker_boto_client=sagemaker_boto_client)
 
 
-def test_load_trial_component_mock_training_job(sagemaker_boto_client):
-    # Update os environ
-    training_job_name = 'smexperiments-integ-2d138285-f0d3-48be-ad1e-0296058876d0'
-    training_job_arn = sagemaker_boto_client.describe_training_job(TrainingJobName=training_job_name)['TrainingJobArn']
-
-    old_value = os.environ.get(tracker.TRAINING_JOB_ARN_ENV)
-    try:
-        os.environ[tracker.TRAINING_JOB_ARN_ENV] = training_job_arn
-        tracker_obj = tracker.Tracker.load(sagemaker_boto_client=sagemaker_boto_client)
-        assert tracker_obj._trial_component
-    finally:
-        if old_value is not None:
-            os.environ[tracker.TRAINING_JOB_ARN_ENV] = old_value
-        else:
-            del os.environ[tracker.TRAINING_JOB_ARN_ENV]
-
-
 def test_create(sagemaker_boto_client):
     tracker_obj = tracker.Tracker.create(sagemaker_boto_client=sagemaker_boto_client)
     try:
@@ -99,12 +82,3 @@ def test_create_default_bucket(boto3_session):
     finally:
         s3_client.delete_bucket(Bucket=bucket)
 
-
-def test_log_metric(trial_component_obj, sagemaker_boto_client):
-    metric_name = name()
-    N = 25
-    with tracker.Tracker.load(trial_component_obj.trial_component_name, sagemaker_boto_client=sagemaker_boto_client)\
-            as tracker_obj:
-        for i in range(N):
-            tracker_obj.log_metric(metric_name, i)
-    expect_stat(sagemaker_boto_client, trial_component_obj.trial_component_arn, metric_name, 'Count', N)

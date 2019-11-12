@@ -10,6 +10,9 @@ import docker
 import botocore
 
 from tests.fixtures import *
+from tests.helpers import *
+
+from smexperiments import api_types
 
 
 @pytest.fixture(scope='session')
@@ -24,6 +27,10 @@ def training_docker_image():
     [sdist_path] = glob.glob('dist/smexperiments*')
     shutil.copy(sdist_path, 'tests/integ-jobs/docker/smexperiments-1.0.0.tar.gz')
 
+    if not os.path.exists('tests/integ-jobs/docker/boto'):
+        os.makedirs('tests/integ-jobs/docker/boto')
+    
+    shutil.copy('boto/sagemaker-experiments-2017-07-24.normal.json', 'tests/integ-jobs/docker/boto/sagemaker-experiments-2017-07-24.normal.json')
     repository_name = "smexperiments-test"
     try:
         ecr_client.create_repository(repositoryName=repository_name)
@@ -46,8 +53,9 @@ def training_docker_image():
         tag=tag,
         cache_from=[tag],
         buildargs={'library': 'smexperiments-1.0.0.tar.gz',
-                   'botomodel': 'boto/sagemaker-2017-07-24.normal.json',
-                   'script': 'scripts/script.py'})
+                   'botomodel': 'boto/sagemaker-experiments-2017-07-24.normal.json',
+                   'script': 'scripts/script.py',
+                   'endpoint': os.environ.get('SAGEMAKER_ENDPOINT', '')})
     client.images.push(tag, auth_config={'username': username, 'password': password})
     return tag
 
@@ -127,16 +135,47 @@ def test_track_from_training_job(sagemaker_boto_client, training_job_name):
     wait_for_job(training_job_name, sagemaker_boto_client)
     trial_component_name = list(trial_component.TrialComponent.\
                                 list(source_arn=source_arn,
-                                    sagemaker_boto_client=sagemaker_boto_client))[0].trial_component_name
+                                     sagemaker_boto_client=sagemaker_boto_client))[0].trial_component_name
     trial_component_obj = trial_component.TrialComponent.load(trial_component_name=trial_component_name,
                                                               sagemaker_boto_client=sagemaker_boto_client)
 
-    assert trial_component_obj.parameters['p1'] == 1.0
-    assert trial_component_obj.parameters['InstanceCount'] == 1
-    assert trial_component_obj.parameters['InstanceType'].string_value == 'ml.m5.large'
-    assert trial_component_obj.parameters['TrainingImage'].string_value == tj['AlgorithmSpecification']['TrainingImage']
-    assert trial_component_obj.input_artifacts['train'].value == tj['InputDataConfig']['Channels'][0]['S3DataSource']['S3Uri']
-    assert trial_component_obj.output_artifacts['ModelArtifact'].value == tj['ModelArtifacts']['S3ModelArtifacts']
-    [metric_summary] = trial_component_obj.metrics
-    assert 'm1' == metric_summary.metric_name
-    assert 1 == metric_summary.count
+    print(training_job_name)
+    print(tj)
+    print(trial_component_obj)
+
+
+    def validate():
+        assert source_arn == trial_component_obj.source.source_arn
+        assert to_seconds(tj['TrainingStartTime']) == to_seconds(trial_component_obj.start_time)
+        assert to_seconds(tj['TrainingEndTime']) == to_seconds(trial_component_obj.end_time)
+        assert trial_component_obj.parameters.items() >= {
+            'InstanceCount': 1.0,
+            'InstanceType': 'ml.m5.large',
+            'p1': 1.0
+        }.items()
+        assert trial_component_obj.input_artifacts.items() >= {
+            'TrainingImage': api_types.TrialComponentArtifact(value=tj['AlgorithmSpecification']['TrainingImage']),
+            'train': api_types.TrialComponentArtifact(value=tj['InputDataConfig'][0]['DataSource']['S3DataSource']['S3Uri'])
+        }.items()
+        assert trial_component_obj.output_artifacts.items() >= {
+            'ModelArtifact': api_types.TrialComponentArtifact(value=tj['ModelArtifacts']['S3ModelArtifacts'])
+        }.items()
+        metrics = trial_component_obj.metrics
+        for metric_summary in metrics:
+            assert metric_summary.count == 2
+            assert metric_summary.min == 0.0
+            assert metric_summary.max == 1.0
+        assert 4 == len(metrics)
+        
+        # Currently broken
+        # assert trial_component_obj.status.primary_status == 'Completed'
+
+    try:
+        retry(lambda: dump_logs(training_job_name))
+    except:
+        pass  # best effort attempt to print logs, there may be no logs if script didn't print anything
+    retry(validate)
+
+
+def to_seconds(dt):
+    return int(dt.timestamp())

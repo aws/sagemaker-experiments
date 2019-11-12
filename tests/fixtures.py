@@ -14,9 +14,9 @@ from smexperiments import experiment, trial, trial_component
 @pytest.fixture
 def sagemaker_boto_client():
     if 'SAGEMAKER_ENDPOINT' in os.environ:
-        return boto3.client('sagemaker', endpoint_url=os.environ.get('SAGEMAKER_ENDPOINT'))
+        return boto3.client('sagemaker-experiments', endpoint_url=os.environ.get('SAGEMAKER_ENDPOINT'))
     else:
-        return boto3.client('sagemaker')
+        return boto3.client('sagemaker-experiments')
 
 @pytest.fixture(scope='session')
 def boto3_session():
@@ -171,7 +171,7 @@ def bucket(boto3_session):
             }
         )
     except Exception as ex:
-        if 'BucketAlreadyOwnedByYou' in str(ex):
+        if 'BucketAlreadyOwnedByYou' in str(ex) or 'BucketAlreadyExists' in str(ex):
             return bucket_name
         raise ex
     return bucket_name

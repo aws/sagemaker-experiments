@@ -3,6 +3,7 @@ FROM ubuntu:16.04
 ARG script
 ARG library
 ARG botomodel
+ARG endpoint
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         python3 \
@@ -24,10 +25,12 @@ COPY $library .
 
 COPY $botomodel .
 
-RUN aws configure add-model --service-model file://$(basename $botomodel) --service-name sagemaker
+RUN aws configure add-model --service-model file://$(basename $botomodel) --service-name sagemaker-experiments
 
 RUN python3 -m pip install $(basename $library)
 
 COPY $script script.py
+
+ENV SAGEMAKER_ENDPOINT=${endpoint}
 
 ENTRYPOINT ["python3", "./script.py"]

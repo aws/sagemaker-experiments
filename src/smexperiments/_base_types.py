@@ -12,8 +12,7 @@
 # language governing permissions and limitations under the License.
 """Placeholder docstring"""
 
-import boto3
-from smexperiments import _boto_functions
+from smexperiments import _boto_functions, _utils
 
 
 class ApiObject(object):
@@ -117,7 +116,7 @@ class Record(ApiObject):
 
     @classmethod
     def _construct(cls, boto_method_name, sagemaker_boto_client=None, **kwargs):
-        sagemaker_boto_client = sagemaker_boto_client or cls._default_sagemaker_boto_client()
+        sagemaker_boto_client = sagemaker_boto_client or _utils.sagemaker_client()
         instance = cls(sagemaker_boto_client, **kwargs)
         return instance._invoke_api(boto_method_name, kwargs)
 
@@ -137,7 +136,3 @@ class Record(ApiObject):
         api_method = getattr(self.sagemaker_boto_client, boto_method)
         api_boto_response = api_method(**api_kwargs)
         return self.with_boto(api_boto_response)
-
-    @staticmethod
-    def _default_sagemaker_boto_client():
-        return boto3.client("sagemaker")

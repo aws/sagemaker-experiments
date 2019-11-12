@@ -17,16 +17,14 @@ import time
 import urllib.parse
 import urllib.request
 
-import boto3
+
 import dateutil
 
 from smexperiments import api_types, metrics, trial_component, _utils
 
-TRAINING_JOB_ARN_ENV = 'TRAINING_JOB_ARN'
-TRAINING_JOB_NAME_ENV = 'TRAINING_JOB_NAME'
 
 RESOLVE_JOB_INTERVAL_SECONDS = 2
-RESOLVE_JOB_TIMEOUT_SECONDS = 300
+RESOLVE_JOB_TIMEOUT_SECONDS = 30
 
 
 class Tracker(object):
@@ -37,18 +35,18 @@ class Tracker(object):
     _artifact_uploader = None
 
     def __init__(self, trial_component, metrics_writer, artifact_uploader):
-        self._trial_component = trial_component
-        self._trial_component.parameters = self._trial_component.parameters or {}
-        self._trial_component.input_artifacts = self._trial_component.input_artifacts or {}
-        self._trial_component.output_artifacts = self._trial_component.output_artifacts or {}
+        self.trial_component = trial_component
+        self.trial_component.parameters = self.trial_component.parameters or {}
+        self.trial_component.input_artifacts = self.trial_component.input_artifacts or {}
+        self.trial_component.output_artifacts = self.trial_component.output_artifacts or {}
         self._artifact_uploader = artifact_uploader
         self._metrics_writer = metrics_writer
 
     @classmethod
     def load(cls, trial_component_name=None, artifact_bucket=None, artifact_prefix=None,
              boto3_session=None, sagemaker_boto_client=None):
-        boto3_session = boto3_session or boto3.Session()
-        sagemaker_boto_client = sagemaker_boto_client or boto3_session.client('sagemaker')
+        boto3_session = boto3_session or _utils.boto_session()
+        sagemaker_boto_client = sagemaker_boto_client or _utils.sagemaker_client()
 
         # Resolve the trial component for this tracker to track: If a trial component name was passed in, then load
         # and track that trial component. Otherwise, try to find a trial component given the current environment,
@@ -61,12 +59,11 @@ class Tracker(object):
             if not tc:
                 raise ValueError('Could not load TrialComponent. Specify a trial_component_name or invoke "create"')
 
-        # Create a metrics writer: If a trial component name is specified, then use an API metrics writer.
-        # Otherwise use the metrics writer that writes a to a job specific file.
-        if trial_component_name:
-            metrics_writer = metrics.SageMakerMetricsWriter(tc.trial_component_arn, sagemaker_boto_client)
-        else:
+        # Create a metrics writer if we are in a SageMaker Training Job
+        if _utils.resolve_environment_type() == _utils.EnvironmentType.SageMakerTrainingJob:
             metrics_writer = metrics.SageMakerFileMetricsWriter()
+        else:
+            metrics_writer = None
 
         tracker = cls(tc,
                       metrics_writer,
@@ -77,15 +74,15 @@ class Tracker(object):
     @classmethod
     def create(cls, display_name=None, artifact_bucket=None, artifact_prefix=None, boto3_session=None,
                sagemaker_boto_client=None):
-        boto3_session = boto3_session or boto3.Session()
-        sagemaker_boto_client = sagemaker_boto_client or boto3_session.client('sagemaker')
-        print(sagemaker_boto_client._endpoint)
+        boto3_session = boto3_session or _utils.boto_session()
+        sagemaker_boto_client = sagemaker_boto_client or _utils.sagemaker_client()
+
         tc = trial_component.TrialComponent.create(
             trial_component_name=_utils.name('TrialComponent'),
             display_name=display_name,
             sagemaker_boto_client=sagemaker_boto_client)
         return cls(tc,
-                   metrics.SageMakerMetricsWriter(tc.trial_component_arn, sagemaker_boto_client),
+                   None,
                    _ArtifactUploader(tc.trial_component_name, artifact_bucket, artifact_prefix, boto3_session))
 
     def log_parameter(self, name, value):
@@ -95,14 +92,14 @@ class Tracker(object):
             name (str): The name of the parameter
             value (str or numbers.Number): The value of the parameter
         """
-        self._trial_component.parameters[name] = value
+        self.trial_component.parameters[name] = value
 
     def log_parameters(self, parameters):
         """Record a collection of parameter values for this trial component.
         Args:
             parameters (dict[str, str or numbers.Number]): The parameters to record.
         """
-        self._trial_component.parameters.update(parameters)
+        self.trial_component.parameters.update(parameters)
 
     def log_input(self, name, value, media_type=None):
         """Record a single input artifact for this trial component. Overwrites any previous value
@@ -112,7 +109,7 @@ class Tracker(object):
             value (str): The value.
             media_type (str): The MediaType (MIME type) of the value
         """
-        self._trial_component.input_artifacts[name] = api_types.TrialComponentArtifact(value, media_type=media_type)
+        self.trial_component.input_artifacts[name] = api_types.TrialComponentArtifact(value, media_type=media_type)
 
     def log_output(self, name, value, media_type=None):
         """Record a single output artifact for this trial component. Overwrites any previous value
@@ -122,42 +119,55 @@ class Tracker(object):
             value (str): The value.
             media_type (str): The MediaType (MIME type) of the value
         """
-        self._trial_component.output_artifacts[name] = api_types.TrialComponentArtifact(value, media_type=media_type)
+        self.trial_component.output_artifacts[name] = api_types.TrialComponentArtifact(value, media_type=media_type)
 
     def log_artifact(self, file_path, name=None, media_type=None):
         media_type = media_type or _guess_media_type(file_path)
         name = name or _resolve_artifact_name(file_path)
         s3_uri = self._artifact_uploader.upload_artifact(file_path, name)
-        self._trial_component.output_artifacts[name] = api_types.TrialComponentArtifact(
+        self.trial_component.output_artifacts[name] = api_types.TrialComponentArtifact(
             value=s3_uri, media_type=media_type
         )
 
     def log_metric(self, metric_name, value, timestamp=None, iteration_number=None):
-        self._metrics_writer.log_metric(metric_name, value, timestamp, iteration_number)
+        try:
+            self._metrics_writer.log_metric(metric_name, value, timestamp, iteration_number)
+        except AttributeError:
+            if not self._metrics_writer:
+                raise SageMakerTrackerException('Logging metrics is not available in this environment')
+            else:
+                raise
 
     def __enter__(self):
         self._start_time = datetime.datetime.now(dateutil.tz.tzlocal())
         if not self._in_sagemaker_job:
-            self._trial_component.start_time = self._start_time
-            self._trial_component.status = api_types.TrialComponentStatus(primary_status='InProgress')
+            self.trial_component.start_time = self._start_time
+            self.trial_component.status = api_types.TrialComponentStatus(primary_status='InProgress')
         return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self._end_time = datetime.datetime.now(dateutil.tz.tzlocal())
         if not self._in_sagemaker_job:
-            self._trial_component.end_time = self._end_time
+            self.trial_component.end_time = self._end_time
             if exc_value:
-                self._trial_component.status = api_types.TrialComponentStatus(primary_status='Failed',
-                                                                              message=str(exc_value))
+                self.trial_component.status = api_types.TrialComponentStatus(primary_status='Failed',
+                                                                             message=str(exc_value))
             else:
-                self._trial_component.status = api_types.TrialComponentStatus(primary_status='Completed')
+                self.trial_component.status = api_types.TrialComponentStatus(primary_status='Completed')
         self.close()
 
     def close(self):
         try:
-            self._trial_component.save()
+            self.trial_component.save()
         finally:
-            self._metrics_writer.close()
+            if self._metrics_writer:
+                self._metrics_writer.close()
+
+
+class SageMakerTrackerException(Exception):
+
+    def __init__(self, message):
+        super().__init__(message)
 
 
 def _resolve_artifact_name(file_path):
@@ -191,11 +201,8 @@ class _ArtifactUploader(object):
 
 def _resolve_trial_component_for_job(sagemaker_boto_client):
     start = time.time()
-    if TRAINING_JOB_ARN_ENV in os.environ:
-        source_arn = os.environ.get(TRAINING_JOB_ARN_ENV)
-    else:
-        return None
-    while time.time() - start < RESOLVE_JOB_TIMEOUT_SECONDS:
+    source_arn = _utils.resolve_source_arn_from_environment()
+    while source_arn and time.time() - start < RESOLVE_JOB_TIMEOUT_SECONDS:
         summaries = list(trial_component.TrialComponent.list(
             source_arn=source_arn, sagemaker_boto_client=sagemaker_boto_client))
         if summaries:

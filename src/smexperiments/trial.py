@@ -29,10 +29,6 @@ class Trial(_base_types.Record):
 
     _boto_delete_members = ["trial_name"]
 
-    def update(self):
-        """Placeholder docstring"""
-        return self._invoke_api(self._boto_update_method, self._boto_update_members)
-
     def delete(self):
         """Placeholder docstring"""
         self._invoke_api(self._boto_delete_method, self._boto_delete_members)
