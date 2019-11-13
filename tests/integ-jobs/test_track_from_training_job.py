@@ -29,7 +29,6 @@ def training_docker_image():
 
     if not os.path.exists('tests/integ-jobs/docker/boto'):
         os.makedirs('tests/integ-jobs/docker/boto')
-    
     shutil.copy('boto/sagemaker-experiments-2017-07-24.normal.json', 'tests/integ-jobs/docker/boto/sagemaker-experiments-2017-07-24.normal.json')
     repository_name = "smexperiments-test"
     try:
@@ -118,8 +117,8 @@ def wait_for_job(job, sagemaker_client):
             response = sagemaker_client.describe_training_job(TrainingJobName=job)
             status = response['TrainingJobStatus']
             if status == 'Failed':
-                dump_logs(job)
                 print(response)
+                dump_logs(job)
                 pytest.fail('Training job failed: ' + job)
             if status == 'Completed':
                 break
@@ -133,18 +132,19 @@ def test_track_from_training_job(sagemaker_boto_client, training_job_name):
     tj = sagemaker_boto_client.describe_training_job(TrainingJobName=training_job_name)
     source_arn = tj['TrainingJobArn']
     wait_for_job(training_job_name, sagemaker_boto_client)
+    tj = sagemaker_boto_client.describe_training_job(TrainingJobName=training_job_name)
+
     trial_component_name = list(trial_component.TrialComponent.\
                                 list(source_arn=source_arn,
                                      sagemaker_boto_client=sagemaker_boto_client))[0].trial_component_name
     trial_component_obj = trial_component.TrialComponent.load(trial_component_name=trial_component_name,
                                                               sagemaker_boto_client=sagemaker_boto_client)
 
-    print(training_job_name)
-    print(tj)
-    print(trial_component_obj)
-
-
     def validate():
+        tj = sagemaker_boto_client.describe_training_job(TrainingJobName=training_job_name)
+        trial_component_obj = trial_component.TrialComponent.load(trial_component_name=trial_component_name,
+                                                                  sagemaker_boto_client=sagemaker_boto_client)
+        print(tj)
         assert source_arn == trial_component_obj.source.source_arn
         assert to_seconds(tj['TrainingStartTime']) == to_seconds(trial_component_obj.start_time)
         assert to_seconds(tj['TrainingEndTime']) == to_seconds(trial_component_obj.end_time)
@@ -166,7 +166,7 @@ def test_track_from_training_job(sagemaker_boto_client, training_job_name):
             assert metric_summary.min == 0.0
             assert metric_summary.max == 1.0
         assert 4 == len(metrics)
-        
+
         # Currently broken
         # assert trial_component_obj.status.primary_status == 'Completed'
 
