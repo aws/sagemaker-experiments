@@ -1,7 +1,7 @@
 import time
 
 
-def retry(callable, num_attempts = 3):
+def retry(callable, num_attempts=6):
     assert num_attempts >= 1
     for i in range(num_attempts):
         try:
