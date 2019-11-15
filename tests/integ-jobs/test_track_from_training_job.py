@@ -137,8 +137,6 @@ def test_track_from_training_job(sagemaker_boto_client, training_job_name):
     trial_component_name = list(trial_component.TrialComponent.\
                                 list(source_arn=source_arn,
                                      sagemaker_boto_client=sagemaker_boto_client))[0].trial_component_name
-    trial_component_obj = trial_component.TrialComponent.load(trial_component_name=trial_component_name,
-                                                              sagemaker_boto_client=sagemaker_boto_client)
 
     def validate():
         tj = sagemaker_boto_client.describe_training_job(TrainingJobName=training_job_name)

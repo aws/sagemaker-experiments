@@ -29,7 +29,7 @@ RESOLVE_JOB_TIMEOUT_SECONDS = 30
 
 class Tracker(object):
 
-    _trial_component = None
+    trial_component = None
     _metrics_writer = None
     _in_sagemaker_job = False
     _artifact_uploader = None
@@ -124,7 +124,7 @@ class Tracker(object):
     def log_artifact(self, file_path, name=None, media_type=None):
         media_type = media_type or _guess_media_type(file_path)
         name = name or _resolve_artifact_name(file_path)
-        s3_uri = self._artifact_uploader.upload_artifact(file_path, name)
+        s3_uri = self._artifact_uploader.upload_artifact(file_path)
         self.trial_component.output_artifacts[name] = api_types.TrialComponentArtifact(
             value=s3_uri, media_type=media_type
         )
@@ -187,13 +187,14 @@ class _ArtifactUploader(object):
         self.artifact_bucket = artifact_bucket
         self.artifact_prefix = artifact_prefix or 'trial-component-artifacts'
 
-    def upload_artifact(self, file_path, artifact_name):
+    def upload_artifact(self, file_path):
         """Upload an artifact file to S3 and record the artifact S3 key with this trial run."""
         file_path = os.path.expanduser(file_path)
         if not os.path.isfile(file_path):
             raise ValueError("{} does not exist or is not a file. Please supply a file path.".format(file_path))
         if not self.artifact_bucket:
             self.artifact_bucket = _utils.get_or_create_default_bucket(self.boto_session)
+        artifact_name = os.path.basename(file_path)
         artifact_s3_key = "{}/{}/{}".format(self.artifact_prefix, self.trial_component_name, artifact_name)
         self.s3_client.upload_file(file_path, self.artifact_bucket, artifact_s3_key)
         return "s3://{}/{}".format(self.artifact_bucket, artifact_s3_key)

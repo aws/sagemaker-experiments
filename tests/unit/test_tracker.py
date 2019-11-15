@@ -100,7 +100,7 @@ def test_load_in_sagemaker_job(mocked_rtcfj, sagemaker_boto_client):
     tc = trial_component.TrialComponent(trial_component_name='foo', sagemaker_boto_client=sagemaker_boto_client)
     mocked_rtcfj.return_value = tc
     tracker_obj = tracker.Tracker.load(sagemaker_boto_client=sagemaker_boto_client)
-    assert tc == tracker_obj._trial_component
+    assert tc == tracker_obj.trial_component
 
 
 @unittest.mock.patch('smexperiments.tracker._resolve_trial_component_for_job')
@@ -138,7 +138,7 @@ def test_load(boto3_session, sagemaker_boto_client):
         'TrialComponentName': trial_component_name
     }
     assert trial_component_name == tracker.Tracker.load(
-        trial_component_name=trial_component_name, sagemaker_boto_client=sagemaker_boto_client)._trial_component.trial_component_name
+        trial_component_name=trial_component_name, sagemaker_boto_client=sagemaker_boto_client).trial_component.trial_component_name
 
 
 @pytest.fixture
@@ -153,23 +153,23 @@ def under_test(trial_component_obj):
 
 def test_log_parameter(under_test):
     under_test.log_parameter('foo', 'bar')
-    assert under_test._trial_component.parameters['foo'] == 'bar'
+    assert under_test.trial_component.parameters['foo'] == 'bar'
     under_test.log_parameter('whizz', 1)
-    assert under_test._trial_component.parameters['whizz'] == 1
+    assert under_test.trial_component.parameters['whizz'] == 1
 
 
 def test_enter(under_test):
     under_test.__enter__()
-    assert isinstance(under_test._trial_component.start_time, datetime.datetime)
-    assert under_test._trial_component.status.primary_status == 'InProgress'
+    assert isinstance(under_test.trial_component.start_time, datetime.datetime)
+    assert under_test.trial_component.status.primary_status == 'InProgress'
 
 
 def test_cm(sagemaker_boto_client, under_test):
     sagemaker_boto_client.update_trial_component.return_value = {}
     with under_test:
         pass
-    assert under_test._trial_component.status.primary_status == 'Completed'
-    assert isinstance(under_test._trial_component.end_time, datetime.datetime)
+    assert under_test.trial_component.status.primary_status == 'Completed'
+    assert isinstance(under_test.trial_component.end_time, datetime.datetime)
 
 
 def test_cm_fail(sagemaker_boto_client, under_test):
@@ -180,9 +180,9 @@ def test_cm_fail(sagemaker_boto_client, under_test):
     except ValueError:
         pass
 
-    assert under_test._trial_component.status.primary_status == 'Failed'
-    assert under_test._trial_component.status.message
-    assert isinstance(under_test._trial_component.end_time, datetime.datetime)
+    assert under_test.trial_component.status.primary_status == 'Failed'
+    assert under_test.trial_component.status.message
+    assert isinstance(under_test.trial_component.end_time, datetime.datetime)
 
 
 def test_enter_sagemaker_job(sagemaker_boto_client, under_test):
@@ -190,14 +190,14 @@ def test_enter_sagemaker_job(sagemaker_boto_client, under_test):
     under_test._in_sagemaker_job = True
     with under_test:
         pass
-    assert under_test._trial_component.start_time is None
-    assert under_test._trial_component.end_time is None
-    assert under_test._trial_component.status is None
+    assert under_test.trial_component.start_time is None
+    assert under_test.trial_component.end_time is None
+    assert under_test.trial_component.status is None
 
 
 def test_log_parameters(under_test):
     under_test.log_parameters({'a':'b', 'c':'d', 'e':5})
-    assert under_test._trial_component.parameters == {
+    assert under_test.trial_component.parameters == {
         'a': 'b',
         'c': 'd',
         'e': 5
@@ -206,14 +206,14 @@ def test_log_parameters(under_test):
 
 def test_log_input(under_test):
     under_test.log_input('foo', 'baz', 'text/text')
-    assert under_test._trial_component.input_artifacts == {
+    assert under_test.trial_component.input_artifacts == {
         'foo': api_types.TrialComponentArtifact(value='baz', media_type='text/text')
     }
 
 
 def test_log_output(under_test):
     under_test.log_output('foo', 'baz', 'text/text')
-    assert under_test._trial_component.output_artifacts == {
+    assert under_test.trial_component.output_artifacts == {
         'foo': api_types.TrialComponentArtifact(value='baz', media_type='text/text')
     }
 
@@ -226,13 +226,13 @@ def test_log_metric(under_test):
 
 def test_log_artifact(under_test):
     under_test.log_artifact('foo.txt', 'name', 'whizz/bang')
-    under_test._artifact_uploader.upload_artifact.assert_called_with('foo.txt', 'name')
-    assert 'whizz/bang' == under_test._trial_component.output_artifacts['name'].media_type
+    under_test._artifact_uploader.upload_artifact.assert_called_with('foo.txt')
+    assert 'whizz/bang' == under_test.trial_component.output_artifacts['name'].media_type
 
     under_test.log_artifact('foo.txt')
-    under_test._artifact_uploader.upload_artifact.assert_called_with('foo.txt', 'foo.txt')
-    assert 'foo.txt' in under_test._trial_component.output_artifacts
-    assert 'text/plain' == under_test._trial_component.output_artifacts['foo.txt'].media_type
+    under_test._artifact_uploader.upload_artifact.assert_called_with('foo.txt')
+    assert 'foo.txt' in under_test.trial_component.output_artifacts
+    assert 'text/plain' == under_test.trial_component.output_artifacts['foo.txt'].media_type
 
 
 def test_resolve_artifact_name():
@@ -266,7 +266,7 @@ def test_artifact_uploader_init(artifact_uploader):
 def test_artifact_uploader_upload_artifact_file_not_exists(tempdir, artifact_uploader):
     not_exist_file = os.path.join(tempdir, 'not.exists')
     with pytest.raises(ValueError):
-        artifact_uploader.upload_artifact(not_exist_file, 'not.exists')
+        artifact_uploader.upload_artifact(not_exist_file)
 
 
 def test_artifact_uploader_s3(tempdir, artifact_uploader):
@@ -275,7 +275,7 @@ def test_artifact_uploader_s3(tempdir, artifact_uploader):
         f.write('boo')
 
     name = tracker._resolve_artifact_name(path)
-    s3_uri = artifact_uploader.upload_artifact(path, name)
+    s3_uri = artifact_uploader.upload_artifact(path)
     expected_key = '{}/{}/{}'.format(artifact_uploader.artifact_prefix, artifact_uploader.trial_component_name, name)
 
     artifact_uploader.s3_client.upload_file.assert_called_with(

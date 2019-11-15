@@ -123,7 +123,7 @@ class Trial(_base_types.Record):
     def add_trial_component(self, tc):
         """Add the specified trial component to this trial."""
         if isinstance(tc, tracker.Tracker):
-            trial_component_name = tc._trial_component.trial_component_name
+            trial_component_name = tc.trial_component.trial_component_name
         elif isinstance(tc, trial_component.TrialComponent):
             trial_component_name = tc.trial_component_name
         else:
@@ -133,7 +133,7 @@ class Trial(_base_types.Record):
 
     def remove_trial_component(self, tc):
         if isinstance(tc, tracker.Tracker):
-            trial_component_name = tc._trial_component.trial_component_name
+            trial_component_name = tc.trial_component.trial_component_name
         elif isinstance(tc, trial_component.TrialComponent):
             trial_component_name = tc.trial_component_name
         else:

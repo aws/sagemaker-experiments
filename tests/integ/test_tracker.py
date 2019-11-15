@@ -7,7 +7,7 @@ def test_load_trial_component(trial_component_obj, sagemaker_boto_client):
     tracker_obj = tracker.Tracker.load(trial_component_name=trial_component_obj.trial_component_name,
                                        sagemaker_boto_client=sagemaker_boto_client)
     assert tracker_obj
-    assert tracker_obj._trial_component.trial_component_name == trial_component_obj.trial_component_name
+    assert tracker_obj.trial_component.trial_component_name == trial_component_obj.trial_component_name
 
 
 def test_load_trial_component_fails(sagemaker_boto_client):
@@ -19,19 +19,19 @@ def test_create(sagemaker_boto_client):
     tracker_obj = tracker.Tracker.create(sagemaker_boto_client=sagemaker_boto_client)
     try:
         sagemaker_boto_client.describe_trial_component(
-            TrialComponentName=tracker_obj._trial_component.trial_component_name
+            TrialComponentName=tracker_obj.trial_component.trial_component_name
         )
     finally:
-        tracker_obj._trial_component.delete()
+        tracker_obj.trial_component.delete()
 
 
 def test_create_display_name(sagemaker_boto_client):
     display_name = name()
     tracker_obj = tracker.Tracker.create(display_name=display_name, sagemaker_boto_client=sagemaker_boto_client)
     try:
-        assert display_name == tracker_obj._trial_component.display_name
+        assert display_name == tracker_obj.trial_component.display_name
     finally:
-        tracker_obj._trial_component.delete()
+        tracker_obj.trial_component.delete()
 
 
 def test_log_simple(trial_component_obj, sagemaker_boto_client):
