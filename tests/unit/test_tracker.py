@@ -34,6 +34,16 @@ def tempdir():
 
 
 @pytest.fixture
+def metrics_dir(tempdir):
+    saved = os.environ.get('SAGEMAKER_METRICS_DIRECTORY')
+    os.environ['SAGEMAKER_METRICS_DIRECTORY'] = tempdir
+    yield os.environ
+    del os.environ['SAGEMAKER_METRICS_DIRECTORY']
+    if saved:
+        os.environ['SAGEMAKER_METRICS_DIRECTORY'] = saved
+
+
+@pytest.fixture
 def sagemaker_boto_client(boto3_session):
     return boto3_session.client('sagemaker')
 
@@ -113,7 +123,7 @@ def test_load_in_sagemaker_job_no_resolved_tc(mocked_rtcfj, sagemaker_boto_clien
 @unittest.mock.patch('smexperiments._utils.resolve_environment_type')
 @unittest.mock.patch('smexperiments.tracker._resolve_trial_component_for_job')
 def test_load_set_metrics_writer_in_training_job(mocked_rtcfj, mocked_resolve_environment_type, 
-                                                 sagemaker_boto_client):
+                                                 sagemaker_boto_client, metrics_dir):
     tc = trial_component.TrialComponent(trial_component_name='foo', sagemaker_boto_client=sagemaker_boto_client)
     mocked_rtcfj.return_value = tc
     mocked_resolve_environment_type.return_value = _utils.EnvironmentType.SageMakerTrainingJob
@@ -124,13 +134,14 @@ def test_load_set_metrics_writer_in_training_job(mocked_rtcfj, mocked_resolve_en
 @unittest.mock.patch('smexperiments._utils.resolve_environment_type')
 @unittest.mock.patch('smexperiments.tracker._resolve_trial_component_for_job')
 def test_load_set_metrics_writer_not_in_training_job(mocked_rtcfj, mocked_resolve_environment_type, 
-                                                     sagemaker_boto_client):
+                                                     sagemaker_boto_client, metrics_dir):
     tc = trial_component.TrialComponent(trial_component_name='foo', sagemaker_boto_client=sagemaker_boto_client)
     mocked_rtcfj.return_value = tc
     mocked_resolve_environment_type.return_value = None
     tracker_obj = tracker.Tracker.load(sagemaker_boto_client=sagemaker_boto_client)
     with pytest.raises(tracker.SageMakerTrackerException):
         tracker_obj.log_metric('foo', 1.0)
+
 
 def test_load(boto3_session, sagemaker_boto_client):
     trial_component_name = 'foo-trial-component'
@@ -237,16 +248,16 @@ def test_log_artifact(under_test):
 
 def test_resolve_artifact_name():
     file_names = {
-        'a':'a',
-        'a.txt':'a.txt',
-        'b.':'b.',
-        '.c':'.c',
-        '/x/a/a.txt':'a.txt',
-        '/a/b/c.':'c.',
-        './.a':'.a',
-        '../b.txt':'b.txt',
-        '~/a.txt':'a.txt',
-        'c/d.txt':'d.txt'
+        'a': 'a',
+        'a.txt': 'a.txt',
+        'b.': 'b.',
+        '.c': '.c',
+        '/x/a/a.txt': 'a.txt',
+        '/a/b/c.': 'c.',
+        './.a': '.a',
+        '../b.txt': 'b.txt',
+        '~/a.txt': 'a.txt',
+        'c/d.txt': 'd.txt'
     }
     for file_name, artifact_name in file_names.items():
         assert artifact_name == tracker._resolve_artifact_name(file_name)
