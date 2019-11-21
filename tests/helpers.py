@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+import signal
 import time
 
 
@@ -37,3 +39,35 @@ def expect_stat(sagemaker_boto_client, resource_arn, metric_name, statistic, val
                 'Actual: {}, Expected: {}'.format(str(result), value)
             return
     assert False, "Timed out waiting for statistic, last result {}".format(str(result))
+
+
+class TimeoutError(Exception):
+    pass
+
+
+@contextmanager
+def timeout(seconds=0, minutes=0, hours=0):
+    """
+    Add a signal-based timeout to any block of code.
+    If multiple time units are specified, they will be added together to determine time limit.
+    Usage:
+    with timeout(seconds=5):
+        my_slow_function(...)
+    Args:
+        - seconds: The time limit, in seconds.
+        - minutes: The time limit, in minutes.
+        - hours: The time limit, in hours.
+    """
+
+    limit = seconds + 60 * minutes + 3600 * hours
+
+    def handler(signum, frame):
+        raise TimeoutError('timed out after {} seconds'.format(limit))
+
+    try:
+        signal.signal(signal.SIGALRM, handler)
+        signal.alarm(limit)
+
+        yield
+    finally:
+        signal.alarm(0)

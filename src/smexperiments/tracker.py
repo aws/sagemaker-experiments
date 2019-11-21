@@ -13,18 +13,13 @@
 import datetime
 import os
 import mimetypes
-import time
 import urllib.parse
 import urllib.request
 
 
 import dateutil
 
-from smexperiments import api_types, metrics, trial_component, _utils
-
-
-RESOLVE_JOB_INTERVAL_SECONDS = 2
-RESOLVE_JOB_TIMEOUT_SECONDS = 30
+from smexperiments import api_types, metrics, trial_component, _utils, _environment
 
 
 class Tracker(object):
@@ -48,19 +43,20 @@ class Tracker(object):
         boto3_session = boto3_session or _utils.boto_session()
         sagemaker_boto_client = sagemaker_boto_client or _utils.sagemaker_client()
 
+        tce = _environment.TrialComponentEnvironment.load()
+
         # Resolve the trial component for this tracker to track: If a trial component name was passed in, then load
         # and track that trial component. Otherwise, try to find a trial component given the current environment,
         # failing if we're unable to load one.
         if trial_component_name:
             tc = trial_component.TrialComponent.load(trial_component_name=trial_component_name,
                                                      sagemaker_boto_client=sagemaker_boto_client)
+        elif tce:
+            tc = tce.get_trial_component(sagemaker_boto_client)
         else:
-            tc = _resolve_trial_component_for_job(sagemaker_boto_client)
-            if not tc:
-                raise ValueError('Could not load TrialComponent. Specify a trial_component_name or invoke "create"')
+            raise ValueError('Could not load TrialComponent. Specify a trial_component_name or invoke "create"')
 
-        # Create a metrics writer if we are in a SageMaker Training Job
-        if _utils.resolve_environment_type() == _utils.EnvironmentType.SageMakerTrainingJob:
+        if not trial_component_name and tce.environment_type == _environment.EnvironmentType.SageMakerTrainingJob:
             metrics_writer = metrics.SageMakerFileMetricsWriter()
         else:
             metrics_writer = None
@@ -68,7 +64,7 @@ class Tracker(object):
         tracker = cls(tc,
                       metrics_writer,
                       _ArtifactUploader(tc.trial_component_name, artifact_bucket, artifact_prefix, boto3_session))
-        tracker._in_sagemaker_job = False if trial_component_name else True
+        tracker._in_sagemaker_job = True if tce else False
         return tracker
 
     @classmethod
@@ -198,23 +194,6 @@ class _ArtifactUploader(object):
         artifact_s3_key = "{}/{}/{}".format(self.artifact_prefix, self.trial_component_name, artifact_name)
         self.s3_client.upload_file(file_path, self.artifact_bucket, artifact_s3_key)
         return "s3://{}/{}".format(self.artifact_bucket, artifact_s3_key)
-
-
-def _resolve_trial_component_for_job(sagemaker_boto_client):
-    start = time.time()
-    source_arn = _utils.resolve_source_arn_from_environment()
-    while source_arn and time.time() - start < RESOLVE_JOB_TIMEOUT_SECONDS:
-        summaries = list(trial_component.TrialComponent.list(
-            source_arn=source_arn, sagemaker_boto_client=sagemaker_boto_client))
-        if summaries:
-            summary = summaries[0]
-            return trial_component.TrialComponent.load(
-                trial_component_name=summary.trial_component_name,
-                sagemaker_boto_client=sagemaker_boto_client
-            )
-        else:
-            time.sleep(RESOLVE_JOB_INTERVAL_SECONDS)
-    return None
 
 
 def _guess_media_type(file_path):

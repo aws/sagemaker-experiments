@@ -1,26 +1,33 @@
 import pytest
+
+import botocore
+import base64
+import glob
 import uuid
 import boto3
 import tempfile
-import shutil
-import os
-import time
-import logging
 
+import logging
+import os
+import shutil
+import subprocess
+import sys
+
+import time
+
+import docker
 
 from smexperiments import experiment, trial, trial_component
 
 
 @pytest.fixture
 def sagemaker_boto_client():
-    if 'SAGEMAKER_ENDPOINT' in os.environ:
-        return boto3.client('sagemaker-experiments', endpoint_url=os.environ.get('SAGEMAKER_ENDPOINT'))
-    else:
-        return boto3.client('sagemaker-experiments')
+    return boto3.client('sagemaker-experiments', endpoint_url=os.environ.get('SAGEMAKER_ENDPOINT'))
+
 
 @pytest.fixture(scope='session')
 def boto3_session():
-    return boto3.Session(region_name='us-west-2')
+    return boto3.Session()
 
 
 def name():
@@ -195,7 +202,7 @@ def training_output_s3_uri(bucket):
 
 
 @pytest.fixture
-def training_job_name(sagemaker_boto_client, training_role_arn, training_docker_image,
+def training_job_name(sagemaker_boto_client, training_role_arn, docker_image,
                       training_s3_uri, training_output_s3_uri):
     training_job_name = name()
     sagemaker_boto_client.create_training_job(
@@ -212,7 +219,7 @@ def training_job_name(sagemaker_boto_client, training_role_arn, training_docker_
             }
         ],
         AlgorithmSpecification={
-            'TrainingImage': training_docker_image,
+            'TrainingImage': docker_image,
             'TrainingInputMode': 'File',
             'MetricDefinitions': [
                 {
@@ -223,7 +230,6 @@ def training_job_name(sagemaker_boto_client, training_role_arn, training_docker_
                 }
             ]
         },
-
         RoleArn=training_role_arn,
         ResourceConfig={
             'InstanceType': 'ml.m5.large',
@@ -242,3 +248,68 @@ def training_job_name(sagemaker_boto_client, training_role_arn, training_docker_
 
     )
     return training_job_name
+
+
+@pytest.fixture
+def processing_job_name(sagemaker_boto_client, training_role_arn, docker_image):
+    processing_job_name = name()
+    sagemaker_boto_client.create_processing_job(
+        ProcessingJobName=processing_job_name,
+        ProcessingResources={
+            'ClusterConfig': {
+                'InstanceCount': 1,
+                'InstanceType': 'ml.m5.large',
+                'VolumeSizeInGB': 10
+            }
+        },
+        AppSpecification={
+            'ImageUri': docker_image
+        },
+        RoleArn=training_role_arn
+    )
+    return processing_job_name
+
+
+@pytest.fixture(scope='session')
+def docker_image():
+    client = docker.from_env()
+    ecr_client = boto3.client('ecr')
+    token = ecr_client.get_authorization_token()
+    username, password = base64.b64decode(token['authorizationData'][0]['authorizationToken']).decode().split(':')
+    registry = token['authorizationData'][0]['proxyEndpoint']
+
+    subprocess.check_call([sys.executable, 'setup.py', 'sdist'])
+    [sdist_path] = glob.glob('dist/smexperiments*')
+    shutil.copy(sdist_path, 'tests/integ-jobs/docker/smexperiments-1.0.0.tar.gz')
+
+    if not os.path.exists('tests/integ-jobs/docker/boto'):
+        os.makedirs('tests/integ-jobs/docker/boto')
+    shutil.copy('boto/sagemaker-experiments-2017-07-24.normal.json',
+                'tests/integ-jobs/docker/boto/sagemaker-experiments-2017-07-24.normal.json')
+    repository_name = "smexperiments-test"
+    try:
+        ecr_client.create_repository(repositoryName=repository_name)
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == 'RepositoryAlreadyExistsException':
+            pass
+        else:
+            raise
+
+    tag = '{}/{}:{}'.format(registry, repository_name, '1.0.0')[8:]
+
+    # pull existing image for layer cache
+    try:
+        client.images.pull(tag, auth_config={'username': username, 'password': password})
+    except docker.errors.NotFound:
+        pass
+    client.images.build(
+        path='tests/integ-jobs/docker',
+        dockerfile='Dockerfile',
+        tag=tag,
+        cache_from=[tag],
+        buildargs={'library': 'smexperiments-1.0.0.tar.gz',
+                   'botomodel': 'boto/sagemaker-experiments-2017-07-24.normal.json',
+                   'script': 'scripts/script.py',
+                   'endpoint': os.environ.get('SAGEMAKER_ENDPOINT', '')})
+    client.images.push(tag, auth_config={'username': username, 'password': password})
+    return tag

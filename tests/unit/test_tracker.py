@@ -16,7 +16,7 @@ import shutil
 import tempfile
 import os
 import datetime
-from smexperiments import api_types, tracker, trial_component, metrics, _utils
+from smexperiments import api_types, tracker, trial_component, _utils, _environment
 
 
 @pytest.fixture
@@ -65,82 +65,45 @@ def environ(source_arn):
         del os.environ[_utils.TRAINING_JOB_ARN_ENV]
 
 
-def test_resolve_trial_component_for_job(environ, source_arn, sagemaker_boto_client):
-    trial_component_name = 'foo-trial_component_name'
-    sagemaker_boto_client.list_trial_components.return_value = {
-        'TrialComponentSummaries': [{'TrialComponentName': trial_component_name}]
-    }
-    sagemaker_boto_client.describe_trial_component.return_value = {'TrialComponentName': trial_component_name}
-    trial_component_obj = tracker._resolve_trial_component_for_job(sagemaker_boto_client)
-    sagemaker_boto_client.list_trial_components.assert_called_with(SourceArn=source_arn)
-    sagemaker_boto_client.describe_trial_component.assert_called_with(TrialComponentName=trial_component_name)
+@unittest.mock.patch('smexperiments._environment.TrialComponentEnvironment')
+def test_load_in_sagemaker_training_job(mocked_tce, sagemaker_boto_client):
+    trial_component_obj = trial_component.TrialComponent(
+        trial_component_name='foo-bar',
+        sagemaker_boto_client=sagemaker_boto_client)
 
-    assert trial_component_name == trial_component_obj.trial_component_name
+    rv = unittest.mock.Mock()
+    rv.source_arn = 'arn:1234'
+    rv.environment_type = _environment.EnvironmentType.SageMakerTrainingJob
+    rv.get_trial_component.return_value = trial_component_obj
+    mocked_tce.load.return_value = rv
 
-
-@unittest.mock.patch('os.environ')
-def test_resolve_trial_component_for_job_no_env(mocked_environ, sagemaker_boto_client):
-    mocked_environ.__contains__.side_efect = lambda x: False
-    assert tracker._resolve_trial_component_for_job(sagemaker_boto_client) is None
-
-
-@unittest.mock.patch('time.sleep')
-def test_resolve_trial_component_for_job_sleep(mocked_sleep, environ, sagemaker_boto_client):
-    trial_component_name = 'foo-trial_component_name'
-    sagemaker_boto_client.list_trial_components.side_effect = [
-        {'TrialComponentSummaries': []},
-        {'TrialComponentSummaries': [{'TrialComponentName': trial_component_name}]}
-    ]
-    sagemaker_boto_client.describe_trial_component.return_value = {'TrialComponentName': trial_component_name}
-    trial_component_obj = tracker._resolve_trial_component_for_job(sagemaker_boto_client)
-    assert trial_component_name == trial_component_obj.trial_component_name
-    mocked_sleep.assert_called_with(tracker.RESOLVE_JOB_INTERVAL_SECONDS)
-
-
-@unittest.mock.patch('time.sleep')
-@unittest.mock.patch('time.time')
-def test_resolve_trial_component_for_job_timeout(mocked_time, mocked_sleep, environ, sagemaker_boto_client):
-    sagemaker_boto_client.list_trial_components.return_value = {'TrialComponentSummaries': []}
-    mocked_time.side_effect = [0, 1, tracker.RESOLVE_JOB_TIMEOUT_SECONDS + 1]
-    assert tracker._resolve_trial_component_for_job(sagemaker_boto_client) is None
-
-
-@unittest.mock.patch('smexperiments.tracker._resolve_trial_component_for_job')
-def test_load_in_sagemaker_job(mocked_rtcfj, sagemaker_boto_client):
-    tc = trial_component.TrialComponent(trial_component_name='foo', sagemaker_boto_client=sagemaker_boto_client)
-    mocked_rtcfj.return_value = tc
     tracker_obj = tracker.Tracker.load(sagemaker_boto_client=sagemaker_boto_client)
-    assert tc == tracker_obj.trial_component
+    assert tracker_obj._in_sagemaker_job
+    assert tracker_obj._metrics_writer
+    assert tracker_obj.trial_component == trial_component_obj
 
 
-@unittest.mock.patch('smexperiments.tracker._resolve_trial_component_for_job')
-def test_load_in_sagemaker_job_no_resolved_tc(mocked_rtcfj, sagemaker_boto_client):
-    mocked_rtcfj.return_value = None
+@unittest.mock.patch('smexperiments._environment.TrialComponentEnvironment')
+def test_load_in_sagemaker_processing_job(mocked_tce, sagemaker_boto_client):
+    trial_component_obj = trial_component.TrialComponent(
+        trial_component_name='foo-bar',
+        sagemaker_boto_client=sagemaker_boto_client)
+
+    rv = unittest.mock.Mock()
+    rv.source_arn = 'arn:1234'
+    rv.environment_type = _environment.EnvironmentType.SageMakerProcessingJob
+    rv.get_trial_component.return_value = trial_component_obj
+    mocked_tce.load.return_value = rv
+
+    tracker_obj = tracker.Tracker.load(sagemaker_boto_client=sagemaker_boto_client)
+    assert tracker_obj._in_sagemaker_job
+    assert tracker_obj._metrics_writer is None
+    assert tracker_obj.trial_component == trial_component_obj
+
+
+def test_load_in_sagemaker_job_no_resolved_tc(sagemaker_boto_client):
     with pytest.raises(ValueError):
         tracker.Tracker.load(sagemaker_boto_client=sagemaker_boto_client)
-
-
-@unittest.mock.patch('smexperiments._utils.resolve_environment_type')
-@unittest.mock.patch('smexperiments.tracker._resolve_trial_component_for_job')
-def test_load_set_metrics_writer_in_training_job(mocked_rtcfj, mocked_resolve_environment_type, 
-                                                 sagemaker_boto_client, metrics_dir):
-    tc = trial_component.TrialComponent(trial_component_name='foo', sagemaker_boto_client=sagemaker_boto_client)
-    mocked_rtcfj.return_value = tc
-    mocked_resolve_environment_type.return_value = _utils.EnvironmentType.SageMakerTrainingJob
-    tracker_obj = tracker.Tracker.load(sagemaker_boto_client=sagemaker_boto_client)
-    tracker_obj.log_metric('foo', 1.0)
-
-
-@unittest.mock.patch('smexperiments._utils.resolve_environment_type')
-@unittest.mock.patch('smexperiments.tracker._resolve_trial_component_for_job')
-def test_load_set_metrics_writer_not_in_training_job(mocked_rtcfj, mocked_resolve_environment_type, 
-                                                     sagemaker_boto_client, metrics_dir):
-    tc = trial_component.TrialComponent(trial_component_name='foo', sagemaker_boto_client=sagemaker_boto_client)
-    mocked_rtcfj.return_value = tc
-    mocked_resolve_environment_type.return_value = None
-    tracker_obj = tracker.Tracker.load(sagemaker_boto_client=sagemaker_boto_client)
-    with pytest.raises(tracker.SageMakerTrackerException):
-        tracker_obj.log_metric('foo', 1.0)
 
 
 def test_load(boto3_session, sagemaker_boto_client):
