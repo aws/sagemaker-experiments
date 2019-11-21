@@ -10,8 +10,6 @@
 # distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
-import enum
-import json
 import os
 import random
 import time
@@ -28,7 +26,7 @@ def sagemaker_client():
 
 
 def boto_session():
-    return boto3.Session()
+    return boto3.Session(region_name=os.environ.get('AWS_REGION'))
 
 
 def suffix():
@@ -70,5 +68,3 @@ def get_or_create_default_bucket(boto_session, default_bucket_prefix='sagemaker'
         else:
             raise
     return default_bucket
-
-
