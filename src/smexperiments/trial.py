@@ -26,8 +26,18 @@ class Trial(_base_types.Record):
     _boto_create_method = "create_trial"
     _boto_load_method = "describe_trial"
     _boto_delete_method = "delete_trial"
+    _boto_update_method = "update_trial"
 
+    _boto_update_members = ["trial_name", "display_name"]
     _boto_delete_members = ["trial_name"]
+
+    @classmethod
+    def _boto_ignore(cls):
+        return super(Trial, cls)._boto_ignore + ['CreatedBy']
+
+    def save(self):
+        """Placeholder docstring"""
+        return self._invoke_api(self._boto_update_method, self._boto_update_members)
 
     def delete(self):
         """Placeholder docstring"""

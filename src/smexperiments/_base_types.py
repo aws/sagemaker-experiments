@@ -32,8 +32,13 @@ class ApiObject(object):
         self.__dict__.update(kwargs)
 
     @classmethod
+    def _boto_ignore(cls):
+        return ['ResponseMetadata']
+
+    @classmethod
     def from_boto(cls, boto_dict, **kwargs):
         """Construct an instance of this ApiObject from a boto response."""
+        boto_dict = {k: v for k, v in boto_dict.items() if k not in cls._boto_ignore()}
         custom_boto_names_to_member_names = {a: b for b, a in cls._custom_boto_names.items()}
         cls_kwargs = _boto_functions.from_boto(
             boto_dict, custom_boto_names_to_member_names, cls._custom_boto_types
