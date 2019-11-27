@@ -62,6 +62,10 @@ class TrialComponent(_base_types.Record):
     ]
     _boto_delete_members = ["trial_component_name"]
 
+    @classmethod
+    def _boto_ignore(cls):
+        return super(TrialComponent, cls)._boto_ignore + ['CreatedBy']
+
     def save(self):
         """Placeholder docstring"""
         return self._invoke_api(self._boto_update_method, self._boto_update_members)

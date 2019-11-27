@@ -169,14 +169,22 @@ def training_role_arn(boto3_session):
 @pytest.fixture(scope='session')
 def bucket(boto3_session):
     s3_client = boto3_session.client('s3')
-    bucket_name = 'sagemaker-experiments-integ-test'
+    sts_client = boto3_session.client('sts')
+    account = sts_client.get_caller_identity()['Account']
+
+    bucket_name = 'sagemaker-experiments-integ-test-%s-%s' % (boto3_session.region_name, account)
     try:
-        s3_client.create_bucket(
-            Bucket=bucket_name,
-            CreateBucketConfiguration = {
-                'LocationConstraint': 'us-west-2'
-            }
-        )
+        if boto3_session.region_name != 'us-east-1':
+            s3_client.create_bucket(
+                Bucket=bucket_name,
+                CreateBucketConfiguration={
+                    'LocationConstraint': boto3_session.region_name
+                }
+            )
+        else:
+            s3_client.create_bucket(
+                Bucket=bucket_name
+            )
     except Exception as ex:
         if 'BucketAlreadyOwnedByYou' in str(ex) or 'BucketAlreadyExists' in str(ex):
             return bucket_name
@@ -228,7 +236,8 @@ def training_job_name(sagemaker_boto_client, training_role_arn, docker_image,
                     'Regex': 'test-metric = (.*)'
 
                 }
-            ]
+            ],
+            'EnableSageMakerMetricsTimeSeries': True
         },
         RoleArn=training_role_arn,
         ResourceConfig={
@@ -245,7 +254,6 @@ def training_job_name(sagemaker_boto_client, training_role_arn, docker_image,
         HyperParameters={
             '_enable_minerva_metrics': "true"
         },
-
     )
     return training_job_name
 
@@ -280,12 +288,8 @@ def docker_image():
 
     subprocess.check_call([sys.executable, 'setup.py', 'sdist'])
     [sdist_path] = glob.glob('dist/smexperiments*')
-    shutil.copy(sdist_path, 'tests/integ-jobs/docker/smexperiments-1.0.0.tar.gz')
+    shutil.copy(sdist_path, 'tests/integ-jobs/docker/smexperiments-0.1.0.tar.gz')
 
-    if not os.path.exists('tests/integ-jobs/docker/boto'):
-        os.makedirs('tests/integ-jobs/docker/boto')
-    shutil.copy('boto/sagemaker-experiments-2017-07-24.normal.json',
-                'tests/integ-jobs/docker/boto/sagemaker-experiments-2017-07-24.normal.json')
     repository_name = "smexperiments-test"
     try:
         ecr_client.create_repository(repositoryName=repository_name)
@@ -307,7 +311,7 @@ def docker_image():
         dockerfile='Dockerfile',
         tag=tag,
         cache_from=[tag],
-        buildargs={'library': 'smexperiments-1.0.0.tar.gz',
+        buildargs={'library': 'smexperiments-0.1.0.tar.gz',
                    'botomodel': 'boto/sagemaker-experiments-2017-07-24.normal.json',
                    'script': 'scripts/script.py',
                    'endpoint': os.environ.get('SAGEMAKER_ENDPOINT', '')})

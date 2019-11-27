@@ -20,9 +20,9 @@ import botocore
 
 def sagemaker_client():
     if os.environ.get('SAGEMAKER_ENDPOINT', '').strip():
-        return boto_session().client('sagemaker-experiments', endpoint_url=os.environ.get('SAGEMAKER_ENDPOINT'))
+        return boto_session().client('sagemaker', endpoint_url=os.environ.get('SAGEMAKER_ENDPOINT'))
     else:
-        return boto_session().client('sagemaker-experiments')
+        return boto_session().client('sagemaker')
 
 
 def boto_session():

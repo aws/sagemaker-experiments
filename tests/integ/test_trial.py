@@ -39,7 +39,6 @@ def test_list_sort(trials, sagemaker_boto_client):
         assert trial_names_listed  # sanity test
 
 
-
 def test_add_remove_trial_component(trial_obj, trial_component_obj):
     trial_obj.add_trial_component(trial_component_obj)
     trial_components = list(trial_obj.list_trial_components())
@@ -49,7 +48,6 @@ def test_add_remove_trial_component(trial_obj, trial_component_obj):
     trial_obj.remove_trial_component(trial_component_obj)
     trial_components = list(trial_obj.list_trial_components())
     assert [] == trial_components
-
 
 
 def test_list_trial_components(trial_obj, trial_components):
@@ -63,3 +61,9 @@ def test_list_trial_components(trial_obj, trial_components):
     finally:
         for trial_component_obj in trial_components:
             trial_obj.remove_trial_component(trial_component_obj)
+
+
+def test_save(trial_obj, sagemaker_boto_client):
+    trial_obj.display_name = 'foo'
+    trial_obj.save()
+    assert 'foo' == trial.Trial.load(trial_name=trial_obj.trial_name).display_name

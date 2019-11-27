@@ -14,9 +14,6 @@
 import re
 
 
-BOTO_IGNORE = ['ResponseMetadata']
-
-
 def to_camel_case(snake_case):
     """Convert a snake case string to camel case"""
     return ''.join([x.title() for x in snake_case.split('_')])
@@ -42,8 +39,6 @@ def from_boto(boto_dict, boto_name_to_member_name, member_name_to_type):
     """
     from_boto_values = {}
     for boto_name, boto_value in boto_dict.items():
-        if boto_name in BOTO_IGNORE:
-            continue
         # Convert the boto_name to a snake-case name by preferentially looking up the boto name in
         # boto_name_to_member_name before defaulting to the snake case representation
         member_name = boto_name_to_member_name.get(boto_name, to_snake_case(boto_name))
