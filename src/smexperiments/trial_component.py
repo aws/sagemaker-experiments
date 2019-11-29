@@ -10,14 +10,15 @@
 # distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
-"""Placeholder docstring"""
+"""Contains the TrialComponent class."""
 from smexperiments import _base_types, api_types
 
 
 class TrialComponent(_base_types.Record):
     """
-    This class represents a SageMaker TrialComponent object. A TrialComponent represents a stage in
-    a trial.
+    This class represents a SageMaker TrialComponent object.
+
+    A TrialComponent is a stage in a Trial.
     """
 
     trial_component_name = None
@@ -67,23 +68,24 @@ class TrialComponent(_base_types.Record):
         return super(TrialComponent, cls)._boto_ignore + ['CreatedBy']
 
     def save(self):
-        """Placeholder docstring"""
+        """Save the state of this TrialComponent to SageMaker."""
         return self._invoke_api(self._boto_update_method, self._boto_update_members)
 
     def delete(self):
-        """Placeholder docstring"""
+        """Delete this TrialComponent from SageMaker."""
         self._invoke_api(self._boto_delete_method, self._boto_delete_members)
 
     @classmethod
     def load(cls, trial_component_name, sagemaker_boto_client=None):
         """
-        Load an existing trial component and return an ``TrialComponent`` object representing it.
+        Load an existing TrialComponent and return an ``TrialComponent`` object representing it.
+
         Args:
-            trial_component_name: (str): Name of the experiment
+            trial_component_name: (str): Name of the TrialComponent
             sagemaker_boto_client (SageMaker.Client, optional): Boto3 client for SageMaker.
                 If not supplied, a default boto3 client will be created and used.
         Returns:
-            sagemaker.experiments.experiment.Experiment: A SageMaker ``Experiment`` object
+            smexperiments.trial_component.TrialComponent: A SageMaker ``TrialComponent`` object
         """
         trial_component = cls._construct(
             cls._boto_load_method,
@@ -98,7 +100,7 @@ class TrialComponent(_base_types.Record):
         Create a trial component and return a ``TrialComponent`` object representing it.
 
         Returns:
-            sagemaker.experiments.trial_component.TrialComponent: A SageMaker ``TrialComponent``
+            smexperiments.trial_component.TrialComponent: A SageMaker ``TrialComponent``
                 object.
         """
         return super(TrialComponent, cls)._construct(
@@ -111,13 +113,14 @@ class TrialComponent(_base_types.Record):
     def list(cls, trial_name=None, experiment_name=None, source_arn=None, created_before=None, created_after=None,
              sort_by=None, sort_order=None, sagemaker_boto_client=None):
         """
-        Returns the list of trial components in a given trial.
+        Return the list of trial components in a given Trial or Experiment.
+
         Args:
             trial_name (str) : Name of the trial.
             sagemaker_boto_client (SageMaker.Client, optional) : Boto3 client for SageMaker.
                 If not supplied, a default boto3 client will be created and used.
         Returns:
-            collections.Iterator[sagemaker.experiments.trial_component.TrialComponent]: An iterator
+            collections.Iterator[smexperiments.trial_component.TrialComponent]: An iterator
                 over ``TrialComponent`` objects in the trial.
         """
         return super(TrialComponent, cls)._list(

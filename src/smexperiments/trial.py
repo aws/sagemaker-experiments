@@ -10,14 +10,16 @@
 # distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
-"""Placeholder docstring"""
+"""Contains the Trial class."""
+
 from smexperiments import api_types, _base_types, trial_component, _utils, tracker
 
 
 class Trial(_base_types.Record):
     """
-    An execution of a data-science workflow with an Experiment. Consists of a list of TrialComponent objects, which
-    document individual activities within the workflow.
+    An execution of a data-science workflow with an Experiment.
+
+    Consists of a list of TrialComponent objects, which document individual activities within the workflow.
     """
 
     trial_name = None
@@ -36,23 +38,28 @@ class Trial(_base_types.Record):
         return super(Trial, cls)._boto_ignore + ['CreatedBy']
 
     def save(self):
-        """Placeholder docstring"""
+        """Save the state of this Trial to SageMaker."""
         return self._invoke_api(self._boto_update_method, self._boto_update_members)
 
     def delete(self):
-        """Placeholder docstring"""
+        """Delete this Trial from SageMaker.
+
+        Requires that this Trial contains no TrialComponents. Individual TrialComponents can be removed by
+        calling :meth:`~smexperiments.trial.Trial.remove_trial_component`.
+        """
         self._invoke_api(self._boto_delete_method, self._boto_delete_members)
 
     @classmethod
     def load(cls, trial_name, sagemaker_boto_client=None):
         """
         Load details about an existing trial and return a ``Trial`` object.
+
         Args:
             trial_name: (str): Name of the Trial.
             sagemaker_boto_client (SageMaker.Client, optional): Boto3 client for SageMaker.
                 If not supplied, a default boto3 client will be created and used.
         Returns:
-            sagemaker.experiments.trial.Trial: A SageMaker ``Trial`` object
+            smexperiments.trial.Trial: A SageMaker ``Trial`` object
         """
         return super(Trial, cls)._construct(
             cls._boto_load_method,
@@ -77,7 +84,7 @@ class Trial(_base_types.Record):
                 If not supplied, a default boto3 client will be created and used.
             trial_components (list): A list of trial component names, trial components, or trial component trackers
         Returns:
-            sagemaker.experiments.trial.Trial: A SageMaker ``Trial`` object
+            smexperiments.trial.Trial: A SageMaker ``Trial`` object
         """
         trial_name = trial_name or _utils.name('Trial')
         trial = super(Trial, cls)._construct(
@@ -115,7 +122,7 @@ class Trial(_base_types.Record):
             sagemaker_boto_client (SageMaker.Client, optional): Boto3 client for SageMaker.
                 If not supplied, a default boto3 client will be created and used.
         Returns:
-            collections.Iterator[sagemaker.experiments.trial.TrialSummary]: An iterator over trials
+            collections.Iterator[smexperiments.trial.TrialSummary]: An iterator over trials
                 matching the specified criteria.
         """
         return super(Trial, cls)._list(
@@ -131,7 +138,15 @@ class Trial(_base_types.Record):
         )
 
     def add_trial_component(self, tc):
-        """Add the specified trial component to this trial."""
+        """Add the specified TrialComponent to this Trial.
+
+        A TrialComponent may belong to many Trials and a Trial may have many TrialComponent objects.
+
+        Args:
+           tc: (tracker.Tracker|trial_component.TrialComponent|str) The TrialComponent to add. Can be
+           one of a Tracker instance, a TrialComponent instance, or a string containing the name of
+           the trial component to add.
+        """
         if isinstance(tc, tracker.Tracker):
             trial_component_name = tc.trial_component.trial_component_name
         elif isinstance(tc, trial_component.TrialComponent):
@@ -142,6 +157,13 @@ class Trial(_base_types.Record):
             TrialName=self.trial_name, TrialComponentName=trial_component_name)
 
     def remove_trial_component(self, tc):
+        """Remove the specified TrialComponent from this Trial.
+
+        Args:
+            tc: (tracker.Tracker|trial_component.TrialComponent|str) The TrialComponent to remove. Can be
+            one of a Tracker instance, a TrialComponent instance, or a string containing the name of
+            the trial component to remove.
+        """
         if isinstance(tc, tracker.Tracker):
             trial_component_name = tc.trial_component.trial_component_name
         elif isinstance(tc, trial_component.TrialComponent):
@@ -154,9 +176,10 @@ class Trial(_base_types.Record):
 
     def list_trial_components(self):
         """
-        Returns all the trial components in this trial.
+        Return all the trial components in this Trial.
+
         Returns:
-            collections.Iterator[sagemaker.experiments.trial_component.TrialComponentSummary]:  An iterator
+            collections.Iterator[smexperiments.trial_component.TrialComponentSummary]:  An iterator
                 over trial component summaries.
         """
         return trial_component.TrialComponent.list(trial_name=self.trial_name,

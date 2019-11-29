@@ -1,5 +1,5 @@
 import datetime
-from tests.fixtures import  *
+from tests.fixtures import *
 from smexperiments import experiment
 
 
@@ -21,11 +21,12 @@ def test_save_load(experiment_obj, sagemaker_boto_client):
     assert experiment_obj.description == experiment_obj_two.description
 
     experiment_obj.description = name()
+    experiment_obj.display_name = name()
     experiment_obj.save()
     experiment_obj_three = experiment.Experiment.load(experiment_name=experiment_obj.experiment_name,
-                                                    sagemaker_boto_client=sagemaker_boto_client)
+                                                      sagemaker_boto_client=sagemaker_boto_client)
     assert experiment_obj.description == experiment_obj_three.description
-
+    assert experiment_obj.display_name == experiment_obj_three.display_name
 
 def test_list(sagemaker_boto_client, experiments):
     slack = datetime.timedelta(minutes=1)

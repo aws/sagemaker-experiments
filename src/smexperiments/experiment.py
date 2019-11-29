@@ -10,13 +10,19 @@
 # distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
-"""Placeholder docstring"""
+
+"""Contains the SageMaker Experiment class."""
 from smexperiments import _base_types, api_types, trial, _utils
 
 
 class Experiment(_base_types.Record):
     """
-    An Amazon SageMaker Experiment. An Experiment is a collection of related Trials.
+    An Amazon SageMaker Experiment, which is a collection of related Trials.
+
+    New Experiments are created by calling :meth:`~smexperiments.experiment.Experiment.create`. Existing
+    experiments can be reloaded by calling :meth:`~smexperiments.experiment.Experiment.load`. You can
+    add a new Trial to an Experiment by calling :meth:`~smexperiments.experiment.Experiment.create_trial`.
+    To remove a Trial from an Experiment, delete the Trial.
     """
 
     experiment_name = None
@@ -27,21 +33,25 @@ class Experiment(_base_types.Record):
     _boto_update_method = "update_experiment"
     _boto_delete_method = "delete_experiment"
 
-    _boto_update_members = ["experiment_name", "description"]
+    _boto_update_members = ["experiment_name", "description", "display_name"]
     _boto_delete_members = ["experiment_name"]
 
     def save(self):
-        """Placeholder docstring"""
+        """Save the state of this Experiment to SageMaker."""
         return self._invoke_api(self._boto_update_method, self._boto_update_members)
 
     def delete(self):
-        """Placeholder docstring"""
+        """Delete this Experiment from SageMaker.
+
+        Deleting an Experiment requires that each Trial in the Experiment is first deleted.
+        """
         self._invoke_api(self._boto_delete_method, self._boto_delete_members)
 
     @classmethod
     def load(cls, experiment_name, sagemaker_boto_client=None):
         """
         Load an existing experiment and return an ``Experiment`` object representing it.
+
         Args:
             experiment_name: (str): Name of the experiment
             sagemaker_boto_client (SageMaker.Client, optional): Boto3 client for SageMaker.
@@ -49,21 +59,17 @@ class Experiment(_base_types.Record):
         Returns:
             sagemaker.experiments.experiment.Experiment: A SageMaker ``Experiment`` object
         """
-        x = cls._construct(
+        return cls._construct(
             cls._boto_load_method,
             experiment_name=experiment_name,
             sagemaker_boto_client=sagemaker_boto_client,
         )
-        # TODO: Fix this once model reverted back to description
-        if(hasattr(x, 'experiment_description')):
-            x.description = x.experiment_description
-        return x
 
     @classmethod
     def create(cls, experiment_name=None, description=None, sagemaker_boto_client=None):
         """
-        Create a new experiment and return an ``Experiment`` object representing the created
-        experiment.
+        Create a new experiment in SageMaker and return an ``Experiment`` object.
+
         Args:
             experiment_name: (str): Name of the experiment. Must be unique.
             experiment_description: (str): Description of the experiment
@@ -90,6 +96,7 @@ class Experiment(_base_types.Record):
     ):
         """
         List experiments. Returns experiments in the account matching the specified criteria.
+
         Args:
             created_before: (datetime.datetime, optional): Return experiments created before this
                 instant.
@@ -99,7 +106,7 @@ class Experiment(_base_types.Record):
                 'Name', 'CreationTime'.
             sort_order (str, optional): One of 'Ascending', or 'Descending'.
             sagemaker_boto_client (SageMaker.Client, optional): Boto3 client for SageMaker. If not
-                supplied, a default boto3 client will be created and used.
+                supplied, a default boto3 client will be used.
         Returns:
             collections.Iterator[sagemaker.experiments.api_types.ExperimentSummary] : An iterator
                 over experiment summaries matching the specified criteria.
@@ -117,6 +124,7 @@ class Experiment(_base_types.Record):
 
     def list_trials(self, created_before=None, created_after=None, sort_by=None, sort_order=None):
         """List trials in this experiment matching the specified criteria.
+
         Args:
             created_before (datetime.datetime, optional): Return trials created before this instant.
             created_after (datetime.datetime, optional): Return trials created after this instant.
@@ -127,7 +135,6 @@ class Experiment(_base_types.Record):
             collections.Iterator[sagemaker.experiments.api_types.TrialSummary] : An iterator over
                 trials matching the criteria.
         """
-
         return trial.Trial.list(
             experiment_name=self.experiment_name,
             created_before=created_before,
@@ -138,9 +145,12 @@ class Experiment(_base_types.Record):
         )
 
     def create_trial(self, trial_name=None, trial_name_prefix="SageMakerTrial"):
-        """Creates a trial in this experiment. Since trial names are expected to be unique in an
-        account, ``trial_name_prefix`` can be provided instead of ``trial_name`` in order to let
-        SageMaker generate an unique name.
+        """Create a trial in this experiment.
+
+        Since trial names are expected to be unique in an account, ``trial_name_prefix`` can be provided
+        instead of ``trial_name``. In this case a unique name will be generated that begins with the specified
+        prefix.
+
         Args:
             trial_name (str): Name of the trial.
             trial_name_prefix (str): Prefix for the trial name if you want SageMaker to

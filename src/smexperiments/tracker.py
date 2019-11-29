@@ -10,12 +10,12 @@
 # distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
+"""Contains the SageMaker Experiments Tracker class."""
 import datetime
 import os
 import mimetypes
 import urllib.parse
 import urllib.request
-
 
 import dateutil
 
@@ -23,6 +23,20 @@ from smexperiments import api_types, metrics, trial_component, _utils, _environm
 
 
 class Tracker(object):
+    """"A SageMaker Experiments Tracker.
+
+    Use a Tracker object to record experiment information to a SageMaker TrialComponent.
+
+    A new Tracker can be created in two ways:
+
+    - By loading an existing TrialComponent with :meth:`~smexperiments.tracker.Tracker.load`
+    - By creating a Tracker for a new TrialComponent with :meth:`~smexperiments.tracker.Tracker.load`.
+
+    When creating a Tracker within a SageMaker Training or Processing Job, use the ``load`` method with
+    no arguments to track artifacts to the TrialComponent automatically created for your Job. When tracking
+    within a Notebook running in SageMaker, use the ``create`` method to automatically create a new
+    TrialComponent.
+    """
 
     trial_component = None
     _metrics_writer = None
@@ -36,10 +50,26 @@ class Tracker(object):
         self.trial_component.output_artifacts = self.trial_component.output_artifacts or {}
         self._artifact_uploader = artifact_uploader
         self._metrics_writer = metrics_writer
+        self._warned_on_metrics = False
 
     @classmethod
     def load(cls, trial_component_name=None, artifact_bucket=None, artifact_prefix=None,
              boto3_session=None, sagemaker_boto_client=None):
+        """Create a new Tracker by loading an existing TrialComponent.
+
+        Args:
+            trial_component_name: (str, optional). The name of the TrialComponent to track. If specified, this
+                TrialComponent must exist in SageMaker. If you invoke this method in a running SageMaker Training
+                or Processing Job, then trial_component_name can be left empty. In this case, the Tracker will
+                resolve the TrialComponent automatically created for your SageMaker Job.
+            artifact_bucket: (str, optional) The name of the S3 bucket to store artifacts to.
+            artifact_prefix: (str, optional) The prefix to write artifacts to within ``artifact_bucket``
+            boto3_session: (boto3.Session, optional) The boto3.Session to use to interact with AWS services.
+                If not specified a new default boto3 session will be created.
+            sagemaker_boto_client: (boto3.Client, optional) The SageMaker AWS service client to use. If not
+                specified a new client will be created from the specified ``boto3_session`` or default
+                boto3.Session.
+        """
         boto3_session = boto3_session or _utils.boto_session()
         sagemaker_boto_client = sagemaker_boto_client or _utils.sagemaker_client()
 
@@ -70,6 +100,18 @@ class Tracker(object):
     @classmethod
     def create(cls, display_name=None, artifact_bucket=None, artifact_prefix=None, boto3_session=None,
                sagemaker_boto_client=None):
+        """Create a new Tracker by creating a new TrialComponent.
+
+        Args:
+            display_name: (str, optional). The display name of the TrialComponent to track.
+            artifact_bucket: (str, optional) The name of the S3 bucket to store artifacts to.
+            artifact_prefix: (str, optional) The prefix to write artifacts to within ``artifact_bucket``
+            boto3_session: (boto3.Session, optional) The boto3.Session to use to interact with AWS services.
+                If not specified a new default boto3 session will be created.
+            sagemaker_boto_client: (boto3.Client, optional) The SageMaker AWS service client to use. If not
+                specified a new client will be created from the specified ``boto3_session`` or default
+                boto3.Session.
+        """
         boto3_session = boto3_session or _utils.boto_session()
         sagemaker_boto_client = sagemaker_boto_client or _utils.sagemaker_client()
 
@@ -82,8 +124,10 @@ class Tracker(object):
                    _ArtifactUploader(tc.trial_component_name, artifact_bucket, artifact_prefix, boto3_session))
 
     def log_parameter(self, name, value):
-        """Record a single parameter value for this trial component. Overwrites any previous value
-        recorded for the specified parameter name.
+        """Record a single parameter value for this trial component.
+
+        Overwrites any previous value recorded for the specified parameter name.
+
         Args:
             name (str): The name of the parameter
             value (str or numbers.Number): The value of the parameter
@@ -92,14 +136,17 @@ class Tracker(object):
 
     def log_parameters(self, parameters):
         """Record a collection of parameter values for this trial component.
+
         Args:
             parameters (dict[str, str or numbers.Number]): The parameters to record.
         """
         self.trial_component.parameters.update(parameters)
 
     def log_input(self, name, value, media_type=None):
-        """Record a single input artifact for this trial component. Overwrites any previous value
-        recorded for the specified input name.
+        """Record a single input artifact for this trial component.
+
+        Overwrites any previous value recorded for the specified input name.
+
         Args:
             name (str): The name of the input value.
             value (str): The value.
@@ -108,16 +155,26 @@ class Tracker(object):
         self.trial_component.input_artifacts[name] = api_types.TrialComponentArtifact(value, media_type=media_type)
 
     def log_output(self, name, value, media_type=None):
-        """Record a single output artifact for this trial component. Overwrites any previous value
-        recorded for the specified output name.
+        """Record a single output artifact for this trial component.
+
+        Overwrites any previous value recorded for the specified output name.
+
         Args:
             name (str): The name of the output value.
             value (str): The value.
-            media_type (str): The MediaType (MIME type) of the value
+            media_type (str, optional): The MediaType (MIME type) of the value.
         """
         self.trial_component.output_artifacts[name] = api_types.TrialComponentArtifact(value, media_type=media_type)
 
     def log_artifact(self, file_path, name=None, media_type=None):
+        """Upload a local file to s3 and store it as an artifact in this trial component.
+
+        Args:
+            file_path (str): The path of the local file to upload.
+            name (str, optional): The name of the artifact.
+            media_type (str, optional): The MediaType (MIME type) of the file. If not specified, this library
+                will attempt to infer the media type from the file extension of ``file_path``.
+        """
         media_type = media_type or _guess_media_type(file_path)
         name = name or _resolve_artifact_name(file_path)
         s3_uri = self._artifact_uploader.upload_artifact(file_path)
@@ -126,11 +183,24 @@ class Tracker(object):
         )
 
     def log_metric(self, metric_name, value, timestamp=None, iteration_number=None):
+        """
+        Record a scalar metric value for this TrialComponent.
+
+        Args:
+            metric_name (str): The name of the metric.
+            value (number): The value of the metric.
+            timestamp (datetime.datetime|number, optional): The timestamp of the metric. If specified, should
+                either be a datetime.datetime object or a number representing the seconds since
+                the epoch. If not specified, the current local time will be used.
+            iteration_number (number, optional): The integer iteration number of the metric value.
+        """
         try:
             self._metrics_writer.log_metric(metric_name, value, timestamp, iteration_number)
         except AttributeError:
             if not self._metrics_writer:
-                raise SageMakerTrackerException('Logging metrics is not available in this environment')
+                if not self._warned_on_metrics:
+                    print('Cannot write metrics in this environment.')
+                    self._warned_on_metrics = True
             else:
                 raise
 
@@ -153,17 +223,12 @@ class Tracker(object):
         self.close()
 
     def close(self):
+        """Close this tracker and save state to SageMaker."""
         try:
             self.trial_component.save()
         finally:
             if self._metrics_writer:
                 self._metrics_writer.close()
-
-
-class SageMakerTrackerException(Exception):
-
-    def __init__(self, message):
-        super().__init__(message)
 
 
 def _resolve_artifact_name(file_path):
