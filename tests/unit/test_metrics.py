@@ -17,6 +17,8 @@ import shutil
 import datetime
 import dateutil
 import json
+import time
+
 from smexperiments import metrics
 import unittest.mock
 
@@ -56,14 +58,14 @@ def test_RawMetricData_utc_timestamp():
 
 
 def test_RawMetricData_aware_timestamp():
-    aware_datetime = datetime.datetime(2000, 1, 1, tzinfo=dateutil.tz.gettz('America/Chicago'))
+    aware_datetime = datetime.datetime.now(dateutil.tz.gettz('America/Chicago'))
     assert aware_datetime.tzinfo
     metric = metrics._RawMetricData(metric_name='foo', value=1.0, timestamp=aware_datetime)
     assert (aware_datetime - aware_datetime.utcoffset()).replace(tzinfo=datetime.timezone.utc).timestamp() == metric.Timestamp
 
 
 def test_RawMetricData_naive_timestamp():
-    naive_datetime = datetime.datetime(2000, 1, 1)
+    naive_datetime = datetime.datetime.now()
     assert naive_datetime.tzinfo is None
     metric = metrics._RawMetricData(metric_name='foo', value=1.0, timestamp=naive_datetime)
     local_datetime = naive_datetime.replace(tzinfo=dateutil.tz.tzlocal())
@@ -71,8 +73,16 @@ def test_RawMetricData_naive_timestamp():
 
 
 def test_RawMetricData_number_timestamp():
-    metric = metrics._RawMetricData(metric_name='foo', value=1.0, timestamp=371730600)
-    assert 371730600 == metric.Timestamp
+    time_now = time.time()
+    metric = metrics._RawMetricData(metric_name='foo', value=1.0, timestamp=time_now)
+    assert time_now == metric.Timestamp
+
+
+def test_RawMetricData_invalid_timestamp():
+    with pytest.raises(ValueError):
+        metrics._RawMetricData(metric_name='IFail', value=100, timestamp=time.time() - 2000000)
+    with pytest.raises(ValueError):
+        metrics._RawMetricData(metric_name='IFail', value=100, timestamp=time.time() + 10000)
 
 
 def test_file_metrics_writer_log_metric(timestamp, filepath):

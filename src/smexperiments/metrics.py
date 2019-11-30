@@ -12,6 +12,7 @@
 # language governing permissions and limitations under the License.
 import datetime
 import json
+import logging
 import os
 import time
 
@@ -19,6 +20,9 @@ import dateutil.tz
 
 
 METRICS_DIR = os.environ.get('SAGEMAKER_METRICS_DIRECTORY', '.')
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class SageMakerFileMetricsWriter(object):
@@ -32,6 +36,7 @@ class SageMakerFileMetricsWriter(object):
         raw_metric_data = _RawMetricData(metric_name=metric_name, value=value, timestamp=timestamp,
                                          iteration_number=iteration_number)
         try:
+            logging.debug('Writing metric: %s', raw_metric_data)
             self._file.write(json.dumps(raw_metric_data.to_record()))
             self._file.write('\n')
         except AttributeError:
@@ -93,6 +98,9 @@ class _RawMetricData(object):
         else:
             timestamp = float(timestamp)
 
+        if timestamp < (time.time() - 1209600) or timestamp > (time.time() + 7200):
+            raise ValueError('Supplied timestamp %f is invalid.'
+                             ' Timestamps must be between two weeks before and two hours from now.' % timestamp)
         value = float(value)
 
         self.MetricName = metric_name
