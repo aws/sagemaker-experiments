@@ -25,17 +25,29 @@ from smexperiments import api_types, metrics, trial_component, _utils, _environm
 class Tracker(object):
     """"A SageMaker Experiments Tracker.
 
-    Use a Tracker object to record experiment information to a SageMaker TrialComponent.
+    Use a tracker object to record experiment information to a SageMaker trial component.
 
-    A new Tracker can be created in two ways:
+    A new tracker can be created in two ways:
 
-    - By loading an existing TrialComponent with :meth:`~smexperiments.tracker.Tracker.load`
-    - By creating a Tracker for a new TrialComponent with :meth:`~smexperiments.tracker.Tracker.load`.
+    - By loading an existing trial component with :meth:`~smexperiments.tracker.Tracker.load`
+    - By creating a tracker for a new trial component with :meth:`~smexperiments.tracker.Tracker.create`.
 
-    When creating a Tracker within a SageMaker Training or Processing Job, use the ``load`` method with
-    no arguments to track artifacts to the TrialComponent automatically created for your Job. When tracking
-    within a Notebook running in SageMaker, use the ``create`` method to automatically create a new
-    TrialComponent.
+    When creating a tracker within a SageMaker training or processing job, use the ``load`` method with
+    no arguments to track artifacts to the trial component automatically created for your job. When tracking
+    within a  Jupyternotebook running in SageMaker, use the ``create`` method to automatically create a new
+    trial component.
+
+    Trackers are Python context managers and you can use them using the Python ``with`` keyword. Exceptions
+    thrown within the with block will cause the tracker's trial component to be marked as failed. Start and
+    end times are automatically set when using the with statement and the trial component is saved to
+    SageMaker at the end of the block.
+
+    .. code-block:: python
+
+        with smexperiments.tracker.Tracker.create() as my_tracker:
+            my_tracker.log_parameter('learning_rate', 0.01)
+
+            # Perform data-science code within the with block.
     """
 
     trial_component = None
@@ -55,13 +67,13 @@ class Tracker(object):
     @classmethod
     def load(cls, trial_component_name=None, artifact_bucket=None, artifact_prefix=None,
              boto3_session=None, sagemaker_boto_client=None):
-        """Create a new Tracker by loading an existing TrialComponent.
+        """Create a new ``Tracker`` by loading an existing trial component.
 
         Args:
-            trial_component_name: (str, optional). The name of the TrialComponent to track. If specified, this
-                TrialComponent must exist in SageMaker. If you invoke this method in a running SageMaker Training
-                or Processing Job, then trial_component_name can be left empty. In this case, the Tracker will
-                resolve the TrialComponent automatically created for your SageMaker Job.
+            trial_component_name: (str, optional). The name of the trial component to track. If specified, this
+                trial component must exist in SageMaker. If you invoke this method in a running SageMaker training
+                or processing job, then trial_component_name can be left empty. In this case, the Tracker will
+                resolve the trial component automatically created for your SageMaker Job.
             artifact_bucket: (str, optional) The name of the S3 bucket to store artifacts to.
             artifact_prefix: (str, optional) The prefix to write artifacts to within ``artifact_bucket``
             boto3_session: (boto3.Session, optional) The boto3.Session to use to interact with AWS services.
@@ -100,10 +112,10 @@ class Tracker(object):
     @classmethod
     def create(cls, display_name=None, artifact_bucket=None, artifact_prefix=None, boto3_session=None,
                sagemaker_boto_client=None):
-        """Create a new Tracker by creating a new TrialComponent.
+        """Create a new ``Tracker`` by creating a new trial component.
 
         Args:
-            display_name: (str, optional). The display name of the TrialComponent to track.
+            display_name: (str, optional). The display name of the trial component to track.
             artifact_bucket: (str, optional) The name of the S3 bucket to store artifacts to.
             artifact_prefix: (str, optional) The prefix to write artifacts to within ``artifact_bucket``
             boto3_session: (boto3.Session, optional) The boto3.Session to use to interact with AWS services.

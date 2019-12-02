@@ -12,7 +12,6 @@ import os
 import shutil
 import subprocess
 import sys
-
 import time
 
 import docker
@@ -22,7 +21,7 @@ from smexperiments import experiment, trial, trial_component
 
 @pytest.fixture
 def sagemaker_boto_client():
-    return boto3.client('sagemaker-experiments', endpoint_url=os.environ.get('SAGEMAKER_ENDPOINT'))
+    return boto3.client('sagemaker', endpoint_url=os.environ.get('SAGEMAKER_ENDPOINT'))
 
 
 @pytest.fixture(scope='session')
@@ -36,9 +35,9 @@ def name():
 
 @pytest.fixture
 def tempdir():
-    dir = tempfile.mkdtemp()
-    yield dir
-    shutil.rmtree(dir)
+    temp_dir = tempfile.mkdtemp()
+    yield temp_dir
+    shutil.rmtree(temp_dir)
 
 
 @pytest.fixture
@@ -48,6 +47,7 @@ def experiment_obj(sagemaker_boto_client):
     experiment_obj = experiment.Experiment.create(experiment_name=name(), description=description,
                                                   sagemaker_boto_client=sagemaker_boto_client)
     yield experiment_obj
+    time.sleep(0.5)
     experiment_obj.delete()
 
 
@@ -57,6 +57,7 @@ def trial_obj(sagemaker_boto_client, experiment_obj):
                                    experiment_name=experiment_obj.experiment_name,
                                    sagemaker_boto_client=sagemaker_boto_client)
     yield trial_obj
+    time.sleep(0.5)
     trial_obj.delete()
 
 
@@ -65,6 +66,7 @@ def trial_component_obj(sagemaker_boto_client):
     trial_component_obj = trial_component.TrialComponent.create(trial_component_name=name(),
                                                                 sagemaker_boto_client=sagemaker_boto_client)
     yield trial_component_obj
+    time.sleep(0.5)
     trial_component_obj.delete()
 
 
@@ -79,11 +81,14 @@ def names():
 
 @pytest.fixture
 def trials(experiment_obj, sagemaker_boto_client):
-    trial_objs = [
-        trial.Trial.create(trial_name=trial_name,
-                           experiment_name=experiment_obj.experiment_name,
-                           sagemaker_boto_client=sagemaker_boto_client) for trial_name in names()
-    ]
+    trial_objs = []
+    for trial_name in names():
+        next_trial = trial.Trial.create(
+            trial_name=trial_name,
+            experiment_name=experiment_obj.experiment_name,
+            sagemaker_boto_client=sagemaker_boto_client)
+        trial_objs.append(next_trial)
+        time.sleep(0.5)
     yield trial_objs
     for trial_obj in trial_objs:
         trial_obj.delete()

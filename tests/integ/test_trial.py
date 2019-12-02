@@ -2,6 +2,7 @@ import datetime
 
 from tests.fixtures import *
 
+
 def test_create_delete(trial_obj):
     # Fixture creates / deletes, just ensure used at least once.
     assert trial_obj.trial_name
@@ -41,26 +42,7 @@ def test_list_sort(trials, sagemaker_boto_client):
 
 def test_add_remove_trial_component(trial_obj, trial_component_obj):
     trial_obj.add_trial_component(trial_component_obj)
-    trial_components = list(trial_obj.list_trial_components())
-    trial_components = [s.trial_component_name for s in trial_components]
-    assert [trial_component_obj.trial_component_name] == trial_components
-
     trial_obj.remove_trial_component(trial_component_obj)
-    trial_components = list(trial_obj.list_trial_components())
-    assert [] == trial_components
-
-
-def test_list_trial_components(trial_obj, trial_components):
-    for trial_component_obj in trial_components:
-        trial_obj.add_trial_component(trial_component_obj)
-    try:
-        trial_component_names = [trial_component_obj.trial_component_name for trial_component_obj in trial_components]
-        listed_trial_component_names = [s.trial_component_name for s in trial_obj.list_trial_components()]
-        assert set(trial_component_names) == set(listed_trial_component_names)
-        assert listed_trial_component_names  # sanity test
-    finally:
-        for trial_component_obj in trial_components:
-            trial_obj.remove_trial_component(trial_component_obj)
 
 
 def test_save(trial_obj, sagemaker_boto_client):

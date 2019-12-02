@@ -17,12 +17,12 @@ from smexperiments import _base_types, api_types, trial, _utils
 
 class Experiment(_base_types.Record):
     """
-    An Amazon SageMaker Experiment, which is a collection of related Trials.
+    An Amazon SageMaker experiment, which is a collection of related trials.
 
-    New Experiments are created by calling :meth:`~smexperiments.experiment.Experiment.create`. Existing
+    New experiments are created by calling :meth:`~smexperiments.experiment.Experiment.create`. Existing
     experiments can be reloaded by calling :meth:`~smexperiments.experiment.Experiment.load`. You can
-    add a new Trial to an Experiment by calling :meth:`~smexperiments.experiment.Experiment.create_trial`.
-    To remove a Trial from an Experiment, delete the Trial.
+    add a new trial to an Experiment by calling :meth:`~smexperiments.experiment.Experiment.create_trial`.
+    To remove a Trial from an experiment, delete the trial.
     """
 
     experiment_name = None

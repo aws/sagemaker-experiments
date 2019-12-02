@@ -17,9 +17,9 @@ from smexperiments import api_types, _base_types, trial_component, _utils, track
 
 class Trial(_base_types.Record):
     """
-    An execution of a data-science workflow with an Experiment.
+    An execution of a data-science workflow with an experiment.
 
-    Consists of a list of TrialComponent objects, which document individual activities within the workflow.
+    Consists of a list of trial component objects, which document individual activities within the workflow.
     """
 
     trial_name = None
@@ -52,7 +52,7 @@ class Trial(_base_types.Record):
     @classmethod
     def load(cls, trial_name, sagemaker_boto_client=None):
         """
-        Load details about an existing trial and return a ``Trial`` object.
+        Load an existing trial and return a ``Trial`` object.
 
         Args:
             trial_name: (str): Name of the Trial.
@@ -138,12 +138,12 @@ class Trial(_base_types.Record):
         )
 
     def add_trial_component(self, tc):
-        """Add the specified TrialComponent to this Trial.
+        """Add the specified trial component to this ``Trial``.
 
-        A TrialComponent may belong to many Trials and a Trial may have many TrialComponent objects.
+        A trial component may belong to many trials and a trial may have many trial components.
 
         Args:
-           tc: (tracker.Tracker|trial_component.TrialComponent|str) The TrialComponent to add. Can be
+           tc: (tracker.Tracker|trial_component.TrialComponent|str) The trial component to add. Can be
            one of a Tracker instance, a TrialComponent instance, or a string containing the name of
            the trial component to add.
         """
@@ -157,10 +157,10 @@ class Trial(_base_types.Record):
             TrialName=self.trial_name, TrialComponentName=trial_component_name)
 
     def remove_trial_component(self, tc):
-        """Remove the specified TrialComponent from this Trial.
+        """Remove the specified trial component from this trial.
 
         Args:
-            tc: (tracker.Tracker|trial_component.TrialComponent|str) The TrialComponent to remove. Can be
+            tc: (tracker.Tracker|trial_component.TrialComponent|str) The trial component to remove. Can be
             one of a Tracker instance, a TrialComponent instance, or a string containing the name of
             the trial component to remove.
         """
@@ -173,14 +173,3 @@ class Trial(_base_types.Record):
         self.sagemaker_boto_client.disassociate_trial_component(
             TrialName=self.trial_name, TrialComponentName=trial_component_name
         )
-
-    def list_trial_components(self):
-        """
-        Return all the trial components in this Trial.
-
-        Returns:
-            collections.Iterator[smexperiments.trial_component.TrialComponentSummary]:  An iterator
-                over trial component summaries.
-        """
-        return trial_component.TrialComponent.list(trial_name=self.trial_name,
-                                                   sagemaker_boto_client=self.sagemaker_boto_client)

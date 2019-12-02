@@ -46,18 +46,6 @@ def test_load(trial_component_obj, sagemaker_boto_client):
     assert trial_component_obj.trial_component_arn == loaded.trial_component_arn
 
 
-def test_list_by_trial(trial_obj, trial_components_in_trial, sagemaker_boto_client):
-    trial_component_names = [
-        tc.trial_component_name for tc in trial_components_in_trial
-    ]
-    listed_trial_component_names = [
-        s.trial_component_name for s in trial_component.TrialComponent.list(
-            trial_name=trial_obj.trial_name, sagemaker_boto_client=sagemaker_boto_client)
-    ]
-    assert set(trial_component_names) == set(listed_trial_component_names)
-    assert trial_component_names  # sanity test
-
-
 def test_list_sort(trial_components, sagemaker_boto_client):
     slack = datetime.timedelta(minutes=1)
     now = datetime.datetime.now(datetime.timezone.utc)

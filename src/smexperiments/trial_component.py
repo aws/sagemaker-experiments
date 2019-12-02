@@ -16,9 +16,9 @@ from smexperiments import _base_types, api_types
 
 class TrialComponent(_base_types.Record):
     """
-    This class represents a SageMaker TrialComponent object.
+    This class represents a SageMaker trial component object.
 
-    A TrialComponent is a stage in a Trial.
+    A trial component is a stage in a trial.
     """
 
     trial_component_name = None
@@ -78,10 +78,10 @@ class TrialComponent(_base_types.Record):
     @classmethod
     def load(cls, trial_component_name, sagemaker_boto_client=None):
         """
-        Load an existing TrialComponent and return an ``TrialComponent`` object representing it.
+        Load an existing trial component and return an ``TrialComponent`` object representing it.
 
         Args:
-            trial_component_name: (str): Name of the TrialComponent
+            trial_component_name (str): Name of the trial component
             sagemaker_boto_client (SageMaker.Client, optional): Boto3 client for SageMaker.
                 If not supplied, a default boto3 client will be created and used.
         Returns:
@@ -110,25 +110,28 @@ class TrialComponent(_base_types.Record):
             sagemaker_boto_client=sagemaker_boto_client)
 
     @classmethod
-    def list(cls, trial_name=None, experiment_name=None, source_arn=None, created_before=None, created_after=None,
+    def list(cls, source_arn=None, created_before=None, created_after=None,
              sort_by=None, sort_order=None, sagemaker_boto_client=None):
         """
-        Return the list of trial components in a given Trial or Experiment.
+        Return a list of trial component summaries.
 
         Args:
-            trial_name (str) : Name of the trial.
+            source_arn (str, optional): A SageMaker Training or Processing Job ARN.
+            created_before (datetime.datetime, optional): Return trial components created before this instant.
+            created_after (datetime.datetime, optional): Return trial components created after this instant.
+            sort_by (str, optional): Which property to sort results by. One of 'SourceArn', 'CreatedBefore',
+                'CreatedAfter'
+            sort_order (str, optional): One of 'Ascending', or 'Descending'.
             sagemaker_boto_client (SageMaker.Client, optional) : Boto3 client for SageMaker.
                 If not supplied, a default boto3 client will be created and used.
         Returns:
-            collections.Iterator[smexperiments.trial_component.TrialComponent]: An iterator
-                over ``TrialComponent`` objects in the trial.
+            collections.Iterator[smexperiments.api_types.TrialComponentSummary]: An iterator
+                over ``TrialComponentSummary`` objects.
         """
         return super(TrialComponent, cls)._list(
             "list_trial_components",
             api_types.TrialComponentSummary.from_boto,
             "TrialComponentSummaries",
-            trial_name=trial_name,
-            experiment_name=experiment_name,
             source_arn=source_arn,
             created_before=created_before,
             created_after=created_after,
