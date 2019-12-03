@@ -30,7 +30,7 @@ def read_version():
 # Declare minimal set for installation
 required_packages = [
     "boto3>=1.10",
-    "python-dateutil>=2.8"
+    "python-dateutil>=2.1"
 ]
 
 setup(
