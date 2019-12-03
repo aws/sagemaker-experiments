@@ -34,7 +34,7 @@ required_packages = [
 ]
 
 setup(
-    name="smexperiments",
+    name="sagemaker-experiments",
     version=read_version(),
     description="Open source library for Experiment Tracking in SageMaker Jobs and Notebooks",
     packages=find_packages("src"),
