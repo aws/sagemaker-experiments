@@ -296,8 +296,8 @@ def docker_image(boto_model_file):
     [sdist_path] = glob.glob('dist/smexperiments*')
     shutil.copy(sdist_path, 'tests/integ-jobs/docker/smexperiments-0.1.0.tar.gz')
 
-    os.makedirs('tests/integ-jobs/boto', exist_ok=True)
-    shutil.copy(boto_model_file, 'tests/integ-jobs/boto/sagemaker-experiments-2017-07-24.normal.json')
+    os.makedirs('tests/integ-jobs/docker/boto', exist_ok=True)
+    shutil.copy(boto_model_file, 'tests/integ-jobs/docker/boto/sagemaker-experiments-2017-07-24.normal.json')
 
     repository_name = "smexperiments-test"
     try:
