@@ -12,6 +12,7 @@
 # language governing permissions and limitations under the License.
 
 import sys
+
 from tests.helpers import *
 
 from smexperiments import trial_component, api_types
@@ -22,6 +23,7 @@ def wait_for_job(job, sagemaker_client):
         while True:
             response = sagemaker_client.describe_processing_job(ProcessingJobName=job)
             status = response['ProcessingJobStatus']
+            print(f'Processing job status: {status}')
             if status == 'Failed':
                 print(response)
                 dump_logs(job)

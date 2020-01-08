@@ -291,15 +291,11 @@ def docker_image(boto_model_file):
     token = ecr_client.get_authorization_token()
     username, password = base64.b64decode(token['authorizationData'][0]['authorizationToken']).decode().split(':')
     registry = token['authorizationData'][0]['proxyEndpoint']
-
-    subprocess.check_call([sys.executable, 'setup.py', 'sdist'])
-    [sdist_path] = glob.glob('dist/smexperiments*')
-    shutil.copy(sdist_path, 'tests/integ-jobs/docker/smexperiments-0.1.0.tar.gz')
-
-    os.makedirs('tests/integ-jobs/docker/boto', exist_ok=True)
-    shutil.copy(boto_model_file, 'tests/integ-jobs/docker/boto/sagemaker-experiments-2017-07-24.normal.json')
-
     repository_name = "smexperiments-test"
+    image_version = '1.0.0'
+    tag = '{}/{}:{}'.format(registry, repository_name, image_version)[8:]
+
+    # initialize the docker image repository
     try:
         ecr_client.create_repository(repositoryName=repository_name)
     except botocore.exceptions.ClientError as e:
@@ -308,13 +304,24 @@ def docker_image(boto_model_file):
         else:
             raise
 
-    tag = '{}/{}:{}'.format(registry, repository_name, '1.0.0')[8:]
-
     # pull existing image for layer cache
     try:
         client.images.pull(tag, auth_config={'username': username, 'password': password})
+        # the image with this tag already exists
+        return tag
     except docker.errors.NotFound:
         pass
+
+    if boto_model_file is None:
+        raise ValueError('boto_model_file cannot be None')
+
+    subprocess.check_call([sys.executable, 'setup.py', 'sdist'])
+    [sdist_path] = glob.glob('dist/sagemaker-experiments*')
+    shutil.copy(sdist_path, 'tests/integ-jobs/docker/smexperiments-0.1.0.tar.gz')
+
+    os.makedirs('tests/integ-jobs/docker/boto', exist_ok=True)
+    shutil.copy(boto_model_file, 'tests/integ-jobs/docker/boto/sagemaker-experiments-2017-07-24.normal.json')
+
     client.images.build(
         path='tests/integ-jobs/docker',
         dockerfile='Dockerfile',
