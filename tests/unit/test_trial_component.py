@@ -165,9 +165,12 @@ def test_list(sagemaker_boto_client):
             last_modified_by={}
         ) for i in range(20)
     ]
-    result = list(trial_component.TrialComponent.list(sagemaker_boto_client=sagemaker_boto_client,
-                                                                source_arn='foo', sort_by='CreationTime',
-                                                                sort_order='Ascending'))
+    result = list(trial_component.TrialComponent.list(
+        sagemaker_boto_client=sagemaker_boto_client,
+        source_arn='foo',
+        sort_by='CreationTime',
+        sort_order='Ascending'))
+
     assert expected == result
     expected_calls= [unittest.mock.call(SortBy='CreationTime', SortOrder='Ascending', SourceArn='foo'),
                      unittest.mock.call(NextToken='100', SortBy='CreationTime', SortOrder='Ascending', SourceArn='foo')]
@@ -179,6 +182,41 @@ def test_list_empty(sagemaker_boto_client):
         'TrialComponentSummaries': []
     }
     assert [] == list(trial_component.TrialComponent.list(sagemaker_boto_client=sagemaker_boto_client))
+
+
+def test_list_trial_components_call_args(sagemaker_boto_client):
+    created_before = datetime.datetime(1999, 10, 12, 0, 0, 0)
+    created_after = datetime.datetime(1990, 10, 12, 0, 0, 0)
+    trial_name = 'foo-trial'
+    experiment_name = 'foo-experiment'
+    next_token = 'thetoken'
+    max_results = 99
+
+    sagemaker_boto_client.list_trial_components.return_value = {}
+    assert [] == list(
+        trial_component.TrialComponent.list(
+            sagemaker_boto_client=sagemaker_boto_client,
+            trial_name=trial_name,
+            experiment_name=experiment_name,
+            created_before=created_before,
+            created_after=created_after,
+            next_token=next_token,
+            max_results=max_results,
+            sort_by='CreationTime',
+            sort_order='Ascending')
+    )
+
+    expected_calls = [unittest.mock.call(
+        TrialName='foo-trial',
+        ExperimentName='foo-experiment',
+        CreatedBefore=created_before,
+        CreatedAfter=created_after,
+        SortBy='CreationTime',
+        SortOrder='Ascending',
+        NextToken='thetoken',
+        MaxResults=99,
+    )]
+    assert expected_calls == sagemaker_boto_client.list_trial_components.mock_calls
 
 
 def test_save(sagemaker_boto_client):

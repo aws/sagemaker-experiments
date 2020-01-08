@@ -173,3 +173,36 @@ class Trial(_base_types.Record):
         self.sagemaker_boto_client.disassociate_trial_component(
             TrialName=self.trial_name, TrialComponentName=trial_component_name
         )
+
+    def list_trial_components(
+            self,
+            created_before=None,
+            created_after=None,
+            sort_by=None,
+            sort_order=None,
+            max_results=None,
+            next_token=None):
+        """List trial components in this trial matching the specified criteria.
+
+        Args:
+            created_before (datetime.datetime, optional): Return trials created before this instant.
+            created_after (datetime.datetime, optional): Return trials created after this instant.
+            sort_by (str, optional): Which property to sort results by. One of 'Name',
+                'CreationTime'.
+            sort_order (str, optional): One of 'Ascending', or 'Descending'.
+            max_results (int, optional): maximum number of trial components to retrieve
+            next_token (str, optional): token for next page of results
+        Returns:
+            collections.Iterator[smexperiments.api_types.TrialComponentSummary] : An iterator over
+                trials matching the criteria.
+        """
+        return trial_component.TrialComponent.list(
+            trial_name=self.trial_name,
+            created_before=created_before,
+            created_after=created_after,
+            sort_by=sort_by,
+            sort_order=sort_order,
+            max_results=max_results,
+            next_token=next_token,
+            sagemaker_boto_client=self.sagemaker_boto_client,
+        )

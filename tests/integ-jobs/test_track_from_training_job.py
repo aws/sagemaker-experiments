@@ -12,7 +12,6 @@
 # language governing permissions and limitations under the License.
 
 import sys
-
 import boto3
 
 from tests.helpers import *
