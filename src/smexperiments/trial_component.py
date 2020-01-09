@@ -110,8 +110,18 @@ class TrialComponent(_base_types.Record):
             sagemaker_boto_client=sagemaker_boto_client)
 
     @classmethod
-    def list(cls, source_arn=None, created_before=None, created_after=None,
-             sort_by=None, sort_order=None, sagemaker_boto_client=None):
+    def list(
+            cls,
+            source_arn=None,
+            created_before=None,
+            created_after=None,
+            sort_by=None,
+            sort_order=None,
+            sagemaker_boto_client=None,
+            trial_name=None,
+            experiment_name=None,
+            max_results=None,
+            next_token=None):
         """
         Return a list of trial component summaries.
 
@@ -124,6 +134,11 @@ class TrialComponent(_base_types.Record):
             sort_order (str, optional): One of 'Ascending', or 'Descending'.
             sagemaker_boto_client (SageMaker.Client, optional) : Boto3 client for SageMaker.
                 If not supplied, a default boto3 client will be created and used.
+            trial_name (str, optional): Name of a Trial
+            experiment_name (str, optional): Name of an Experiment
+            max_results (int, optional): maximum number of trial components to retrieve
+            next_token (str, optional): token for next page of results
+
         Returns:
             collections.Iterator[smexperiments.api_types.TrialComponentSummary]: An iterator
                 over ``TrialComponentSummary`` objects.
@@ -137,4 +152,8 @@ class TrialComponent(_base_types.Record):
             created_after=created_after,
             sort_by=sort_by,
             sort_order=sort_order,
-            sagemaker_boto_client=sagemaker_boto_client)
+            sagemaker_boto_client=sagemaker_boto_client,
+            trial_name=trial_name,
+            experiment_name=experiment_name,
+            max_results=max_results,
+            next_token=next_token)
