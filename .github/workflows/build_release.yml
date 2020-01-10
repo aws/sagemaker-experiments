@@ -1,0 +1,65 @@
+name: Build and Release
+
+on:
+  pull_request:
+    branches:
+      - master
+  release:
+    types: [published]
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 3
+      matrix:
+        python-version: [3.5, 3.6, 3.7]
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Python ${{matrix.python-version}}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Dependencies
+        run: pip install tox tox-gh-actions
+      - name: Flake8
+        run: tox -e flake8
+      - name: Black Check
+        run: tox -e black-check
+      - name: Pylint
+        run: tox -e pylint
+      # starts 3 jobs, 1 for each python version
+      - name: Test
+        run: tox
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-west-2
+          CODECOV_UPLOAD_TOKEN: ${{ secrets.CODECOV_UPLOAD_TOKEN }}
+  release:
+    needs: build
+    if: github.event_name == 'release' && github.repository == 'aws/sagemaker-experiments'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+    - name: Install Dependencies
+      run: pip install setuptools wheel twine tox
+    - name: Create Distribution
+      run: python setup.py bdist_wheel
+    - name: Sign Release
+      run: |
+        echo "${{ secrets.PYPI_SIGN_PRIVATE_KEY }}" | gpg --batch --import --no-default-keyring --keyring ./sessionring.gpg
+        gpg --no-default-keyring --keyring ./sessionring.gpg --pinentry-mode loopback --passphrase ""${{ secrets.PYPI_SIGN_PASSPHRASE }}"" --detach-sign -ao /dev/null dist/*
+    - name: Twine Check
+      run: twine check dist/*
+    - name: Publish to PyPi
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        user: ${{ secrets.PYPI_USERNAME }}
+        password: ${{ secrets.PYPI_PASSWORD }}
+        repository_url: https://test.pypi.org/legacy/
