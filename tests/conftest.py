@@ -43,7 +43,10 @@ def boto_model_file(request):
 
 @pytest.fixture
 def sagemaker_boto_client():
-    return boto3.client("sagemaker", endpoint_url=os.environ.get("SAGEMAKER_ENDPOINT"))
+    if os.environ.get("SAGEMAKER_ENDPOINT", "").strip():
+        return boto3.client("sagemaker", endpoint_url=os.environ.get("SAGEMAKER_ENDPOINT"))
+    else:
+        return boto3.client("sagemaker")
 
 
 @pytest.fixture(scope="session")
@@ -108,10 +111,14 @@ def trials(experiment_obj, sagemaker_boto_client):
 
 @pytest.fixture
 def experiments(sagemaker_boto_client):
-    experiment_objs = [
-        experiment.Experiment.create(experiment_name=experiment_name, sagemaker_boto_client=sagemaker_boto_client)
-        for experiment_name in names()
-    ]
+    experiment_objs = []
+
+    for experiment_name in names():
+        experiment_objs.append(
+            experiment.Experiment.create(experiment_name=experiment_name, sagemaker_boto_client=sagemaker_boto_client)
+        )
+        time.sleep(1)
+
     yield experiment_objs
     for experiment_obj in experiment_objs:
         experiment_obj.delete()
@@ -282,6 +289,7 @@ def docker_image(boto_model_file):
     # pull existing image for layer cache
     try:
         client.images.pull(tag, auth_config={"username": username, "password": password})
+        print("Docker image with tag {} already exists.".format(tag))
         # the image with this tag already exists
         return tag
     except docker.errors.NotFound:
