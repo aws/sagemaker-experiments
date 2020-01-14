@@ -313,14 +313,15 @@ def docker_image(boto_model_file):
         pass
 
     if boto_model_file is None:
-        raise ValueError('boto_model_file cannot be None')
+        print('boto_model_file is None, using default model.')
+    else:
+        shutil.copy(boto_model_file, 'tests/integ-jobs/docker/boto/sagemaker-experiments-2017-07-24.normal.json')
 
     subprocess.check_call([sys.executable, 'setup.py', 'sdist'])
     [sdist_path] = glob.glob('dist/sagemaker-experiments*')
     shutil.copy(sdist_path, 'tests/integ-jobs/docker/smexperiments-0.1.0.tar.gz')
 
     os.makedirs('tests/integ-jobs/docker/boto', exist_ok=True)
-    shutil.copy(boto_model_file, 'tests/integ-jobs/docker/boto/sagemaker-experiments-2017-07-24.normal.json')
 
     client.images.build(
         path='tests/integ-jobs/docker',

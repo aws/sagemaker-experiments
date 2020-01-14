@@ -34,11 +34,13 @@ RUN curl -fSsL -O https://bootstrap.pypa.io/get-pip.py && \
 
 WORKDIR /root
 
-COPY $botomodel .
-
 COPY $library .
 
-RUN aws configure add-model --service-name sagemaker --service-model file://sagemaker-experiments-2017-07-24.normal.json 
+# use a custom model if provided
+RUN if [ "$botomodel" -a  -f "$botomodel" ]; then \
+    cp "$botomodel" . \
+    aws configure add-model --service-name sagemaker --service-model file://sagemaker-experiments-2017-07-24.normal.json; \
+fi
 
 RUN python3 -m pip install $(basename $library)
 
