@@ -77,3 +77,18 @@ def test_list_sort(trial_components, sagemaker_boto_client):
         trial_component_names_listed = trial_component_names_listed[::-1]
     assert trial_component_names == trial_component_names_listed
     assert trial_component_names # sanity test
+
+
+def test_list_trial_components_by_experiment(experiment_obj, trial_component_obj, sagemaker_boto_client):
+    trial_obj = experiment_obj.create_trial()
+    trial_obj.add_trial_component(trial_component_obj)
+    trial_components = list(trial_component.TrialComponent.list(
+                            sagemaker_boto_client=sagemaker_boto_client,
+                            experiment_name=experiment_obj.experiment_name))
+    assert 1 == len(trial_components)
+    trial_obj.remove_trial_component(trial_component_obj)
+    trial_components = list(trial_component.TrialComponent.list(
+        sagemaker_boto_client=sagemaker_boto_client,
+        experiment_name=experiment_obj.experiment_name))
+    assert 0 == len(trial_components)
+    trial_obj.delete()

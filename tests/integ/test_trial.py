@@ -55,8 +55,11 @@ def test_list_sort(trials, sagemaker_boto_client):
 
 def test_add_remove_trial_component(trial_obj, trial_component_obj):
     trial_obj.add_trial_component(trial_component_obj)
+    trial_components = list(trial_obj.list_trial_components())
+    assert 1 == len(trial_components)
     trial_obj.remove_trial_component(trial_component_obj)
-
+    trial_components = list(trial_obj.list_trial_components())
+    assert 0 == len(trial_components)
 
 def test_save(trial_obj, sagemaker_boto_client):
     trial_obj.display_name = 'foo'
