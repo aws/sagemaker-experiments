@@ -12,7 +12,7 @@
 # language governing permissions and limitations under the License.
 
 import sys
-
+import pytest
 from tests.helpers import *
 
 from smexperiments import trial_component, api_types
@@ -35,7 +35,7 @@ def wait_for_job(job, sagemaker_client):
                 sys.stdout.flush()
                 time.sleep(30)
 
-
+@pytest.mark.skip(reason="to be only run manually, integ/canaries already cover this scenario")
 def test_track_from_processing_job(sagemaker_boto_client, processing_job_name):
     processing_job = sagemaker_boto_client.describe_processing_job(ProcessingJobName=processing_job_name)
 

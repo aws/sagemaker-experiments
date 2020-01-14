@@ -94,3 +94,4 @@ def test_list_trials(experiment_obj, trials):
     assert set(trial_names) == set([s.trial_name for s in experiment_obj.list_trials()])
     assert trial_names  # sanity test
 
+

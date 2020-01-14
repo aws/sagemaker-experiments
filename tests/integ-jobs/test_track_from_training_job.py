@@ -13,6 +13,7 @@
 
 import sys
 import boto3
+import pytest
 
 from tests.helpers import *
 from smexperiments import trial_component
@@ -58,7 +59,7 @@ def wait_for_job(job, sagemaker_client):
                 sys.stdout.flush()
                 time.sleep(30)
 
-
+@pytest.mark.skip(reason="to be only run manually, integ/canaries already cover this scenario")
 def test_track_from_training_job(sagemaker_boto_client, training_job_name):
     tj = sagemaker_boto_client.describe_training_job(TrainingJobName=training_job_name)
     source_arn = tj['TrainingJobArn']
