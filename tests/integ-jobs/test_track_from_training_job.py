@@ -48,6 +48,7 @@ def wait_for_job(job, sagemaker_client):
         while True:
             response = sagemaker_client.describe_training_job(TrainingJobName=job)
             status = response['TrainingJobStatus']
+            print('Training Job status is {}'.format(status))
             if status == 'Failed':
                 print(response)
                 dump_logs(job)
