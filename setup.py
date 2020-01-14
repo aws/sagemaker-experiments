@@ -32,6 +32,13 @@ required_packages = [
     "boto3>=1.10.32"
 ]
 
+# Open readme with original (i.e. LF) newlines
+# to prevent the all too common "`long_description_content_type` missing"
+# bug (https://github.com/pypa/twine/issues/454)
+with open('README.rst', 'r', newline='', encoding='utf-8') as readme_file:
+    long_description = readme_file.read()
+    long_description_content_type = 'text/x-rst'
+
 setup(
     name="sagemaker-experiments",
     version=read_version(),
@@ -39,7 +46,8 @@ setup(
     packages=find_packages("src"),
     package_dir={"": "src"},
     py_modules=[os.path.splitext(os.path.basename(path))[0] for path in glob.glob("src/*.py")],
-    long_description=read("README.rst"),
+    long_description=long_description,
+    long_description_content_type=long_description_content_type,
     author="Amazon Web Services",
     url="https://github.com/aws/sagemaker-experiment-tracking/",
     license="Apache License 2.0",
