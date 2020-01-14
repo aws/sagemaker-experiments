@@ -1,0 +1,29 @@
+name: Main
+
+on: pull_request
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: github.repository == 'aws/sagemaker-experiments'
+    strategy:
+      max-parallel: 3
+      matrix:
+        python-version: [3.5, 3.6, 3.7]
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Python ${{matrix.python-version}}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Dependencies
+        run: pip install tox tox-gh-actions
+      # starts 3 jobs, 1 for each python version
+      - name: Test
+        run: tox
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-west-2
+      - name: Flake8
+        run: tox -e flake8
