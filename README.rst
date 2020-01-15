@@ -17,6 +17,11 @@ SageMaker Experiments Python SDK
 
 .. image:: https://img.shields.io/pypi/l/sagemaker-experiments
     :target: https://github.com/aws/sagemaker-experiments/blob/master/LICENSE
+    :alt: License
+
+.. image:: https://readthedocs.org/projects/sagemaker-experiments/badge/?version=stable
+    :target: https://sagemaker-experiments.readthedocs.io/en/stable/?badge=stable
+    :alt: Documentation Status
 
 .. image:: https://img.shields.io/pypi/dm/sagemaker-experiments
     :target: https://pypi.python.org/pypi/sagemaker-experiments
@@ -58,6 +63,10 @@ SageMaker Experiments Python SDK
     :target: https://github.com/python/black
     :alt: Code style: black
 
+.. image:: https://readthedocs.org/projects/sagemaker-experiments/badge/?version=latest&style=plastic
+    :target: https://readthedocs.org/projects/sagemaker-experiments/
+    :alt: Read the Docs - Sagemaker Experiments
+
 
 
 Experiment tracking in SageMaker Training Jobs, Processing Jobs, and Notebooks.
@@ -67,6 +76,8 @@ Overview
 SageMaker Experiments is an AWS service for tracking machine learning Experiments. The SageMaker Experiments Python SDK is a high-level interface to this service that helps you track Experiment information using Python.
 
 Experiment tracking powers the machine learning integrated development environment `Amazon SageMaker Studio <https://docs.aws.amazon.com/sagemaker/latest/dg/gs-studio.html>`_.
+
+For detailed API reference please go to: `Read the Docs <https://sagemaker-experiments.readthedocs.io>`_
 
 Concepts
 --------
