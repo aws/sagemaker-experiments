@@ -84,7 +84,7 @@ class TrialComponentParameterValue(_base_types.ApiObject):
             return self.string_value
         if self.number_value is not None:
             return str(self.number_value)
-        return ''
+        return ""
 
 
 class TrialComponentParameters(_base_types.ApiObject):

@@ -2,11 +2,11 @@ from smexperiments import api_types
 
 
 def test_parameter_str_string():
-    param = api_types.TrialComponentParameterValue('kmeans', None)
+    param = api_types.TrialComponentParameterValue("kmeans", None)
 
     param_str = str(param)
 
-    assert 'kmeans' == param_str
+    assert "kmeans" == param_str
 
 
 def test_parameter_str_number():
@@ -14,7 +14,7 @@ def test_parameter_str_number():
 
     param_str = str(param)
 
-    assert '2.99792458' == param_str
+    assert "2.99792458" == param_str
 
 
 def test_parameter_str_none():
@@ -22,4 +22,4 @@ def test_parameter_str_none():
 
     param_str = str(param)
 
-    assert '' == param_str
+    assert "" == param_str
