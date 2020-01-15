@@ -22,6 +22,10 @@ SageMaker Experiments Python SDK
     :target: https://pypi.python.org/pypi/sagemaker-experiments
     :alt: PyPI - Downloads
 
+.. image:: https://codecov.io/gh/aws/sagemaker-experiments/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/aws/sagemaker-experiments
+   :alt: CodeCov
+
 .. image:: https://img.shields.io/pypi/status/sagemaker-experiments
     :target: https://github.com/aws/sagemaker-experiments
     :alt: PyPI - Status
