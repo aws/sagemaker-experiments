@@ -1,7 +1,6 @@
 .. image:: https://github.com/aws/sagemaker-experiments/raw/master/branding/icon/sagemaker-banner.png
     :height: 100px
     :alt: SageMaker
-    :target: https://aws.amazon.com/sagemaker/
 
 ================================
 SageMaker Experiments Python SDK
@@ -22,6 +21,33 @@ SageMaker Experiments Python SDK
     :target: https://pypi.python.org/pypi/sagemaker-experiments
     :alt: PyPI - Downloads
 
+.. image:: https://img.shields.io/pypi/status/sagemaker-experiments
+    :target: https://github.com/aws/sagemaker-experiments
+    :alt: PyPI - Status
+
+.. image:: https://img.shields.io/pypi/format/coverage.svg
+    :target: https://pypi.org/project/coverage/
+    :alt: Kit format
+
+.. image:: https://img.shields.io/github/workflow/status/aws/sagemaker-experiments/Main
+    :target: https://github.com/aws/sagemaker-experiments/actions
+    :alt: GitHub Workflow Status
+
+.. image:: https://img.shields.io/github/stars/aws/sagemaker-experiments.svg?logo=github
+    :target: https://github.com/aws/sagemaker-experiments/stargazers
+    :alt: Github stars
+
+.. image:: https://img.shields.io/github/forks/aws/sagemaker-experiments.svg?logo=github
+    :target: https://github.com/aws/sagemaker-experiments/network/members
+    :alt: Github forks
+
+.. image:: https://img.shields.io/github/contributors/aws/sagemaker-experiments.svg?logo=github
+    :target: https://github.com/aws/sagemaker-experiments/graphs/contributors
+    :alt: Contributors
+
+.. image:: https://img.shields.io/github/search/aws/sagemaker-experiments/sagemaker
+    :target: https://github.com/aws/sagemaker-experiments
+    :alt: GitHub search hit counter
 Experiment tracking in SageMaker Training Jobs, Processing Jobs, and Notebooks.
 
 Overview
