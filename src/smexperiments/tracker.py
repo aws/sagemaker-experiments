@@ -65,8 +65,14 @@ class Tracker(object):
         self._warned_on_metrics = False
 
     @classmethod
-    def load(cls, trial_component_name=None, artifact_bucket=None, artifact_prefix=None,
-             boto3_session=None, sagemaker_boto_client=None):
+    def load(
+        cls,
+        trial_component_name=None,
+        artifact_bucket=None,
+        artifact_prefix=None,
+        boto3_session=None,
+        sagemaker_boto_client=None,
+    ):
         """Create a new ``Tracker`` by loading an existing trial component.
 
         Args:
@@ -91,8 +97,9 @@ class Tracker(object):
         # and track that trial component. Otherwise, try to find a trial component given the current environment,
         # failing if we're unable to load one.
         if trial_component_name:
-            tc = trial_component.TrialComponent.load(trial_component_name=trial_component_name,
-                                                     sagemaker_boto_client=sagemaker_boto_client)
+            tc = trial_component.TrialComponent.load(
+                trial_component_name=trial_component_name, sagemaker_boto_client=sagemaker_boto_client
+            )
         elif tce:
             tc = tce.get_trial_component(sagemaker_boto_client)
         else:
@@ -103,15 +110,23 @@ class Tracker(object):
         else:
             metrics_writer = None
 
-        tracker = cls(tc,
-                      metrics_writer,
-                      _ArtifactUploader(tc.trial_component_name, artifact_bucket, artifact_prefix, boto3_session))
+        tracker = cls(
+            tc,
+            metrics_writer,
+            _ArtifactUploader(tc.trial_component_name, artifact_bucket, artifact_prefix, boto3_session),
+        )
         tracker._in_sagemaker_job = True if tce else False
         return tracker
 
     @classmethod
-    def create(cls, display_name=None, artifact_bucket=None, artifact_prefix=None, boto3_session=None,
-               sagemaker_boto_client=None):
+    def create(
+        cls,
+        display_name=None,
+        artifact_bucket=None,
+        artifact_prefix=None,
+        boto3_session=None,
+        sagemaker_boto_client=None,
+    ):
         """Create a new ``Tracker`` by creating a new trial component.
 
         Args:
@@ -128,12 +143,13 @@ class Tracker(object):
         sagemaker_boto_client = sagemaker_boto_client or _utils.sagemaker_client()
 
         tc = trial_component.TrialComponent.create(
-            trial_component_name=_utils.name('TrialComponent'),
+            trial_component_name=_utils.name("TrialComponent"),
             display_name=display_name,
-            sagemaker_boto_client=sagemaker_boto_client)
-        return cls(tc,
-                   None,
-                   _ArtifactUploader(tc.trial_component_name, artifact_bucket, artifact_prefix, boto3_session))
+            sagemaker_boto_client=sagemaker_boto_client,
+        )
+        return cls(
+            tc, None, _ArtifactUploader(tc.trial_component_name, artifact_bucket, artifact_prefix, boto3_session)
+        )
 
     def log_parameter(self, name, value):
         """Record a single parameter value for this trial component.
@@ -211,7 +227,7 @@ class Tracker(object):
         except AttributeError:
             if not self._metrics_writer:
                 if not self._warned_on_metrics:
-                    print('Cannot write metrics in this environment.')
+                    print("Cannot write metrics in this environment.")
                     self._warned_on_metrics = True
             else:
                 raise
@@ -220,7 +236,7 @@ class Tracker(object):
         self._start_time = datetime.datetime.now(dateutil.tz.tzlocal())
         if not self._in_sagemaker_job:
             self.trial_component.start_time = self._start_time
-            self.trial_component.status = api_types.TrialComponentStatus(primary_status='InProgress')
+            self.trial_component.status = api_types.TrialComponentStatus(primary_status="InProgress")
         return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
@@ -228,10 +244,11 @@ class Tracker(object):
         if not self._in_sagemaker_job:
             self.trial_component.end_time = self._end_time
             if exc_value:
-                self.trial_component.status = api_types.TrialComponentStatus(primary_status='Failed',
-                                                                             message=str(exc_value))
+                self.trial_component.status = api_types.TrialComponentStatus(
+                    primary_status="Failed", message=str(exc_value)
+                )
             else:
-                self.trial_component.status = api_types.TrialComponentStatus(primary_status='Completed')
+                self.trial_component.status = api_types.TrialComponentStatus(primary_status="Completed")
         self.close()
 
     def close(self):
@@ -248,17 +265,16 @@ def _resolve_artifact_name(file_path):
     if filename:
         return filename
     else:
-        return _utils.name('artifact')
+        return _utils.name("artifact")
 
 
 class _ArtifactUploader(object):
-
     def __init__(self, trial_component_name, artifact_bucket, artifact_prefix, boto_session):
-        self.s3_client = boto_session.client('s3')
+        self.s3_client = boto_session.client("s3")
         self.boto_session = boto_session
         self.trial_component_name = trial_component_name
         self.artifact_bucket = artifact_bucket
-        self.artifact_prefix = artifact_prefix or 'trial-component-artifacts'
+        self.artifact_prefix = artifact_prefix or "trial-component-artifacts"
 
     def upload_artifact(self, file_path):
         """Upload an artifact file to S3 and record the artifact S3 key with this trial run."""
@@ -274,6 +290,6 @@ class _ArtifactUploader(object):
 
 
 def _guess_media_type(file_path):
-    file_url = urllib.parse.urljoin('file:', urllib.request.pathname2url(file_path))
+    file_url = urllib.parse.urljoin("file:", urllib.request.pathname2url(file_path))
     guessed_media_type, _ = mimetypes.guess_type(file_url, strict=False)
     return guessed_media_type

@@ -60,9 +60,7 @@ class Experiment(_base_types.Record):
             sagemaker.experiments.experiment.Experiment: A SageMaker ``Experiment`` object
         """
         return cls._construct(
-            cls._boto_load_method,
-            experiment_name=experiment_name,
-            sagemaker_boto_client=sagemaker_boto_client,
+            cls._boto_load_method, experiment_name=experiment_name, sagemaker_boto_client=sagemaker_boto_client,
         )
 
     @classmethod
@@ -87,12 +85,7 @@ class Experiment(_base_types.Record):
 
     @classmethod
     def list(
-        cls,
-        created_before=None,
-        created_after=None,
-        sort_by=None,
-        sort_order=None,
-        sagemaker_boto_client=None,
+        cls, created_before=None, created_after=None, sort_by=None, sort_order=None, sagemaker_boto_client=None,
     ):
         """
         List experiments. Returns experiments in the account matching the specified criteria.

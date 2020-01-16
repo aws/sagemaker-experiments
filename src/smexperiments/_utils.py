@@ -18,52 +18,53 @@ import boto3
 import botocore
 import logging
 
+
 def sagemaker_client():
-    if os.environ.get('SAGEMAKER_ENDPOINT', '').strip():
-        return boto_session().client('sagemaker', endpoint_url=os.environ.get('SAGEMAKER_ENDPOINT'))
+    if os.environ.get("SAGEMAKER_ENDPOINT", "").strip():
+        return boto_session().client("sagemaker", endpoint_url=os.environ.get("SAGEMAKER_ENDPOINT"))
     else:
-        return boto_session().client('sagemaker')
+        return boto_session().client("sagemaker")
 
 
 def boto_session():
-    return boto3.Session(region_name=os.environ.get('AWS_REGION'))
+    return boto3.Session(region_name=os.environ.get("AWS_REGION"))
 
 
 def suffix():
     """Generate a random string of length 4"""
     alph = "abcdefghijklmnopqrstuvwxyz"
-    return '-'.join([time.strftime("%Y-%m-%d-%H%M%S"), ''.join(random.sample(alph, 4))])
+    return "-".join([time.strftime("%Y-%m-%d-%H%M%S"), "".join(random.sample(alph, 4))])
 
 
 def name(prefix):
     """Generate a new name with the specified prefix."""
-    return '-'.join([prefix, suffix()])
+    return "-".join([prefix, suffix()])
 
 
-def get_or_create_default_bucket(boto_session, default_bucket_prefix='sagemaker'):
-    account = boto_session.client('sts').get_caller_identity()['Account']
+def get_or_create_default_bucket(boto_session, default_bucket_prefix="sagemaker"):
+    account = boto_session.client("sts").get_caller_identity()["Account"]
     region = boto_session.region_name
-    default_bucket = '{}-{}-{}'.format(default_bucket_prefix, region, account)
+    default_bucket = "{}-{}-{}".format(default_bucket_prefix, region, account)
 
-    s3 = boto_session.resource('s3')
+    s3 = boto_session.resource("s3")
     try:
         # 'us-east-1' cannot be specified because it is the default region:
-        if region == 'us-east-1':
+        if region == "us-east-1":
             s3.create_bucket(Bucket=default_bucket)
         else:
-            s3.create_bucket(Bucket=default_bucket, CreateBucketConfiguration={'LocationConstraint': region})
+            s3.create_bucket(Bucket=default_bucket, CreateBucketConfiguration={"LocationConstraint": region})
 
     except botocore.exceptions.ClientError as e:
-        error_code = e.response['Error']['Code']
-        message = e.response['Error']['Message']
-        logging.debug('Create Bucket failed. error code: {}, message: {}'.format(error_code, message))
+        error_code = e.response["Error"]["Code"]
+        message = e.response["Error"]["Message"]
+        logging.debug("Create Bucket failed. error code: {}, message: {}".format(error_code, message))
 
-        if error_code == 'BucketAlreadyOwnedByYou':
+        if error_code == "BucketAlreadyOwnedByYou":
             pass
-        elif error_code == 'OperationAborted' and 'conflicting conditional operation' in message:
+        elif error_code == "OperationAborted" and "conflicting conditional operation" in message:
             # If this bucket is already being concurrently created, we don't need to create it again.
             pass
-        elif error_code == 'TooManyBuckets':
+        elif error_code == "TooManyBuckets":
             # Succeed if the default bucket exists
             s3.meta.client.head_bucket(Bucket=default_bucket)
         else:

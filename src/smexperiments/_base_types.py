@@ -33,16 +33,14 @@ class ApiObject(object):
 
     @classmethod
     def _boto_ignore(cls):
-        return ['ResponseMetadata']
+        return ["ResponseMetadata"]
 
     @classmethod
     def from_boto(cls, boto_dict, **kwargs):
         """Construct an instance of this ApiObject from a boto response."""
         boto_dict = {k: v for k, v in boto_dict.items() if k not in cls._boto_ignore()}
         custom_boto_names_to_member_names = {a: b for b, a in cls._custom_boto_names.items()}
-        cls_kwargs = _boto_functions.from_boto(
-            boto_dict, custom_boto_names_to_member_names, cls._custom_boto_types
-        )
+        cls_kwargs = _boto_functions.from_boto(boto_dict, custom_boto_names_to_member_names, cls._custom_boto_types)
         cls_kwargs.update(kwargs)
         return cls(**cls_kwargs)
 
@@ -72,8 +70,7 @@ class ApiObject(object):
     def __repr__(self):
         """Returns a string representation of this ApiObject."""
         return "{}({})".format(
-            type(self).__name__,
-            ",".join(["{}={}".format(k, repr(v)) for k, v in vars(self).items()]),
+            type(self).__name__, ",".join(["{}={}".format(k, repr(v)) for k, v in vars(self).items()]),
         )
 
 
@@ -129,9 +126,7 @@ class Record(ApiObject):
         """Update this ApiObject with a boto response."""
         custom_boto_names_to_member_names = {a: b for b, a in self._custom_boto_names.items()}
         self.__dict__.update(
-            **_boto_functions.from_boto(
-                boto_dict, custom_boto_names_to_member_names, self._custom_boto_types
-            )
+            **_boto_functions.from_boto(boto_dict, custom_boto_names_to_member_names, self._custom_boto_types)
         )
         return self
 

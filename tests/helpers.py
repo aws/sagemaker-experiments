@@ -17,13 +17,11 @@ import uuid
 
 
 def name():
-    return 'smexperiments-integ-{}'.format(str(uuid.uuid4()))
+    return "smexperiments-integ-{}".format(str(uuid.uuid4()))
 
 
 def names():
-    return [
-        'smexperiments-integ-{}'.format(str(uuid.uuid4())) for i in range(3)
-    ]
+    return ["smexperiments-integ-{}".format(str(uuid.uuid4())) for i in range(3)]
 
 
 def retry(callable, num_attempts=8):
@@ -34,13 +32,14 @@ def retry(callable, num_attempts=8):
         except Exception as ex:
             if i == num_attempts - 1:
                 raise ex
-            print('Retrying', ex)
+            print("Retrying", ex)
             time.sleep(2 ** i)
-    assert False, 'logic error in retry'
+    assert False, "logic error in retry"
 
 
-def expect_stat(sagemaker_boto_client, resource_arn, metric_name, statistic, value,
-                period='OneMinute', x_axis_type='Timestamp'):
+def expect_stat(
+    sagemaker_boto_client, resource_arn, metric_name, statistic, value, period="OneMinute", x_axis_type="Timestamp"
+):
     result = {}
     slack = 0.01
     for i in range(100):
@@ -51,15 +50,16 @@ def expect_stat(sagemaker_boto_client, resource_arn, metric_name, statistic, val
                     "ResourceArn": resource_arn,
                     "MetricStat": statistic,
                     "Period": period,
-                    "XAxisType": x_axis_type
+                    "XAxisType": x_axis_type,
                 }
             ]
-        )['MetricQueryResults']
+        )["MetricQueryResults"]
         result = result[0]
-        if result['Status'] == 'Complete':
-            [statistic_value] = result['MetricValues']
-            assert statistic_value * (1.0 - slack) <= value <= statistic_value * (1.0 + slack), \
-                'Actual: {}, Expected: {}'.format(str(result), value)
+        if result["Status"] == "Complete":
+            [statistic_value] = result["MetricValues"]
+            assert (
+                statistic_value * (1.0 - slack) <= value <= statistic_value * (1.0 + slack)
+            ), "Actual: {}, Expected: {}".format(str(result), value)
             return
     assert False, "Timed out waiting for statistic, last result {}".format(str(result))
 
@@ -85,7 +85,7 @@ def timeout(seconds=0, minutes=0, hours=0):
     limit = seconds + 60 * minutes + 3600 * hours
 
     def handler(signum, frame):
-        raise TimeoutError('timed out after {} seconds'.format(limit))
+        raise TimeoutError("timed out after {} seconds".format(limit))
 
     try:
         signal.signal(signal.SIGALRM, handler)

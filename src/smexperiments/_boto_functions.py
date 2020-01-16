@@ -16,7 +16,7 @@ import re
 
 def to_camel_case(snake_case):
     """Convert a snake case string to camel case"""
-    return ''.join([x.title() for x in snake_case.split('_')])
+    return "".join([x.title() for x in snake_case.split("_")])
 
 
 def to_snake_case(name):
@@ -49,9 +49,7 @@ def from_boto(boto_dict, boto_name_to_member_name, member_name_to_type):
             api_type, is_collection = member_name_to_type[member_name]
             if is_collection:
                 if isinstance(boto_value, dict):
-                    member_value = {
-                        key: api_type.from_boto(value) for key, value in boto_value.items()
-                    }
+                    member_value = {key: api_type.from_boto(value) for key, value in boto_value.items()}
                 else:
                     member_value = [api_type.from_boto(item) for item in boto_value]
             else:
