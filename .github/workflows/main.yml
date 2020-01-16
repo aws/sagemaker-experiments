@@ -27,3 +27,5 @@ jobs:
           AWS_DEFAULT_REGION: us-west-2
       - name: Flake8
         run: tox -e flake8
+      - name: Pylint
+        run: tox -e pylint
