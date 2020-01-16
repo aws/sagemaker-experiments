@@ -18,6 +18,10 @@ SageMaker Experiments Python SDK
 .. image:: https://img.shields.io/pypi/l/sagemaker-experiments
     :target: https://github.com/aws/sagemaker-experiments/blob/master/LICENSE
 
+.. image:: https://img.shields.io/pypi/dm/sagemaker-experiments
+    :target: https://pypi.python.org/pypi/sagemaker-experiments
+    :alt: PyPI - Downloads
+
 Experiment tracking in SageMaker Training Jobs, Processing Jobs, and Notebooks.
 
 Overview
