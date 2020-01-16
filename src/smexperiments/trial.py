@@ -35,7 +35,7 @@ class Trial(_base_types.Record):
 
     @classmethod
     def _boto_ignore(cls):
-        return super(Trial, cls)._boto_ignore() + ['CreatedBy']
+        return super(Trial, cls)._boto_ignore() + ["CreatedBy"]
 
     def save(self):
         """Save the state of this Trial to SageMaker."""
@@ -62,18 +62,11 @@ class Trial(_base_types.Record):
             smexperiments.trial.Trial: A SageMaker ``Trial`` object
         """
         return super(Trial, cls)._construct(
-            cls._boto_load_method,
-            trial_name=trial_name,
-            sagemaker_boto_client=sagemaker_boto_client)
+            cls._boto_load_method, trial_name=trial_name, sagemaker_boto_client=sagemaker_boto_client
+        )
 
     @classmethod
-    def create(
-        cls,
-        experiment_name,
-        trial_name=None,
-        sagemaker_boto_client=None,
-        trial_components=None
-    ):
+    def create(cls, experiment_name, trial_name=None, sagemaker_boto_client=None, trial_components=None):
         """
         Create a new trial and return a ``Trial`` object.
 
@@ -86,7 +79,7 @@ class Trial(_base_types.Record):
         Returns:
             smexperiments.trial.Trial: A SageMaker ``Trial`` object
         """
-        trial_name = trial_name or _utils.name('Trial')
+        trial_name = trial_name or _utils.name("Trial")
         trial = super(Trial, cls)._construct(
             cls._boto_create_method,
             trial_name=trial_name,
@@ -106,7 +99,7 @@ class Trial(_base_types.Record):
         created_after=None,
         sort_by=None,
         sort_order=None,
-        sagemaker_boto_client=None
+        sagemaker_boto_client=None,
     ):
         """
         List all trials matching the specified criteria.
@@ -154,7 +147,8 @@ class Trial(_base_types.Record):
         else:
             trial_component_name = str(tc)
         self.sagemaker_boto_client.associate_trial_component(
-            TrialName=self.trial_name, TrialComponentName=trial_component_name)
+            TrialName=self.trial_name, TrialComponentName=trial_component_name
+        )
 
     def remove_trial_component(self, tc):
         """Remove the specified trial component from this trial.
@@ -175,13 +169,8 @@ class Trial(_base_types.Record):
         )
 
     def list_trial_components(
-            self,
-            created_before=None,
-            created_after=None,
-            sort_by=None,
-            sort_order=None,
-            max_results=None,
-            next_token=None):
+        self, created_before=None, created_after=None, sort_by=None, sort_order=None, max_results=None, next_token=None
+    ):
         """List trial components in this trial matching the specified criteria.
 
         Args:

@@ -48,7 +48,7 @@ class TrialComponent(_base_types.Record):
         "parameters": (api_types.TrialComponentParameters, False),
         "input_artifacts": (api_types.TrialComponentArtifact, True),
         "output_artifacts": (api_types.TrialComponentArtifact, True),
-        "metrics": (api_types.TrialComponentMetricSummary, True)
+        "metrics": (api_types.TrialComponentMetricSummary, True),
     }
 
     _boto_update_members = [
@@ -65,7 +65,7 @@ class TrialComponent(_base_types.Record):
 
     @classmethod
     def _boto_ignore(cls):
-        return super(TrialComponent, cls)._boto_ignore() + ['CreatedBy']
+        return super(TrialComponent, cls)._boto_ignore() + ["CreatedBy"]
 
     def save(self):
         """Save the state of this TrialComponent to SageMaker."""
@@ -107,21 +107,23 @@ class TrialComponent(_base_types.Record):
             cls._boto_create_method,
             trial_component_name=trial_component_name,
             display_name=display_name,
-            sagemaker_boto_client=sagemaker_boto_client)
+            sagemaker_boto_client=sagemaker_boto_client,
+        )
 
     @classmethod
     def list(
-            cls,
-            source_arn=None,
-            created_before=None,
-            created_after=None,
-            sort_by=None,
-            sort_order=None,
-            sagemaker_boto_client=None,
-            trial_name=None,
-            experiment_name=None,
-            max_results=None,
-            next_token=None):
+        cls,
+        source_arn=None,
+        created_before=None,
+        created_after=None,
+        sort_by=None,
+        sort_order=None,
+        sagemaker_boto_client=None,
+        trial_name=None,
+        experiment_name=None,
+        max_results=None,
+        next_token=None,
+    ):
         """
         Return a list of trial component summaries.
 
@@ -156,4 +158,5 @@ class TrialComponent(_base_types.Record):
             trial_name=trial_name,
             experiment_name=experiment_name,
             max_results=max_results,
-            next_token=next_token)
+            next_token=next_token,
+        )

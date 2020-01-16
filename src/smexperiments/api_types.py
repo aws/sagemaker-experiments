@@ -49,9 +49,7 @@ class TrialComponentMetricSummary(_base_types.ApiObject):
     std_dev = None
 
     def __init__(self, metric_name=None, source_arn=None, **kwargs):
-        super(TrialComponentMetricSummary, self).__init__(
-            metric_name=metric_name, source_arn=source_arn, **kwargs
-        )
+        super(TrialComponentMetricSummary, self).__init__(metric_name=metric_name, source_arn=source_arn, **kwargs)
 
 
 class TrialSummary(_base_types.ApiObject):
@@ -83,12 +81,11 @@ class TrialComponentParameterValue(_base_types.ApiObject):
 
 
 class TrialComponentParameters(_base_types.ApiObject):
-
     @classmethod
     def from_boto(cls, boto_dict, **kwargs):
         return_map = {}
         for key, value in boto_dict.items():
-            return_map[key] = value.get('NumberValue', value.get('StringValue', None))
+            return_map[key] = value.get("NumberValue", value.get("StringValue", None))
         return return_map
 
     @classmethod
@@ -96,13 +93,9 @@ class TrialComponentParameters(_base_types.ApiObject):
         boto_map = {}
         for key, value in parameters.items():
             if isinstance(value, numbers.Number):
-                boto_map[key] = {
-                    'NumberValue': value
-                }
+                boto_map[key] = {"NumberValue": value}
             else:
-                boto_map[key] = {
-                    'StringValue': str(value)
-                }
+                boto_map[key] = {"StringValue": str(value)}
         return boto_map
 
 
@@ -110,6 +103,7 @@ class TrialComponentArtifact(_base_types.ApiObject):
     """
     TrialComponentArtifact
     """
+
     media_type = None
     value = None
 
@@ -131,6 +125,7 @@ class TrialComponentSummary(_base_types.ApiObject):
     """
     TrialComponentSummary
     """
+
     _custom_boto_types = {
         "status": (TrialComponentStatus, False),
     }

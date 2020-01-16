@@ -43,10 +43,10 @@ def boto_model_file(request):
 
 @pytest.fixture
 def sagemaker_boto_client():
-    return boto3.client('sagemaker', endpoint_url=os.environ.get('SAGEMAKER_ENDPOINT'))
+    return boto3.client("sagemaker", endpoint_url=os.environ.get("SAGEMAKER_ENDPOINT"))
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def boto3_session():
     return boto3.Session()
 
@@ -60,10 +60,11 @@ def tempdir():
 
 @pytest.fixture
 def experiment_obj(sagemaker_boto_client):
-    description = '{}-{}'.format('description', str(uuid.uuid4()))
-    boto3.set_stream_logger('', logging.INFO)
-    experiment_obj = experiment.Experiment.create(experiment_name=name(), description=description,
-                                                  sagemaker_boto_client=sagemaker_boto_client)
+    description = "{}-{}".format("description", str(uuid.uuid4()))
+    boto3.set_stream_logger("", logging.INFO)
+    experiment_obj = experiment.Experiment.create(
+        experiment_name=name(), description=description, sagemaker_boto_client=sagemaker_boto_client
+    )
     yield experiment_obj
     time.sleep(0.5)
     experiment_obj.delete()
@@ -71,9 +72,9 @@ def experiment_obj(sagemaker_boto_client):
 
 @pytest.fixture
 def trial_obj(sagemaker_boto_client, experiment_obj):
-    trial_obj = trial.Trial.create(trial_name=name(),
-                                   experiment_name=experiment_obj.experiment_name,
-                                   sagemaker_boto_client=sagemaker_boto_client)
+    trial_obj = trial.Trial.create(
+        trial_name=name(), experiment_name=experiment_obj.experiment_name, sagemaker_boto_client=sagemaker_boto_client
+    )
     yield trial_obj
     time.sleep(0.5)
     trial_obj.delete()
@@ -81,14 +82,12 @@ def trial_obj(sagemaker_boto_client, experiment_obj):
 
 @pytest.fixture
 def trial_component_obj(sagemaker_boto_client):
-    trial_component_obj = trial_component.TrialComponent.create(trial_component_name=name(),
-                                                                sagemaker_boto_client=sagemaker_boto_client)
+    trial_component_obj = trial_component.TrialComponent.create(
+        trial_component_name=name(), sagemaker_boto_client=sagemaker_boto_client
+    )
     yield trial_component_obj
     time.sleep(0.5)
     trial_component_obj.delete()
-
-
-
 
 
 @pytest.fixture
@@ -98,7 +97,8 @@ def trials(experiment_obj, sagemaker_boto_client):
         next_trial = trial.Trial.create(
             trial_name=trial_name,
             experiment_name=experiment_obj.experiment_name,
-            sagemaker_boto_client=sagemaker_boto_client)
+            sagemaker_boto_client=sagemaker_boto_client,
+        )
         trial_objs.append(next_trial)
         time.sleep(0.5)
     yield trial_objs
@@ -109,8 +109,7 @@ def trials(experiment_obj, sagemaker_boto_client):
 @pytest.fixture
 def experiments(sagemaker_boto_client):
     experiment_objs = [
-        experiment.Experiment.create(experiment_name=experiment_name,
-                                     sagemaker_boto_client=sagemaker_boto_client)
+        experiment.Experiment.create(experiment_name=experiment_name, sagemaker_boto_client=sagemaker_boto_client)
         for experiment_name in names()
     ]
     yield experiment_objs
@@ -121,8 +120,9 @@ def experiments(sagemaker_boto_client):
 @pytest.fixture
 def trial_components(sagemaker_boto_client):
     trial_component_objs = [
-        trial_component.TrialComponent.create(trial_component_name=trial_component_name,
-                                              sagemaker_boto_client=sagemaker_boto_client)
+        trial_component.TrialComponent.create(
+            trial_component_name=trial_component_name, sagemaker_boto_client=sagemaker_boto_client
+        )
         for trial_component_name in names()
     ]
     yield trial_component_objs
@@ -133,8 +133,9 @@ def trial_components(sagemaker_boto_client):
 @pytest.fixture
 def trial_components_in_trial(sagemaker_boto_client, trial_obj):
     trial_components = [
-        trial_component.TrialComponent.create(trial_component_name=trial_component_name,
-                                              sagemaker_boto_client=sagemaker_boto_client)
+        trial_component.TrialComponent.create(
+            trial_component_name=trial_component_name, sagemaker_boto_client=sagemaker_boto_client
+        )
         for trial_component_name in names()
     ]
     for trial_component_obj in trial_components:
@@ -145,9 +146,9 @@ def trial_components_in_trial(sagemaker_boto_client, trial_obj):
         trial_component_obj.delete()
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def training_role_arn(boto3_session):
-    iam_client = boto3_session.client('iam')
+    iam_client = boto3_session.client("iam")
     policy_string = """
         {
   "Version": "2012-10-17",
@@ -165,45 +166,37 @@ def training_role_arn(boto3_session):
     }
   ]
 }"""
-    policy_string = ''.join(policy_string.split())  # strip all whitespace
-    role_name = 'SMExperimentsIntegTestSageMakerRole'
+    policy_string = "".join(policy_string.split())  # strip all whitespace
+    role_name = "SMExperimentsIntegTestSageMakerRole"
     try:
-        response = iam_client.create_role(
-            RoleName=role_name,
-            AssumeRolePolicyDocument=policy_string
-        )
+        response = iam_client.create_role(RoleName=role_name, AssumeRolePolicyDocument=policy_string)
     except Exception as ex:
-        if 'exists' in str(ex):
-            return iam_client.get_role(RoleName=role_name)['Role']['Arn']
+        if "exists" in str(ex):
+            return iam_client.get_role(RoleName=role_name)["Role"]["Arn"]
         else:
             raise ex
 
-    iam_client.attach_role_policy(RoleName=role_name, PolicyArn='arn:aws:iam::aws:policy/AmazonSageMakerFullAccess')
+    iam_client.attach_role_policy(RoleName=role_name, PolicyArn="arn:aws:iam::aws:policy/AmazonSageMakerFullAccess")
     time.sleep(30)
-    return response['Role']['Arn']
+    return response["Role"]["Arn"]
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def bucket(boto3_session):
-    s3_client = boto3_session.client('s3')
-    sts_client = boto3_session.client('sts')
-    account = sts_client.get_caller_identity()['Account']
+    s3_client = boto3_session.client("s3")
+    sts_client = boto3_session.client("sts")
+    account = sts_client.get_caller_identity()["Account"]
 
-    bucket_name = 'sagemaker-experiments-integ-test-%s-%s' % (boto3_session.region_name, account)
+    bucket_name = "sagemaker-experiments-integ-test-%s-%s" % (boto3_session.region_name, account)
     try:
-        if boto3_session.region_name != 'us-east-1':
+        if boto3_session.region_name != "us-east-1":
             s3_client.create_bucket(
-                Bucket=bucket_name,
-                CreateBucketConfiguration={
-                    'LocationConstraint': boto3_session.region_name
-                }
+                Bucket=bucket_name, CreateBucketConfiguration={"LocationConstraint": boto3_session.region_name}
             )
         else:
-            s3_client.create_bucket(
-                Bucket=bucket_name
-            )
+            s3_client.create_bucket(Bucket=bucket_name)
     except Exception as ex:
-        if 'BucketAlreadyOwnedByYou' in str(ex) or 'BucketAlreadyExists' in str(ex):
+        if "BucketAlreadyOwnedByYou" in str(ex) or "BucketAlreadyExists" in str(ex):
             return bucket_name
         raise ex
     return bucket_name
@@ -211,55 +204,41 @@ def bucket(boto3_session):
 
 @pytest.fixture
 def training_s3_uri(boto3_session, tempdir, bucket):
-    s3_client = boto3_session.client('s3')
+    s3_client = boto3_session.client("s3")
     filepath = os.path.join(tempdir, name())
-    with open(filepath, 'w') as w:
-        w.write('Hello World!')
-    key = 'sagemaker/training-input/{}'.format(name())
+    with open(filepath, "w") as w:
+        w.write("Hello World!")
+    key = "sagemaker/training-input/{}".format(name())
     s3_client.upload_file(filepath, bucket, key)
-    yield 's3://{}/{}'.format(bucket, key)
+    yield "s3://{}/{}".format(bucket, key)
     s3_client.delete_object(Bucket=bucket, Key=key)
 
 
 @pytest.fixture
 def training_output_s3_uri(bucket):
-    return 's3://{}/sagemaker/training-output/'.format(bucket)
+    return "s3://{}/sagemaker/training-output/".format(bucket)
 
 
 @pytest.fixture
-def training_job_name(sagemaker_boto_client, training_role_arn, docker_image,
-                      training_s3_uri, training_output_s3_uri):
+def training_job_name(sagemaker_boto_client, training_role_arn, docker_image, training_s3_uri, training_output_s3_uri):
     training_job_name = name()
     sagemaker_boto_client.create_training_job(
         TrainingJobName=training_job_name,
         InputDataConfig=[
             {
-                'ChannelName': 'train',
-                'DataSource': {
-                    'S3DataSource': {
-                        'S3Uri': training_s3_uri,
-                        'S3DataType': 'S3Prefix'
-                    }
-                }
+                "ChannelName": "train",
+                "DataSource": {"S3DataSource": {"S3Uri": training_s3_uri, "S3DataType": "S3Prefix"}},
             }
         ],
         AlgorithmSpecification={
-            'TrainingImage': docker_image,
-            'TrainingInputMode': 'File',
-            'EnableSageMakerMetricsTimeSeries': True
+            "TrainingImage": docker_image,
+            "TrainingInputMode": "File",
+            "EnableSageMakerMetricsTimeSeries": True,
         },
         RoleArn=training_role_arn,
-        ResourceConfig={
-            'InstanceType': 'ml.m5.large',
-            'InstanceCount': 1,
-            'VolumeSizeInGB': 10
-        },
-        StoppingCondition={
-            'MaxRuntimeInSeconds': 900
-        },
-        OutputDataConfig={
-            'S3OutputPath': training_output_s3_uri
-        }
+        ResourceConfig={"InstanceType": "ml.m5.large", "InstanceCount": 1, "VolumeSizeInGB": 10},
+        StoppingCondition={"MaxRuntimeInSeconds": 900},
+        OutputDataConfig={"S3OutputPath": training_output_s3_uri},
     )
     return training_job_name
 
@@ -270,67 +249,64 @@ def processing_job_name(sagemaker_boto_client, training_role_arn, docker_image):
     sagemaker_boto_client.create_processing_job(
         ProcessingJobName=processing_job_name,
         ProcessingResources={
-            'ClusterConfig': {
-                'InstanceCount': 1,
-                'InstanceType': 'ml.m5.large',
-                'VolumeSizeInGB': 10
-            }
+            "ClusterConfig": {"InstanceCount": 1, "InstanceType": "ml.m5.large", "VolumeSizeInGB": 10}
         },
-        AppSpecification={
-            'ImageUri': docker_image
-        },
-        RoleArn=training_role_arn
+        AppSpecification={"ImageUri": docker_image},
+        RoleArn=training_role_arn,
     )
     return processing_job_name
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def docker_image(boto_model_file):
     client = docker.from_env()
-    ecr_client = boto3.client('ecr')
+    ecr_client = boto3.client("ecr")
     token = ecr_client.get_authorization_token()
-    username, password = base64.b64decode(token['authorizationData'][0]['authorizationToken']).decode().split(':')
-    registry = token['authorizationData'][0]['proxyEndpoint']
+    username, password = base64.b64decode(token["authorizationData"][0]["authorizationToken"]).decode().split(":")
+    registry = token["authorizationData"][0]["proxyEndpoint"]
     repository_name = "smexperiments-test"
-    image_version = '1.0.0'
-    tag = '{}/{}:{}'.format(registry, repository_name, image_version)[8:]
+    image_version = "1.0.0"
+    tag = "{}/{}:{}".format(registry, repository_name, image_version)[8:]
 
     # initialize the docker image repository
     try:
         ecr_client.create_repository(repositoryName=repository_name)
     except botocore.exceptions.ClientError as e:
-        if e.response['Error']['Code'] == 'RepositoryAlreadyExistsException':
+        if e.response["Error"]["Code"] == "RepositoryAlreadyExistsException":
             pass
         else:
             raise
 
     # pull existing image for layer cache
     try:
-        client.images.pull(tag, auth_config={'username': username, 'password': password})
+        client.images.pull(tag, auth_config={"username": username, "password": password})
         # the image with this tag already exists
         return tag
     except docker.errors.NotFound:
         pass
 
     if boto_model_file is None:
-        print('boto_model_file is None, using default model.')
+        print("boto_model_file is None, using default model.")
     else:
-        shutil.copy(boto_model_file, 'tests/integ-jobs/docker/boto/sagemaker-experiments-2017-07-24.normal.json')
+        shutil.copy(boto_model_file, "tests/integ-jobs/docker/boto/sagemaker-experiments-2017-07-24.normal.json")
 
-    subprocess.check_call([sys.executable, 'setup.py', 'sdist'])
-    [sdist_path] = glob.glob('dist/sagemaker-experiments*')
-    shutil.copy(sdist_path, 'tests/integ-jobs/docker/smexperiments-0.1.0.tar.gz')
+    subprocess.check_call([sys.executable, "setup.py", "sdist"])
+    [sdist_path] = glob.glob("dist/sagemaker-experiments*")
+    shutil.copy(sdist_path, "tests/integ-jobs/docker/smexperiments-0.1.0.tar.gz")
 
-    os.makedirs('tests/integ-jobs/docker/boto', exist_ok=True)
+    os.makedirs("tests/integ-jobs/docker/boto", exist_ok=True)
 
     client.images.build(
-        path='tests/integ-jobs/docker',
-        dockerfile='Dockerfile',
+        path="tests/integ-jobs/docker",
+        dockerfile="Dockerfile",
         tag=tag,
         cache_from=[tag],
-        buildargs={'library': 'smexperiments-0.1.0.tar.gz',
-                   'botomodel': 'boto/sagemaker-experiments-2017-07-24.normal.json',
-                   'script': 'scripts/script.py',
-                   'endpoint': os.environ.get('SAGEMAKER_ENDPOINT', '')})
-    client.images.push(tag, auth_config={'username': username, 'password': password})
+        buildargs={
+            "library": "smexperiments-0.1.0.tar.gz",
+            "botomodel": "boto/sagemaker-experiments-2017-07-24.normal.json",
+            "script": "scripts/script.py",
+            "endpoint": os.environ.get("SAGEMAKER_ENDPOINT", ""),
+        },
+    )
+    client.images.push(tag, auth_config={"username": username, "password": password})
     return tag

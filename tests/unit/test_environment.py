@@ -23,29 +23,28 @@ def sagemaker_boto_client():
 
 @pytest.fixture
 def training_job_env():
-    old_value = os.environ.get('TRAINING_JOB_ARN')
-    os.environ['TRAINING_JOB_ARN'] = 'arn:1234'
+    old_value = os.environ.get("TRAINING_JOB_ARN")
+    os.environ["TRAINING_JOB_ARN"] = "arn:1234"
     yield os.environ
-    del os.environ['TRAINING_JOB_ARN']
+    del os.environ["TRAINING_JOB_ARN"]
     if old_value:
-        os.environ['TRAINING_JOB_ARN'] = old_value
+        os.environ["TRAINING_JOB_ARN"] = old_value
 
 
 def test_processing_job_environment(tempdir):
-    config_path = os.path.join(tempdir, 'config.json')
-    with open(config_path, 'w') as f:
-        f.write(json.dumps({'ProcessingJobArn': 'arn:1234'}))
-    environment = _environment.TrialComponentEnvironment.load(
-        processing_job_config_path=config_path)
+    config_path = os.path.join(tempdir, "config.json")
+    with open(config_path, "w") as f:
+        f.write(json.dumps({"ProcessingJobArn": "arn:1234"}))
+    environment = _environment.TrialComponentEnvironment.load(processing_job_config_path=config_path)
 
     assert _environment.EnvironmentType.SageMakerProcessingJob == environment.environment_type
-    assert 'arn:1234' == environment.source_arn
+    assert "arn:1234" == environment.source_arn
 
 
 def test_training_job_environment(training_job_env):
     environment = _environment.TrialComponentEnvironment.load()
     assert _environment.EnvironmentType.SageMakerTrainingJob == environment.environment_type
-    assert 'arn:1234' == environment.source_arn
+    assert "arn:1234" == environment.source_arn
 
 
 def test_no_environment():
@@ -53,17 +52,11 @@ def test_no_environment():
 
 
 def test_resolve_trial_component(training_job_env, sagemaker_boto_client):
-    trial_component_name = 'foo-bar'
+    trial_component_name = "foo-bar"
     sagemaker_boto_client.list_trial_components.return_value = {
-        'TrialComponentSummaries': [
-            {
-                'TrialComponentName': trial_component_name
-            }
-        ]
+        "TrialComponentSummaries": [{"TrialComponentName": trial_component_name}]
     }
-    sagemaker_boto_client.describe_trial_component.return_value = {
-        'TrialComponentName': trial_component_name
-    }
+    sagemaker_boto_client.describe_trial_component.return_value = {"TrialComponentName": trial_component_name}
     environment = _environment.TrialComponentEnvironment.load()
     tc = environment.get_trial_component(sagemaker_boto_client)
 
@@ -71,8 +64,8 @@ def test_resolve_trial_component(training_job_env, sagemaker_boto_client):
     sagemaker_boto_client.describe_trial_component.assert_called_with(TrialComponentName=trial_component_name)
 
 
-@unittest.mock.patch('time.sleep')
-@unittest.mock.patch('time.time')
+@unittest.mock.patch("time.sleep")
+@unittest.mock.patch("time.time")
 def test_resolve_trial_component_fails(mock_time, mock_sleep, sagemaker_boto_client, training_job_env):
     mock_time.side_effect = [100, 500]
     environment = _environment.TrialComponentEnvironment.load()

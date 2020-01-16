@@ -26,6 +26,7 @@ def sagemaker_boto_client():
 def datetime_obj():
     return datetime.datetime(2017, 6, 16, 15, 55, 0)
 
+
 def test_list_trial_components(sagemaker_boto_client, datetime_obj):
     sagemaker_boto_client.list_trial_components.return_value = {
         "TrialComponentSummaries": [
@@ -43,14 +44,10 @@ def test_list_trial_components(sagemaker_boto_client, datetime_obj):
     }
     expected = [
         api_types.TrialComponentSummary(
-            trial_component_name="trial-component-1",
-            creation_time=datetime_obj,
-            last_modified_time=datetime_obj,
+            trial_component_name="trial-component-1", creation_time=datetime_obj, last_modified_time=datetime_obj,
         ),
         api_types.TrialComponentSummary(
-            trial_component_name="trial-component-2",
-            creation_time=datetime_obj,
-            last_modified_time=datetime_obj,
+            trial_component_name="trial-component-2", creation_time=datetime_obj, last_modified_time=datetime_obj,
         ),
     ]
 
@@ -72,16 +69,14 @@ def test_list_trial_components_single(sagemaker_boto_client, datetime_obj):
             {
                 "TrialComponentName": "trial-component-foo",
                 "CreationTime": datetime_obj,
-                "LastModifiedTime": datetime_obj
+                "LastModifiedTime": datetime_obj,
             }
         ]
     }
 
     assert list(trial_obj.list_trial_components()) == [
         api_types.TrialComponentSummary(
-            trial_component_name="trial-component-foo",
-            creation_time=datetime_obj,
-            last_modified_time=datetime_obj
+            trial_component_name="trial-component-foo", creation_time=datetime_obj, last_modified_time=datetime_obj
         )
     ]
 
@@ -90,21 +85,25 @@ def test_list_trial_components_two_values(sagemaker_boto_client, datetime_obj):
     trial_obj = trial.Trial(sagemaker_boto_client=sagemaker_boto_client)
     sagemaker_boto_client.list_trial_components.return_value = {
         "TrialComponentSummaries": [
-            {"TrialComponentName": "trial-component-foo-1", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj},
-            {"TrialComponentName": "trial-component-foo-2", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj},
+            {
+                "TrialComponentName": "trial-component-foo-1",
+                "CreationTime": datetime_obj,
+                "LastModifiedTime": datetime_obj,
+            },
+            {
+                "TrialComponentName": "trial-component-foo-2",
+                "CreationTime": datetime_obj,
+                "LastModifiedTime": datetime_obj,
+            },
         ]
     }
 
     assert list(trial_obj.list_trial_components()) == [
         api_types.TrialComponentSummary(
-            trial_component_name="trial-component-foo-1",
-            creation_time=datetime_obj,
-            last_modified_time=datetime_obj
+            trial_component_name="trial-component-foo-1", creation_time=datetime_obj, last_modified_time=datetime_obj
         ),
         api_types.TrialComponentSummary(
-            trial_component_name="trial-component-foo-2",
-            creation_time=datetime_obj,
-            last_modified_time=datetime_obj
+            trial_component_name="trial-component-foo-2", creation_time=datetime_obj, last_modified_time=datetime_obj
         ),
     ]
 
@@ -157,20 +156,18 @@ def test_next_token(sagemaker_boto_client, datetime_obj):
 def test_list_trial_components_call_args(sagemaker_boto_client):
     created_before = datetime.datetime(1999, 10, 12, 0, 0, 0)
     created_after = datetime.datetime(1990, 10, 12, 0, 0, 0)
-    trial_name = 'foo-trial'
-    next_token = 'thetoken'
+    trial_name = "foo-trial"
+    next_token = "thetoken"
     max_results = 99
 
     trial_obj = trial.Trial(sagemaker_boto_client=sagemaker_boto_client)
-    trial_obj.trial_name=trial_name
+    trial_obj.trial_name = trial_name
 
     sagemaker_boto_client.list_trial_components.return_value = {}
     assert [] == list(
         trial_obj.list_trial_components(
-            created_after=created_after,
-            created_before=created_before,
-            next_token=next_token,
-            max_results=max_results)
+            created_after=created_after, created_before=created_before, next_token=next_token, max_results=max_results
+        )
     )
     sagemaker_boto_client.list_trial_components.assert_called_with(
         CreatedBefore=created_before,

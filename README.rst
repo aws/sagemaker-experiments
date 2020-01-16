@@ -1,6 +1,7 @@
 .. image:: https://github.com/aws/sagemaker-experiments/raw/master/branding/icon/sagemaker-banner.png
     :height: 100px
     :alt: SageMaker
+    :target: https://aws.amazon.com/sagemaker/
 
 ================================
 SageMaker Experiments Python SDK
@@ -48,6 +49,13 @@ SageMaker Experiments Python SDK
 .. image:: https://img.shields.io/github/search/aws/sagemaker-experiments/sagemaker
     :target: https://github.com/aws/sagemaker-experiments
     :alt: GitHub search hit counter
+
+.. image:: https://img.shields.io/badge/code_style-black-000000.svg
+    :target: https://github.com/python/black
+    :alt: Code style: black
+
+
+
 Experiment tracking in SageMaker Training Jobs, Processing Jobs, and Notebooks.
 
 Overview

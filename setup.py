@@ -28,16 +28,14 @@ def read_version():
 
 
 # Declare minimal set for installation
-required_packages = [
-    "boto3>=1.10.32"
-]
+required_packages = ["boto3>=1.10.32"]
 
 # Open readme with original (i.e. LF) newlines
 # to prevent the all too common "`long_description_content_type` missing"
 # bug (https://github.com/pypa/twine/issues/454)
-with open('README.rst', 'r', newline='', encoding='utf-8') as readme_file:
+with open("README.rst", "r", newline="", encoding="utf-8") as readme_file:
     long_description = readme_file.read()
-    long_description_content_type = 'text/x-rst'
+    long_description_content_type = "text/x-rst"
 
 setup(
     name="sagemaker-experiments",
@@ -60,7 +58,7 @@ setup(
         "Programming Language :: Python",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7"
+        "Programming Language :: Python :: 3.7",
     ],
     install_requires=required_packages,
     extras_require={
@@ -71,7 +69,7 @@ setup(
             "pytest-cov",
             "pytest-coverage",
             "pytest-rerunfailures",
-            "pytest-xdist"
+            "pytest-xdist",
         ]
-    }
+    },
 )

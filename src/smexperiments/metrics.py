@@ -19,30 +19,34 @@ import time
 import dateutil.tz
 
 
-METRICS_DIR = os.environ.get('SAGEMAKER_METRICS_DIRECTORY', '.')
+METRICS_DIR = os.environ.get("SAGEMAKER_METRICS_DIRECTORY", ".")
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 class SageMakerFileMetricsWriter(object):
-
     def __init__(self, metrics_file_path=None):
         self._metrics_file_path = metrics_file_path
         self._file = None
         self._closed = False
 
     def log_metric(self, metric_name, value, timestamp=None, iteration_number=None):
-        raw_metric_data = _RawMetricData(metric_name=metric_name, value=value, timestamp=timestamp,
-                                         iteration_number=iteration_number)
+        raw_metric_data = _RawMetricData(
+            metric_name=metric_name, value=value, timestamp=timestamp, iteration_number=iteration_number
+        )
         try:
-            logging.debug('Writing metric: %s', raw_metric_data)
+            logging.debug("Writing metric: %s", raw_metric_data)
             self._file.write(json.dumps(raw_metric_data.to_record()))
-            self._file.write('\n')
+            self._file.write("\n")
         except AttributeError as e:
             logging.error(e)
             if self._closed:
-                raise SageMakerMetricsWriterException('log_metric called on a closed writer')
+                raise SageMakerMetricsWriterException("log_metric called on a closed writer")
             elif not self._file:
-                self._file = open(self._get_metrics_file_path(), 'a')
+                self._file = open(self._get_metrics_file_path(), "a")
                 self._file.write(json.dumps(raw_metric_data.to_record()))
-                self._file.write('\n')
+                self._file.write("\n")
             else:
                 raise
 
@@ -65,12 +69,11 @@ class SageMakerFileMetricsWriter(object):
         self.close()
 
     def _get_metrics_file_path(self):
-        pid_filename = '{}.json'.format(str(os.getpid()))
+        pid_filename = "{}.json".format(str(os.getpid()))
         return self._metrics_file_path or os.path.join(METRICS_DIR, pid_filename)
 
 
 class SageMakerMetricsWriterException(Exception):
-
     def __init__(self, message, errors=None):
         super().__init__(message)
         if errors:
@@ -96,8 +99,10 @@ class _RawMetricData(object):
             timestamp = float(timestamp)
 
         if timestamp < (time.time() - 1209600) or timestamp > (time.time() + 7200):
-            raise ValueError('Supplied timestamp %f is invalid.'
-                             ' Timestamps must be between two weeks before and two hours from now.' % timestamp)
+            raise ValueError(
+                "Supplied timestamp %f is invalid."
+                " Timestamps must be between two weeks before and two hours from now." % timestamp
+            )
         value = float(value)
 
         self.MetricName = metric_name
@@ -114,7 +119,6 @@ class _RawMetricData(object):
         return repr(self)
 
     def __repr__(self):
-        return '{}({})'.format(
-            type(self).__name__,
-            ','.join(['{}={}'.format(k, repr(v)) for k, v in vars(self).items()]),
+        return "{}({})".format(
+            type(self).__name__, ",".join(["{}={}".format(k, repr(v)) for k, v in vars(self).items()]),
         )

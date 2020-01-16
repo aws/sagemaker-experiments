@@ -28,26 +28,31 @@ def test_save(experiment_obj):
 
 
 def test_save_load(experiment_obj, sagemaker_boto_client):
-    experiment_obj_two = experiment.Experiment.load(experiment_name=experiment_obj.experiment_name,
-                                                    sagemaker_boto_client=sagemaker_boto_client)
+    experiment_obj_two = experiment.Experiment.load(
+        experiment_name=experiment_obj.experiment_name, sagemaker_boto_client=sagemaker_boto_client
+    )
     assert experiment_obj.experiment_name == experiment_obj_two.experiment_name
     assert experiment_obj.description == experiment_obj_two.description
 
     experiment_obj.description = name()
     experiment_obj.display_name = name()
     experiment_obj.save()
-    experiment_obj_three = experiment.Experiment.load(experiment_name=experiment_obj.experiment_name,
-                                                      sagemaker_boto_client=sagemaker_boto_client)
+    experiment_obj_three = experiment.Experiment.load(
+        experiment_name=experiment_obj.experiment_name, sagemaker_boto_client=sagemaker_boto_client
+    )
     assert experiment_obj.description == experiment_obj_three.description
     assert experiment_obj.display_name == experiment_obj_three.display_name
+
 
 def test_list(sagemaker_boto_client, experiments):
     slack = datetime.timedelta(minutes=1)
     now = datetime.datetime.now(datetime.timezone.utc)
-    experiment_names_listed = [s.experiment_name
-                               for s in experiment.Experiment.list(created_after=now - slack,
-                                                                   created_before=now + slack,
-                                                                   sagemaker_boto_client=sagemaker_boto_client)]
+    experiment_names_listed = [
+        s.experiment_name
+        for s in experiment.Experiment.list(
+            created_after=now - slack, created_before=now + slack, sagemaker_boto_client=sagemaker_boto_client
+        )
+    ]
     for experiment_obj in experiments:
         assert experiment_obj.experiment_name in experiment_names_listed
     assert experiment_names_listed  # sanity test
@@ -57,20 +62,24 @@ def test_list_sort(sagemaker_boto_client, experiments):
     slack = datetime.timedelta(minutes=1)
     now = datetime.datetime.now(datetime.timezone.utc)
 
-    for sort_order in ['Ascending', 'Descending']:
-        experiment_names_listed = [s.experiment_name
-                                   for s in experiment.Experiment.list(created_after=now - slack,
-                                                                       created_before=now + slack,
-                                                                       sort_by='CreationTime',
-                                                                       sort_order=sort_order,
-                                                                       sagemaker_boto_client=sagemaker_boto_client)]
+    for sort_order in ["Ascending", "Descending"]:
+        experiment_names_listed = [
+            s.experiment_name
+            for s in experiment.Experiment.list(
+                created_after=now - slack,
+                created_before=now + slack,
+                sort_by="CreationTime",
+                sort_order=sort_order,
+                sagemaker_boto_client=sagemaker_boto_client,
+            )
+        ]
     experiment_names = [experiment_obj.experiment_name for experiment_obj in experiments]
 
     # Restrict the listed names to just be the ones we created.
     # Reverse returned list based on sort order
     # Assert that the list contains the same names in the same order as what we created
     experiment_names_listed = [name for name in experiment_names_listed if name in experiment_names]
-    if sort_order == 'Descending':
+    if sort_order == "Descending":
         experiment_names_listed = experiment_names_listed[::-1]
     assert experiment_names == experiment_names_listed
     assert experiment_names  # sanity test
@@ -79,8 +88,9 @@ def test_list_sort(sagemaker_boto_client, experiments):
 def test_create_trial(experiment_obj, sagemaker_boto_client):
     trial_obj = experiment_obj.create_trial()
     try:
-        loaded_trial_obj = trial.Trial.load(trial_name=trial_obj.trial_name,
-                                            sagemaker_boto_client=sagemaker_boto_client)
+        loaded_trial_obj = trial.Trial.load(
+            trial_name=trial_obj.trial_name, sagemaker_boto_client=sagemaker_boto_client
+        )
         assert trial_obj.trial_name == loaded_trial_obj.trial_name
         assert trial_obj.experiment_name == loaded_trial_obj.experiment_name
 
@@ -93,5 +103,3 @@ def test_list_trials(experiment_obj, trials):
     trial_names = [trial_obj.trial_name for trial_obj in trials]
     assert set(trial_names) == set([s.trial_name for s in experiment_obj.list_trials()])
     assert trial_names  # sanity test
-
-

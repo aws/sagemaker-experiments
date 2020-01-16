@@ -50,28 +50,16 @@ def test_create(sagemaker_boto_client):
 def test_list(sagemaker_boto_client, datetime_obj):
     sagemaker_boto_client.list_experiments.return_value = {
         "ExperimentSummaries": [
-            {
-                "ExperimentName": "experiment-1",
-                "CreationTime": datetime_obj,
-                "LastModifiedTime": datetime_obj,
-            },
-            {
-                "ExperimentName": "experiment-2",
-                "CreationTime": datetime_obj,
-                "LastModifiedTime": datetime_obj,
-            },
+            {"ExperimentName": "experiment-1", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj,},
+            {"ExperimentName": "experiment-2", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj,},
         ]
     }
     expected = [
         api_types.ExperimentSummary(
-            experiment_name="experiment-1",
-            creation_time=datetime_obj,
-            last_modified_time=datetime_obj,
+            experiment_name="experiment-1", creation_time=datetime_obj, last_modified_time=datetime_obj,
         ),
         api_types.ExperimentSummary(
-            experiment_name="experiment-2",
-            creation_time=datetime_obj,
-            last_modified_time=datetime_obj,
+            experiment_name="experiment-2", creation_time=datetime_obj, last_modified_time=datetime_obj,
         ),
     ]
     assert expected == list(experiment.Experiment.list(sagemaker_boto_client=sagemaker_boto_client))
@@ -86,15 +74,11 @@ def test_list_trials_empty(sagemaker_boto_client):
 def test_list_trials_single(sagemaker_boto_client, datetime_obj):
     experiment_obj = experiment.Experiment(sagemaker_boto_client=sagemaker_boto_client)
     sagemaker_boto_client.list_trials.return_value = {
-        "TrialSummaries": [
-            {"Name": "trial-foo", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj}
-        ]
+        "TrialSummaries": [{"Name": "trial-foo", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj}]
     }
 
     assert list(experiment_obj.list_trials()) == [
-        api_types.TrialSummary(
-            name="trial-foo", creation_time=datetime_obj, last_modified_time=datetime_obj
-        )
+        api_types.TrialSummary(name="trial-foo", creation_time=datetime_obj, last_modified_time=datetime_obj)
     ]
 
 
@@ -108,12 +92,8 @@ def test_list_trials_two_values(sagemaker_boto_client, datetime_obj):
     }
 
     assert list(experiment_obj.list_trials()) == [
-        api_types.TrialSummary(
-            name="trial-foo-1", creation_time=datetime_obj, last_modified_time=datetime_obj
-        ),
-        api_types.TrialSummary(
-            name="trial-foo-2", creation_time=datetime_obj, last_modified_time=datetime_obj
-        ),
+        api_types.TrialSummary(name="trial-foo-1", creation_time=datetime_obj, last_modified_time=datetime_obj),
+        api_types.TrialSummary(name="trial-foo-2", creation_time=datetime_obj, last_modified_time=datetime_obj),
     ]
 
 
@@ -122,40 +102,18 @@ def test_next_token(sagemaker_boto_client, datetime_obj):
     sagemaker_boto_client.list_trials.side_effect = [
         {
             "TrialSummaries": [
-                {
-                    "Name": "trial-foo-1",
-                    "CreationTime": datetime_obj,
-                    "LastModifiedTime": datetime_obj,
-                },
-                {
-                    "Name": "trial-foo-2",
-                    "CreationTime": datetime_obj,
-                    "LastModifiedTime": datetime_obj,
-                },
+                {"Name": "trial-foo-1", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj,},
+                {"Name": "trial-foo-2", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj,},
             ],
             "NextToken": "foo",
         },
-        {
-            "TrialSummaries": [
-                {
-                    "Name": "trial-foo-3",
-                    "CreationTime": datetime_obj,
-                    "LastModifiedTime": datetime_obj,
-                }
-            ]
-        },
+        {"TrialSummaries": [{"Name": "trial-foo-3", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj,}]},
     ]
 
     assert list(experiment_obj.list_trials()) == [
-        api_types.TrialSummary(
-            name="trial-foo-1", creation_time=datetime_obj, last_modified_time=datetime_obj
-        ),
-        api_types.TrialSummary(
-            name="trial-foo-2", creation_time=datetime_obj, last_modified_time=datetime_obj
-        ),
-        api_types.TrialSummary(
-            name="trial-foo-3", creation_time=datetime_obj, last_modified_time=datetime_obj
-        ),
+        api_types.TrialSummary(name="trial-foo-1", creation_time=datetime_obj, last_modified_time=datetime_obj),
+        api_types.TrialSummary(name="trial-foo-2", creation_time=datetime_obj, last_modified_time=datetime_obj),
+        api_types.TrialSummary(name="trial-foo-3", creation_time=datetime_obj, last_modified_time=datetime_obj),
     ]
 
     sagemaker_boto_client.list_trials.assert_any_call(**{})
@@ -167,12 +125,8 @@ def test_list_trials_call_args(sagemaker_boto_client):
     created_after = datetime.datetime(1990, 10, 12, 0, 0, 0)
     experiment_obj = experiment.Experiment(sagemaker_boto_client=sagemaker_boto_client)
     sagemaker_boto_client.list_trials.return_value = {}
-    assert [] == list(
-        experiment_obj.list_trials(created_after=created_after, created_before=created_before)
-    )
-    sagemaker_boto_client.list_trials.assert_called_with(
-        CreatedBefore=created_before, CreatedAfter=created_after
-    )
+    assert [] == list(experiment_obj.list_trials(created_after=created_after, created_before=created_before))
+    sagemaker_boto_client.list_trials.assert_called_with(CreatedBefore=created_before, CreatedAfter=created_after)
 
 
 def test_experiment_create_trial_with_name(sagemaker_boto_client):
@@ -184,33 +138,32 @@ def test_experiment_create_trial_with_name(sagemaker_boto_client):
     }
     experiment_obj.create_trial(trial_name="someTrialName")
     sagemaker_boto_client.create_trial.assert_called_with(
-        TrialName="someTrialName",
-        ExperimentName="someExperimentName"
+        TrialName="someTrialName", ExperimentName="someExperimentName"
     )
 
 
 def test_experiment_create_trial_with_prefix(sagemaker_boto_client):
     experiment_obj = experiment.Experiment(sagemaker_boto_client=sagemaker_boto_client)
-    experiment_obj.experiment_name = 'someExperimentName'
+    experiment_obj.experiment_name = "someExperimentName"
     sagemaker_boto_client.create_trial.return_value = {
         "Arn": "arn:aws:1234",
         "TrialName": "someTrialName1234",
     }
-    experiment_obj.create_trial(trial_name_prefix='someTrialName')
+    experiment_obj.create_trial(trial_name_prefix="someTrialName")
     _, _, kwargs = sagemaker_boto_client.mock_calls[0]
-    assert kwargs['ExperimentName'] == 'someExperimentName'
-    assert kwargs['TrialName'].startswith('someTrialName')
+    assert kwargs["ExperimentName"] == "someExperimentName"
+    assert kwargs["TrialName"].startswith("someTrialName")
 
 
 def test_save(sagemaker_boto_client):
-    obj = experiment.Experiment(sagemaker_boto_client, experiment_name='foo', description='bar')
+    obj = experiment.Experiment(sagemaker_boto_client, experiment_name="foo", description="bar")
     sagemaker_boto_client.update_experiment.return_value = {}
     obj.save()
-    sagemaker_boto_client.update_experiment.assert_called_with(ExperimentName='foo', Description='bar')
+    sagemaker_boto_client.update_experiment.assert_called_with(ExperimentName="foo", Description="bar")
 
 
 def test_delete(sagemaker_boto_client):
-    obj = experiment.Experiment(sagemaker_boto_client, experiment_name='foo', description='bar')
+    obj = experiment.Experiment(sagemaker_boto_client, experiment_name="foo", description="bar")
     sagemaker_boto_client.delete_experiment.return_value = {}
     obj.delete()
-    sagemaker_boto_client.delete_experiment.assert_called_with(ExperimentName='foo')
+    sagemaker_boto_client.delete_experiment.assert_called_with(ExperimentName="foo")

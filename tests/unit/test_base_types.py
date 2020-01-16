@@ -15,6 +15,7 @@ import unittest.mock
 
 from smexperiments import _base_types
 
+
 @pytest.fixture
 def sagemaker_boto_client():
     return unittest.mock.Mock()
@@ -26,7 +27,7 @@ def test_from_boto():
 
 
 def test_to_boto():
-    assert dict(A=10) == _base_types.ApiObject.to_boto({'a': 10})
+    assert dict(A=10) == _base_types.ApiObject.to_boto({"a": 10})
 
 
 def test_custom_type():
@@ -86,24 +87,20 @@ def test_custom_type_dict():
     class TestTypeB(_base_types.ApiObject):
         _custom_boto_types = {"test_type_a_value": (TestTypeA, True)}
 
-    obj = TestTypeB.from_boto(
-        dict(TestTypeAValue={"key_1": dict(SomeValue=10), "key_2": dict(SomeValue=11)})
-    )
+    obj = TestTypeB.from_boto(dict(TestTypeAValue={"key_1": dict(SomeValue=10), "key_2": dict(SomeValue=11)}))
 
     assert obj.test_type_a_value == {
         "key_1": TestTypeA(some_value=10),
         "key_2": TestTypeA(some_value=11),
     }
-    assert (
-        dict(TestTypeAValue={"key_1": dict(SomeValue=10), "key_2": dict(SomeValue=11)})
-        == TestTypeB.to_boto(vars(obj))
+    assert dict(TestTypeAValue={"key_1": dict(SomeValue=10), "key_2": dict(SomeValue=11)}) == TestTypeB.to_boto(
+        vars(obj)
     )
+
 
 def test_construct(sagemaker_boto_client):
     sagemaker_boto_client.create.return_value = dict(C=20)
-    record = DummyRecord._construct(
-        DummyRecord._boto_create_method, sagemaker_boto_client, a=10, b=10
-    )
+    record = DummyRecord._construct(DummyRecord._boto_create_method, sagemaker_boto_client, a=10, b=10)
 
     assert record.a == 10
     assert record.b == 10
@@ -123,14 +120,12 @@ def test_delete(sagemaker_boto_client):
     record.delete()
     sagemaker_boto_client.delete.assert_called_with(A=10, B=10)
 
+
 def test_list_empty(sagemaker_boto_client):
     sagemaker_boto_client.list.return_value = {"TestRecordSummaries": []}
     assert [] == list(
         DummyRecord._list(
-            "list",
-            DummyRecordSummary.from_boto,
-            "TestRecordSummaries",
-            sagemaker_boto_client=sagemaker_boto_client,
+            "list", DummyRecordSummary.from_boto, "TestRecordSummaries", sagemaker_boto_client=sagemaker_boto_client,
         )
     )
 
@@ -139,10 +134,7 @@ def test_list_with_items(sagemaker_boto_client):
     sagemaker_boto_client.list.return_value = {"TestRecordSummaries": [{"Foo": "bar"}]}
     assert [DummyRecordSummary(foo="bar")] == list(
         DummyRecord._list(
-            "list",
-            DummyRecordSummary.from_boto,
-            "TestRecordSummaries",
-            sagemaker_boto_client=sagemaker_boto_client,
+            "list", DummyRecordSummary.from_boto, "TestRecordSummaries", sagemaker_boto_client=sagemaker_boto_client,
         )
     )
 
@@ -155,9 +147,6 @@ def test_list_with_next_token(sagemaker_boto_client):
 
     assert [DummyRecordSummary(a=i) for i in range(1, 5)] == list(
         DummyRecord._list(
-            "list",
-            DummyRecordSummary.from_boto,
-            "TestRecordSummaries",
-            sagemaker_boto_client=sagemaker_boto_client,
+            "list", DummyRecordSummary.from_boto, "TestRecordSummaries", sagemaker_boto_client=sagemaker_boto_client,
         )
     )
