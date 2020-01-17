@@ -22,7 +22,7 @@ from smexperiments import api_types, tracker, trial_component, _utils, _environm
 @pytest.fixture
 def boto3_session():
     mocked = unittest.mock.Mock()
-    mocked.client().return_value.get_caller_identity.return_value = {'Account': unittest.mock.Mock()}
+    mocked.client.return_value.get_caller_identity.return_value = {'Account': unittest.mock.Mock()}
     return mocked
 
 

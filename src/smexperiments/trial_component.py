@@ -65,7 +65,7 @@ class TrialComponent(_base_types.Record):
 
     @classmethod
     def _boto_ignore(cls):
-        return super(TrialComponent, cls)._boto_ignore + ['CreatedBy']
+        return super(TrialComponent, cls)._boto_ignore() + ['CreatedBy']
 
     def save(self):
         """Save the state of this TrialComponent to SageMaker."""

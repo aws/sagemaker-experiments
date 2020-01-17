@@ -231,3 +231,7 @@ def test_delete(sagemaker_boto_client):
     sagemaker_boto_client.delete_trial_component.return_value = {}
     obj.delete()
     sagemaker_boto_client.delete_trial_component.assert_called_with(TrialComponentName='foo')
+
+def test_boto_ignore():
+    obj = trial_component.TrialComponent(sagemaker_boto_client, trial_component_name='foo', display_name='bar')
+    assert obj._boto_ignore() == ['ResponseMetadata','CreatedBy']
