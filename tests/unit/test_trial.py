@@ -80,6 +80,14 @@ def test_remove_trial_component(sagemaker_boto_client):
     t.remove_trial_component('foo')
     sagemaker_boto_client.disassociate_trial_component.assert_called_with(TrialName='bar', TrialComponentName='foo')
 
+def test_remove_trial_component_from_tracker(sagemaker_boto_client):
+    t = trial.Trial(sagemaker_boto_client)
+    t.trial_name = 'bar'
+    tc = trial_component.TrialComponent(trial_component_name='tc-foo', sagemaker_boto_client=sagemaker_boto_client)
+    trkr = tracker.Tracker(tc, unittest.mock.Mock(), unittest.mock.Mock())
+    t.remove_trial_component(trkr)
+    sagemaker_boto_client.disassociate_trial_component.assert_called_with(TrialName='bar', TrialComponentName='tc-foo')
+
 
 def test_list_trials_without_experiment_name(sagemaker_boto_client, datetime_obj):
     sagemaker_boto_client.list_trials.return_value = {
@@ -142,3 +150,8 @@ def test_delete(sagemaker_boto_client):
     sagemaker_boto_client.delete_trial.return_value = {}
     obj.delete()
     sagemaker_boto_client.delete_trial.assert_called_with(TrialName='foo')
+
+
+def test_boto_ignore():
+    obj = trial.Trial(sagemaker_boto_client, trial_name='foo')
+    assert obj._boto_ignore() == ['ResponseMetadata','CreatedBy']
