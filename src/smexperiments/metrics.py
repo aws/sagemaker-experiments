@@ -21,10 +21,6 @@ import dateutil.tz
 
 METRICS_DIR = os.environ.get('SAGEMAKER_METRICS_DIRECTORY', '.')
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-
 class SageMakerFileMetricsWriter(object):
 
     def __init__(self, metrics_file_path=None):
@@ -39,7 +35,8 @@ class SageMakerFileMetricsWriter(object):
             logging.debug('Writing metric: %s', raw_metric_data)
             self._file.write(json.dumps(raw_metric_data.to_record()))
             self._file.write('\n')
-        except AttributeError:
+        except AttributeError as e:
+            logging.error(e)
             if self._closed:
                 raise SageMakerMetricsWriterException('log_metric called on a closed writer')
             elif not self._file:

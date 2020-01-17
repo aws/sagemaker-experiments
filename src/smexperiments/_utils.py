@@ -16,7 +16,7 @@ import time
 
 import boto3
 import botocore
-
+import logging
 
 def sagemaker_client():
     if os.environ.get('SAGEMAKER_ENDPOINT', '').strip():
@@ -56,6 +56,7 @@ def get_or_create_default_bucket(boto_session, default_bucket_prefix='sagemaker'
     except botocore.exceptions.ClientError as e:
         error_code = e.response['Error']['Code']
         message = e.response['Error']['Message']
+        logging.debug('Create Bucket failed. error code: {}, message: {}'.format(error_code, message))
 
         if error_code == 'BucketAlreadyOwnedByYou':
             pass
