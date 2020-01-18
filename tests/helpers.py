@@ -14,6 +14,8 @@ from contextlib import contextmanager
 import signal
 import time
 import uuid
+import boto3
+import sys
 
 
 def name():
@@ -94,3 +96,52 @@ def timeout(seconds=0, minutes=0, hours=0):
         yield
     finally:
         signal.alarm(0)
+
+
+def to_seconds(dt):
+    return int(dt.timestamp())
+
+
+def dump_logs(job, log_group):
+    logs = boto3.client("logs")
+    [log_stream] = logs.describe_log_streams(
+        logGroupName="/aws/sagemaker/{}".format(log_group), logStreamNamePrefix=job
+    )["logStreams"]
+    log_stream_name = log_stream["logStreamName"]
+    next_token = None
+    while True:
+        if next_token:
+            log_event_response = logs.get_log_events(
+                logGroupName="/aws/sagemaker/{}".format(log_group), logStreamName=log_stream_name, nextToken=next_token
+            )
+        else:
+            log_event_response = logs.get_log_events(
+                logGroupName="/aws/sagemaker/{}".format(log_group), logStreamName=log_stream_name
+            )
+        next_token = log_event_response["nextForwardToken"]
+        events = log_event_response["events"]
+        if not events:
+            break
+        for event in events:
+            print(event["message"])
+
+
+def wait_for_job(job_name, get_job, status_field):
+    # wait for the trial component to be created from the training job, usually < 5s
+    with timeout(minutes=15):
+        while True:
+            response = get_job()
+            status = response[status_field]
+            if status == "Failed":
+                # for debugging
+                # dump_logs(job, "TrainingJobs")
+                print("Job {} failed.".format(job_name))
+                print(response)
+                break
+            if status == "Completed":
+                print("Job {} completed.".format(job_name))
+                break
+            else:
+                sys.stdout.write(".")
+                sys.stdout.flush()
+                time.sleep(30)
