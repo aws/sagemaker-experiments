@@ -15,6 +15,7 @@ from smexperiments import trial_component, api_types
 import datetime
 import pytest
 import unittest.mock
+import botocore
 
 
 @pytest.fixture
@@ -211,3 +212,25 @@ def test_delete(sagemaker_boto_client):
 def test_boto_ignore():
     obj = trial_component.TrialComponent(sagemaker_boto_client, trial_component_name="foo", display_name="bar")
     assert obj._boto_ignore() == ["ResponseMetadata", "CreatedBy"]
+
+
+def test_create_trial_component_not_allowed_from_context(sagemaker_boto_client):
+
+    exception = botocore.exceptions.ClientError(
+        error_response={
+            "Error":
+                {"Code": "",
+                 "Message": "CreateTrialComponent cannot be called from this context."}
+        },
+        operation_name="CreateTrialComponent",
+    )
+
+    sagemaker_boto_client.create_trial_component.side_effect = exception
+
+    try:
+        trial_component.TrialComponent.create(trial_component_name="test", sagemaker_boto_client=sagemaker_boto_client)
+        assert False
+    except botocore.exceptions.ClientError as e:
+        message = e.response["Error"]["Message"]
+        assert message == "Trial Component creation is currently restricted to the SageMaker " \
+                         "runtime. Try supplying an experiment config when creating a job instead."

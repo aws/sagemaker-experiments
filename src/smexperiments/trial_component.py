@@ -12,13 +12,17 @@
 # language governing permissions and limitations under the License.
 """Contains the TrialComponent class."""
 from smexperiments import _base_types, api_types
-
+import botocore
 
 class TrialComponent(_base_types.Record):
     """
     This class represents a SageMaker trial component object.
 
     A trial component is a stage in a trial.
+
+    Trial components are created automatically within the SageMaker runtime and may not be created directly.
+    To automatically associate trial components with a trial and experiment supply an experiment config when creating a
+    job. For example: https://docs.aws.amazon.com/sagemaker/latest/dg/API_CreateTrainingJob.html
     """
 
     trial_component_name = None
@@ -103,12 +107,20 @@ class TrialComponent(_base_types.Record):
             smexperiments.trial_component.TrialComponent: A SageMaker ``TrialComponent``
                 object.
         """
-        return super(TrialComponent, cls)._construct(
-            cls._boto_create_method,
-            trial_component_name=trial_component_name,
-            display_name=display_name,
-            sagemaker_boto_client=sagemaker_boto_client,
-        )
+        try:
+            return super(TrialComponent, cls)._construct(
+                cls._boto_create_method,
+                trial_component_name=trial_component_name,
+                display_name=display_name,
+                sagemaker_boto_client=sagemaker_boto_client,
+            )
+        except botocore.exceptions.ClientError as e:
+            message = e.response["Error"]["Message"]
+            if message == "CreateTrialComponent cannot be called from this context.":
+                e.response["Error"]["Message"] = "Trial Component creation is currently restricted to the SageMaker " \
+                                                 "runtime. Try supplying an experiment config when creating a job instead."
+            raise e
+
 
     @classmethod
     def list(
