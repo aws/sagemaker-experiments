@@ -79,6 +79,13 @@ class TrialComponentParameterValue(_base_types.ApiObject):
             string_value=string_value, number_value=number_value, **kwargs
         )
 
+    def __str__(self):
+        if self.string_value is not None:
+            return self.string_value
+        if self.number_value is not None:
+            return str(self.number_value)
+        return ''
+
 
 class TrialComponentParameters(_base_types.ApiObject):
     @classmethod
