@@ -19,6 +19,10 @@ class TrialComponent(_base_types.Record):
     This class represents a SageMaker trial component object.
 
     A trial component is a stage in a trial.
+
+    Trial components are created automatically within the SageMaker runtime and may not be created directly.
+    To automatically associate trial components with a trial and experiment supply an experiment config when creating a
+    job. For example: https://docs.aws.amazon.com/sagemaker/latest/dg/API_CreateTrainingJob.html
     """
 
     trial_component_name = None
