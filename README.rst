@@ -19,10 +19,6 @@ SageMaker Experiments Python SDK
     :target: https://github.com/aws/sagemaker-experiments/blob/master/LICENSE
     :alt: License
 
-.. image:: https://readthedocs.org/projects/sagemaker-experiments/badge/?version=stable
-    :target: https://sagemaker-experiments.readthedocs.io/en/stable/?badge=stable
-    :alt: Documentation Status
-
 .. image:: https://img.shields.io/pypi/dm/sagemaker-experiments
     :target: https://pypi.python.org/pypi/sagemaker-experiments
     :alt: PyPI - Downloads
@@ -63,7 +59,7 @@ SageMaker Experiments Python SDK
     :target: https://github.com/python/black
     :alt: Code style: black
 
-.. image:: https://readthedocs.org/projects/sagemaker-experiments/badge/?version=latest&style=plastic
+.. image:: https://readthedocs.org/projects/sagemaker-experiments/badge/?version=latest
     :target: https://readthedocs.org/projects/sagemaker-experiments/
     :alt: Read the Docs - Sagemaker Experiments
 
