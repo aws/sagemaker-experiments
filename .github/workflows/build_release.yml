@@ -16,6 +16,16 @@ jobs:
       matrix:
         python-version: [3.5, 3.6, 3.7]
     steps:
+      - name: Check Environment
+        run: |
+          if [[ -z $AWS_ACCESS_KEY_ID || -z $AWS_SECRET_ACCESS_KEY  ]]; then
+            echo "Missing required environment variables."
+            echo "If this a pull request check your fork's action history."
+            exit 1
+          fi
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - uses: actions/checkout@v1
       - name: Setup Python ${{matrix.python-version}}
         uses: actions/setup-python@v1
@@ -37,6 +47,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: us-west-2
           CODECOV_UPLOAD_TOKEN: ${{ secrets.CODECOV_UPLOAD_TOKEN }}
+
   release:
     needs: build
     if: github.event_name == 'release' && github.repository == 'aws/sagemaker-experiments'
