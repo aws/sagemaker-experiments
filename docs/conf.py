@@ -16,13 +16,13 @@ import pkg_resources
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath(".."))
 
 # -- Project information -----------------------------------------------------
 
-project = 'sagemaker-experiments'
+project = "sagemaker-experiments"
 copyright = u"%s, Amazon" % datetime.now().year
-author = 'Amazon Web Services'
+author = "Amazon Web Services"
 version = pkg_resources.require(project)[0].version
 
 # -- General configuration ---------------------------------------------------
@@ -42,7 +42,7 @@ extensions = [
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 source_suffix = ".rst"  # The suffix of source filenames.
 master_doc = "index"  # The master toctree document.
@@ -59,7 +59,7 @@ exclude_trees = ["_build"]
 
 pygments_style = "default"
 autoclass_content = "both"
-#autodoc_default_options = {"show-inheritance", "members", "undoc-members"}
+# autodoc_default_options = {"show-inheritance", "members", "undoc-members"}
 autodoc_member_order = "bysource"
 if "READTHEDOCS" in os.environ:
     html_theme = "default"
