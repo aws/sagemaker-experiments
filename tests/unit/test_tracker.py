@@ -196,6 +196,28 @@ def test_log_metric(under_test):
     under_test._metrics_writer.log_metric.assert_called_with("foo", 1.0, 1, now)
 
 
+def test_log_metric_attribute_error(under_test):
+    now = datetime.datetime.now()
+
+    exception = AttributeError
+
+    under_test._metrics_writer.log_metric.side_effect = exception
+
+    with pytest.raises(AttributeError):
+        under_test.log_metric("foo", 1.0, 1, now)
+
+
+def test_log_metric_attribute_error_warned(under_test):
+    now = datetime.datetime.now()
+
+    under_test._metrics_writer = None
+    under_test._warned_on_metrics = None
+
+    under_test.log_metric("foo", 1.0, 1, now)
+
+    assert under_test._warned_on_metrics == True
+
+
 def test_log_artifact(under_test):
     under_test.log_artifact("foo.txt", "name", "whizz/bang")
     under_test._artifact_uploader.upload_artifact.assert_called_with("foo.txt")
