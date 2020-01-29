@@ -76,9 +76,14 @@ jobs:
         gpg --no-default-keyring --keyring ./sessionring.gpg --pinentry-mode loopback --passphrase ""${{ secrets.PYPI_SIGN_PASSPHRASE }}"" --detach-sign -ao /dev/null dist/*
     - name: Twine Check
       run: twine check dist/*
+    - name: Publish to Test PyPi
+      run: twine upload dist/*
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        TWINE_REPOSITORY_URL: https://test.pypi.org/legacy/
     - name: Publish to PyPi
-      uses: pypa/gh-action-pypi-publish@master
-      with:
-        user: ${{ secrets.PYPI_USERNAME }}
-        password: ${{ secrets.PYPI_PASSWORD }}
-        repository_url: https://test.pypi.org/legacy/
+      run: twine upload dist/*
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
