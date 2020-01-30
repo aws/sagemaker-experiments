@@ -23,10 +23,6 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 
-def read_version():
-    return read("VERSION").strip()
-
-
 # Declare minimal set for installation
 required_packages = ["boto3>=1.10.32"]
 
@@ -39,7 +35,7 @@ with open("README.rst", "r", newline="", encoding="utf-8") as readme_file:
 
 setup(
     name="sagemaker-experiments",
-    version=read_version(),
+    use_scm_version=True,
     description="Open source library for Experiment Tracking in SageMaker Jobs and Notebooks",
     packages=find_packages("src"),
     package_dir={"": "src"},
@@ -60,6 +56,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
     ],
+    setup_requires=["setuptools_scm", "setuptools"],
     install_requires=required_packages,
     extras_require={
         "test": [

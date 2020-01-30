@@ -1,0 +1,8 @@
+[build-system]
+requires = [
+  "setuptools",
+  "setuptools-scm",
+  "wheel",
+]
+
+[tool.setuptools_scm]
