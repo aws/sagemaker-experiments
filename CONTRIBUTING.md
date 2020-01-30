@@ -112,6 +112,17 @@ Please remember to:
 
 ### Committing Your Change
 
+Prefix your commit message with one of the following to indicate the version part incremented in the next release:
+
+| Commit Message Prefix | Version Part Incremented
+| --- | ---
+| break, breaking | major
+| feat, feature | minor
+| depr, deprecation | minor
+| change, fix | patch
+| doc, documentation | patch
+| default | patch 
+
 For the message use imperative style and keep things concise but informative. See [How to Write a Git Commit Message](https://chris.beams.io/posts/git-commit/) for guidance.
 
 
