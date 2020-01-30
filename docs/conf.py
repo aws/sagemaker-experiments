@@ -12,9 +12,9 @@
 # language governing permissions and limitations under the License.
 
 from datetime import datetime
-import pkg_resources
 import os
 import sys
+from pkg_resources import get_distribution
 
 sys.path.insert(0, os.path.abspath(".."))
 
@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.abspath(".."))
 project = "sagemaker-experiments"
 copyright = u"%s, Amazon" % datetime.now().year
 author = "Amazon Web Services"
-version = pkg_resources.require(project)[0].version
+version = get_distribution(project).version
 
 # -- General configuration ---------------------------------------------------
 
