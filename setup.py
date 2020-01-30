@@ -67,6 +67,7 @@ setup(
             "pytest-coverage",
             "pytest-rerunfailures",
             "pytest-xdist",
+            "docker",
         ]
     },
 )
