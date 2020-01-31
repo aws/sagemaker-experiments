@@ -62,11 +62,9 @@ jobs:
           IGNORE_COVERAGE: '-'
       - name: Upload Code Coverage
         if: github.event_name == 'release'
-        run: |
-          coverage combine .coverage*
-          codecov -t {env:CODECOV_UPLOAD_TOKEN}
+        run: tox -e upload-coverage
         env:
-          CODECOV_UPLOAD_TOKEN: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          CODECOV_UPLOAD_TOKEN: ${{ secrets.CODECOV_UPLOAD_TOKEN }}
 
   release:
     needs: [test, lint]
