@@ -1,0 +1,101 @@
+name: Test and Release
+
+on:
+  pull_request:
+    branches:
+      - master
+  release:
+    types: [published]
+  push:
+    paths:
+    - 'src/**'
+    - 'tests/**'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Python
+        uses: actions/setup-python@v1
+      - name: Install Dependencies
+        run: pip install tox
+      - name: Flake8
+        run: tox -e flake8
+      - name: Black Check
+        run: tox -e black-check
+      - name: Pylint
+        run: tox -e pylint
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Python 3.5
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.5
+      - name: Setup Python 3.6
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.6
+      - name: Setup Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: Install Dependencies
+        run: pip install tox
+      # runs unit tests for each python version
+      - name: Unit Tests
+        run: tox -- tests/unit
+        env:
+          AWS_DEFAULT_REGION: us-west-2
+      - name: Integration Tests
+      # pull requests are untrusted and do not have access to secrets needed for integ tests
+        if: github.event_name != 'pull_request'
+        run: tox -e py36 -- tests/integ
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-west-2
+          COVERAGE_FILE: .coverage.integ
+          IGNORE_COVERAGE: '-'
+      - name: Upload Code Coverage
+        if: github.event_name == 'release'
+        run: |
+          coverage combine .coverage*
+          codecov -t {env:CODECOV_UPLOAD_TOKEN}
+        env:
+          CODECOV_UPLOAD_TOKEN: ${{ secrets.AWS_ACCESS_KEY_ID }}
+
+  release:
+    needs: [test, lint]
+    if: github.event_name == 'release' && github.repository == 'aws/sagemaker-experiments'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+    - name: Install Dependencies
+      run: pip install setuptools wheel twine tox
+    - name: Create Distribution
+      run: python setup.py bdist_wheel
+    - name: Sign Release
+      run: |
+        echo "${{ secrets.PYPI_SIGN_PRIVATE_KEY }}" | gpg --batch --import --no-default-keyring --keyring ./sessionring.gpg
+        gpg --no-default-keyring --keyring ./sessionring.gpg --pinentry-mode loopback --passphrase ""${{ secrets.PYPI_SIGN_PASSPHRASE }}"" --detach-sign -ao /dev/null dist/*
+    - name: Twine Check
+      run: twine check dist/*
+    - name: Publish to Test PyPi
+      run: twine upload dist/*
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        TWINE_REPOSITORY_URL: https://test.pypi.org/legacy/
+    - name: Publish to PyPi
+      run: twine upload dist/*
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
