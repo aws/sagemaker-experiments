@@ -1,0 +1,26 @@
+name: Release
+
+on:
+  schedule:
+    # every weekday at 9:00 AM
+    - cron: '0 9 * * 1-5'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: Install Dependencies
+        run: pip install tox
+      - name: Unit Tests
+        run: tox -e py37 -- tests/unit
+        env:
+          AWS_DEFAULT_REGION: us-west-2
+      - name: Create Release
+        run: tox -e release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
