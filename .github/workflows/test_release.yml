@@ -1,4 +1,4 @@
-name: Build and Release
+name: Test and Release
 
 on:
   pull_request:
@@ -7,9 +7,27 @@ on:
   release:
     types: [published]
   push:
+    paths:
+    - 'src/**'
+    - 'tests/**'
 
 jobs:
-  build:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Python
+        uses: actions/setup-python@v1
+      - name: Install Dependencies
+        run: pip install tox
+      - name: Flake8
+        run: tox -e flake8
+      - name: Black Check
+        run: tox -e black-check
+      - name: Pylint
+        run: tox -e pylint
+
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -27,12 +45,6 @@ jobs:
           python-version: 3.7
       - name: Install Dependencies
         run: pip install tox
-      - name: Flake8
-        run: tox -e flake8
-      - name: Black Check
-        run: tox -e black-check
-      - name: Pylint
-        run: tox -e pylint
       # runs unit tests for each python version
       - name: Unit Tests
         run: tox -- tests/unit
@@ -57,7 +69,7 @@ jobs:
           CODECOV_UPLOAD_TOKEN: ${{ secrets.AWS_ACCESS_KEY_ID }}
 
   release:
-    needs: build
+    needs: [test, lint]
     if: github.event_name == 'release' && github.repository == 'aws/sagemaker-experiments'
     runs-on: ubuntu-latest
     steps:
