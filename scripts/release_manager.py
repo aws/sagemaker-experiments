@@ -20,7 +20,6 @@ class ReleaseManager:
         message = template_text.format(version=tag, changes=change_list_content)
         g = Github(self._token)
         repo = g.get_repo(self._repo)
-        # keep draft=True release script manually verified working
-        repo.create_git_release(tag=tag, name=name, message=message, draft=True, prerelease=False)
+        repo.create_git_release(tag=tag, name=name, message=message, draft=False, prerelease=False)
         print(f"Created release {name}")
         print(f"See it at https://github.com/{self._repo}/releases")
