@@ -11,7 +11,8 @@ def recent_changes_to_src(last_version):
     stdout = check_output(["git", "log", "{}..HEAD".format(last_version), "--name-only", "--pretty=format: master"])
     stdout = stdout.decode("utf-8")
     lines = stdout.splitlines()
-    src_lines = filter(lambda l: l.startswith("src"), lines)
+    src_lines = list(filter(lambda l: l.startswith("src"), lines))
+    print(f"{len(src_lines)} src files changed since {last_version}")
     return src_lines
 
 
