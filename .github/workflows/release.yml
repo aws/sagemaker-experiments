@@ -2,8 +2,8 @@ name: Release
 
 on:
   schedule:
-    # every weekday at 9:00 AM
-    - cron: '0 9 * * 1-5'
+    # every weekday at 9:00 AM PST
+    - cron: '0 17 * * 1-5'
 
 jobs:
   release:
