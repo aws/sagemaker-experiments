@@ -4,12 +4,13 @@ on:
   pull_request:
     branches:
       - master
-  release:
-    types: [published]
   push:
     paths:
     - 'src/**'
     - 'tests/**'
+  schedule:
+    # every weekday at 9:00 AM PST
+    - cron: '0 17 * * 1-5'
 
 jobs:
   lint:
@@ -61,14 +62,14 @@ jobs:
           COVERAGE_FILE: .coverage.integ
           IGNORE_COVERAGE: '-'
       - name: Upload Code Coverage
-        if: github.event_name == 'release'
+        if: github.event_name == 'schedule'
         run: tox -e upload-coverage
         env:
           CODECOV_UPLOAD_TOKEN: ${{ secrets.CODECOV_UPLOAD_TOKEN }}
 
   release:
     needs: [test, lint]
-    if: github.event_name == 'release' && github.repository == 'aws/sagemaker-experiments'
+    if: github.event_name == 'schedule' && github.repository == 'aws/sagemaker-experiments'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
@@ -78,6 +79,10 @@ jobs:
         python-version: '3.x'
     - name: Install Dependencies
       run: pip install setuptools wheel twine tox
+    - name: Create Release
+      run: tox -e release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Create Distribution
       run: python setup.py bdist_wheel
     - name: Sign Release
