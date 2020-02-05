@@ -48,6 +48,7 @@ def release():
 
     if not recent_changes_to_src(last_version):
         print("Nothing to release.")
+        exit(1)
         return
 
     changes = get_changes(last_version)
