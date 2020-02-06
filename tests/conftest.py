@@ -242,7 +242,6 @@ def training_output_s3_uri(bucket):
 
 
 @pytest.fixture
-@pytest.mark.slow
 def training_job_name(sagemaker_boto_client, training_role_arn, docker_image, training_s3_uri, training_output_s3_uri):
     training_job_name = name()
     sagemaker_boto_client.create_training_job(
@@ -281,7 +280,6 @@ def processing_job_name(sagemaker_boto_client, training_role_arn, docker_image):
 
 
 @pytest.fixture(scope="session")
-@pytest.mark.slow
 def docker_image(boto_model_file):
     client = docker.from_env()
     ecr_client = boto3.client("ecr")
