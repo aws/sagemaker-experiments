@@ -63,7 +63,7 @@ def sagemaker_endpoint(request):
 
 
 @pytest.fixture
-def sagemaker_boto_client():
+def sagemaker_boto_client(sagemaker_endpoint):
     if sagemaker_endpoint is None:
         return boto3.client("sagemaker")
     else:
@@ -286,7 +286,7 @@ def processing_job_name(sagemaker_boto_client, training_role_arn, docker_image):
 
 
 @pytest.fixture(scope="session")
-def docker_image(boto_model_file):
+def docker_image(boto_model_file, sagemaker_endpoint):
     client = docker.from_env()
     ecr_client = boto3.client("ecr")
     token = ecr_client.get_authorization_token()
@@ -334,7 +334,7 @@ def docker_image(boto_model_file):
             "library": "smexperiments-0.1.0.tar.gz",
             "botomodel": "boto/sagemaker-experiments-2017-07-24.normal.json",
             "script": "scripts/script.py",
-            "endpoint": os.environ.get("SAGEMAKER_ENDPOINT", ""),
+            "endpoint": sagemaker_endpoint,
         },
     )
     client.images.push(tag, auth_config={"username": username, "password": password})
