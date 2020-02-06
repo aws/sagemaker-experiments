@@ -35,6 +35,7 @@ from tests.helpers import name, names
 def pytest_addoption(parser):
     parser.addoption("--boto-model-file", action="store", default=None)
     parser.addoption("--runslow", action="store_true", default=False, help="run slow tests")
+    parser.addoption("--sagemaker-endpoint", action="store", default=None)
 
 
 def pytest_configure(config):
@@ -56,12 +57,17 @@ def boto_model_file(request):
     return request.config.getoption("--boto-model-file")
 
 
+@pytest.fixture(scope="session")
+def sagemaker_endpoint(request):
+    return request.config.getoption("--sagemaker-endpoint")
+
+
 @pytest.fixture
 def sagemaker_boto_client():
-    if os.environ.get("SAGEMAKER_ENDPOINT", "").strip():
-        return boto3.client("sagemaker", endpoint_url=os.environ.get("SAGEMAKER_ENDPOINT"))
-    else:
+    if sagemaker_endpoint is None:
         return boto3.client("sagemaker")
+    else:
+        return boto3.client("sagemaker", endpoint_url=sagemaker_endpoint)
 
 
 @pytest.fixture(scope="session")
