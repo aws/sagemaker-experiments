@@ -71,4 +71,7 @@ def test_add_remove_trial_component(trial_obj, trial_component_obj):
 def test_save(trial_obj, sagemaker_boto_client):
     trial_obj.display_name = "foo"
     trial_obj.save()
-    assert "foo" == trial.Trial.load(trial_name=trial_obj.trial_name).display_name
+    assert (
+        "foo"
+        == trial.Trial.load(trial_name=trial_obj.trial_name, sagemaker_boto_client=sagemaker_boto_client).display_name
+    )

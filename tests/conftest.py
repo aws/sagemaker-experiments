@@ -35,6 +35,7 @@ from tests.helpers import name, names
 def pytest_addoption(parser):
     parser.addoption("--boto-model-file", action="store", default=None)
     parser.addoption("--runslow", action="store_true", default=False, help="run slow tests")
+    parser.addoption("--sagemaker-endpoint", action="store", default=None)
 
 
 def pytest_configure(config):
@@ -56,12 +57,17 @@ def boto_model_file(request):
     return request.config.getoption("--boto-model-file")
 
 
+@pytest.fixture(scope="session")
+def sagemaker_endpoint(request):
+    return request.config.getoption("--sagemaker-endpoint")
+
+
 @pytest.fixture
-def sagemaker_boto_client():
-    if os.environ.get("SAGEMAKER_ENDPOINT", "").strip():
-        return boto3.client("sagemaker", endpoint_url=os.environ.get("SAGEMAKER_ENDPOINT"))
-    else:
+def sagemaker_boto_client(sagemaker_endpoint):
+    if sagemaker_endpoint is None:
         return boto3.client("sagemaker")
+    else:
+        return boto3.client("sagemaker", endpoint_url=sagemaker_endpoint)
 
 
 @pytest.fixture(scope="session")
@@ -280,7 +286,7 @@ def processing_job_name(sagemaker_boto_client, training_role_arn, docker_image):
 
 
 @pytest.fixture(scope="session")
-def docker_image(boto_model_file):
+def docker_image(boto_model_file, sagemaker_endpoint):
     client = docker.from_env()
     ecr_client = boto3.client("ecr")
     token = ecr_client.get_authorization_token()
@@ -328,7 +334,7 @@ def docker_image(boto_model_file):
             "library": "smexperiments-0.1.0.tar.gz",
             "botomodel": "boto/sagemaker-experiments-2017-07-24.normal.json",
             "script": "scripts/script.py",
-            "endpoint": os.environ.get("SAGEMAKER_ENDPOINT", ""),
+            "endpoint": sagemaker_endpoint,
         },
     )
     client.images.push(tag, auth_config={"username": username, "password": password})
