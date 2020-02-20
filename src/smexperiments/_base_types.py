@@ -102,19 +102,23 @@ class Record(ApiObject):
         sagemaker_boto_client=None,
         **kwargs
     ):
+        sagemaker_boto_client = sagemaker_boto_client or _utils.sagemaker_client()
         next_token = None
-        while True:
-            list_request_kwargs = _boto_functions.to_boto(kwargs, cls._custom_boto_names, cls._custom_boto_types)
-            if next_token:
-                list_request_kwargs[boto_next_token_name] = next_token
-            list_method = getattr(sagemaker_boto_client, boto_list_method)
-            list_method_response = list_method(**list_request_kwargs)
-            list_items = list_method_response.get(boto_list_items_name, [])
-            next_token = list_method_response.get(boto_next_token_name)
-            for item in list_items:
-                yield list_item_factory(item)
-            if not next_token:
-                break
+        try:
+            while True:
+                list_request_kwargs = _boto_functions.to_boto(kwargs, cls._custom_boto_names, cls._custom_boto_types)
+                if next_token:
+                    list_request_kwargs[boto_next_token_name] = next_token
+                list_method = getattr(sagemaker_boto_client, boto_list_method)
+                list_method_response = list_method(**list_request_kwargs)
+                list_items = list_method_response.get(boto_list_items_name, [])
+                next_token = list_method_response.get(boto_next_token_name)
+                for item in list_items:
+                    yield list_item_factory(item)
+                if not next_token:
+                    break
+        except StopIteration:
+            return
 
     @classmethod
     def _construct(cls, boto_method_name, sagemaker_boto_client=None, **kwargs):
