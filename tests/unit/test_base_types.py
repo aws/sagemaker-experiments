@@ -150,3 +150,11 @@ def test_list_with_next_token(sagemaker_boto_client):
             "list", DummyRecordSummary.from_boto, "TestRecordSummaries", sagemaker_boto_client=sagemaker_boto_client,
         )
     )
+
+
+@unittest.mock.patch('smexperiments._base_types._utils.sagemaker_client')
+def test_list_no_client(mocked_utils_sagemaker_client, sagemaker_boto_client):
+    mocked_utils_sagemaker_client.return_value = sagemaker_boto_client
+    sagemaker_boto_client.list.side_effect = []
+    list(DummyRecord._list("list", DummyRecordSummary.from_boto, "TestRecordSummaries"))
+    _base_types._utils.sagemaker_client.assert_called()

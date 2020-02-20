@@ -102,6 +102,7 @@ class Record(ApiObject):
         sagemaker_boto_client=None,
         **kwargs
     ):
+        sagemaker_boto_client = sagemaker_boto_client or _utils.sagemaker_client()
         next_token = None
         while True:
             list_request_kwargs = _boto_functions.to_boto(kwargs, cls._custom_boto_names, cls._custom_boto_types)
