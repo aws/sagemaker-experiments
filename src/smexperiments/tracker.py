@@ -16,6 +16,7 @@ import os
 import mimetypes
 import urllib.parse
 import urllib.request
+import logging
 
 import dateutil
 
@@ -48,6 +49,9 @@ class Tracker(object):
             my_tracker.log_parameter('learning_rate', 0.01)
 
             # Perform data-science code within the with block.
+
+    Attributes:
+        trial_component (TrialComponent): The trial component tracked.
     """
 
     trial_component = None
@@ -87,6 +91,12 @@ class Tracker(object):
             sagemaker_boto_client: (boto3.Client, optional) The SageMaker AWS service client to use. If not
                 specified a new client will be created from the specified ``boto3_session`` or default
                 boto3.Session.
+
+        Returns:
+            Tracker: The tracker for the given trial component.
+
+        Raises:
+            ValueError: If the trial component failed to load.
         """
         boto3_session = boto3_session or _utils.boto_session()
         sagemaker_boto_client = sagemaker_boto_client or _utils.sagemaker_client()
@@ -138,6 +148,9 @@ class Tracker(object):
             sagemaker_boto_client: (boto3.Client, optional) The SageMaker AWS service client to use. If not
                 specified a new client will be created from the specified ``boto3_session`` or default
                 boto3.Session.
+
+        Returns:
+            Tracker: The tracker for the new trial component.
         """
         boto3_session = boto3_session or _utils.boto_session()
         sagemaker_boto_client = sagemaker_boto_client or _utils.sagemaker_client()
@@ -178,7 +191,7 @@ class Tracker(object):
         Args:
             name (str): The name of the input value.
             value (str): The value.
-            media_type (str): The MediaType (MIME type) of the value
+            media_type (str, optional): The MediaType (MIME type) of the value
         """
         self.trial_component.input_artifacts[name] = api_types.TrialComponentArtifact(value, media_type=media_type)
 
@@ -211,8 +224,7 @@ class Tracker(object):
         )
 
     def log_metric(self, metric_name, value, timestamp=None, iteration_number=None):
-        """
-        Record a scalar metric value for this TrialComponent.
+        """Record a scalar metric value for this TrialComponent.
 
         Args:
             metric_name (str): The name of the metric.
@@ -227,7 +239,7 @@ class Tracker(object):
         except AttributeError:
             if not self._metrics_writer:
                 if not self._warned_on_metrics:
-                    print("Cannot write metrics in this environment.")
+                    logging.warning("Cannot write metrics in this environment.")
                     self._warned_on_metrics = True
             else:
                 raise

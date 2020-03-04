@@ -17,8 +17,13 @@ from smexperiments import _base_types
 
 
 class ExperimentSummary(_base_types.ApiObject):
-    """
-    ExperimentSummary
+    """Summary model of an experiment.
+
+    Attributes:
+        experiment_arn (str): Arn of the experiment.
+        experiment_name (str): Name of the experiment.
+        creation_time (datetime): Date experiment was created.
+        last_modified_time (datetime): Date experiment was last modified.
     """
 
     experiment_arn = None
@@ -33,8 +38,19 @@ class ExperimentSummary(_base_types.ApiObject):
 
 
 class TrialComponentMetricSummary(_base_types.ApiObject):
-    """
-    TrialComponentMetricSummary
+    """Summary model of a trial component.
+
+    Attributes:
+        metric_name (str): The name of the metric.
+        source_arn (str):  The ARN of the source.
+        time_stamp (datetime): Metric last updated value.
+        logical_time (datetime):
+        max (float): The max value of the metric.
+        min (float):  The min value of the metric.
+        last (float):  The last value of the metric.
+        count (float):  The number of samples used to generate the metric.
+        avg (float):  The average value of the metric.
+        std_dev (float):  The standard deviation of the metric.
     """
 
     metric_name = None
@@ -53,8 +69,13 @@ class TrialComponentMetricSummary(_base_types.ApiObject):
 
 
 class TrialSummary(_base_types.ApiObject):
-    """
-    TrialSummary
+    """Summary model of a trial.
+
+    Attributes:
+        trial_arn (str): The arn of the trial.
+        trial_name (str): The name of the trial.
+        creation_time (datetime):  When the trial was created.
+        last_modified_time (datetime): When the trial was last modified.
     """
 
     trial_arn = None
@@ -67,8 +88,11 @@ class TrialSummary(_base_types.ApiObject):
 
 
 class TrialComponentParameterValue(_base_types.ApiObject):
-    """
-    TrialComponentParameterValue
+    """Value of a trial component parameter.
+
+    Attributes:
+        string_value (str):  The string value of the parameter value.
+        number_value (float):  The number value of the parameter value if applicable.
     """
 
     string_value = None
@@ -88,8 +112,19 @@ class TrialComponentParameterValue(_base_types.ApiObject):
 
 
 class TrialComponentParameters(_base_types.ApiObject):
+    """A dictionary of TrialComponentParameterValues"""
+
     @classmethod
     def from_boto(cls, boto_dict, **kwargs):
+        """Converts a boto dict to a dictionary of TrialComponentParameterValues
+
+        Args:
+            boto_dict (dict): boto response dictionary.
+            **kwargs:  Arbitrary keyword arguments.
+
+        Returns:
+            dict: Dictionary of parameter values.
+        """
         return_map = {}
         for key, value in boto_dict.items():
             return_map[key] = value.get("NumberValue", value.get("StringValue", None))
@@ -97,6 +132,14 @@ class TrialComponentParameters(_base_types.ApiObject):
 
     @classmethod
     def to_boto(self, parameters):
+        """Converts TrialComponentParameters to dict.
+
+        Args:
+            parameters (TrialComponentParameters): Dictionary to convert.
+
+        Returns:
+            dict: Dictionary of trial component parameters in boto format.
+        """
         boto_map = {}
         for key, value in parameters.items():
             if isinstance(value, numbers.Number):
@@ -107,8 +150,11 @@ class TrialComponentParameters(_base_types.ApiObject):
 
 
 class TrialComponentArtifact(_base_types.ApiObject):
-    """
-    TrialComponentArtifact
+    """Trial component artifact.
+
+    Attributes:
+        media_type (str): The media type.
+        value (str): The artifact value.
     """
 
     media_type = None
@@ -119,7 +165,12 @@ class TrialComponentArtifact(_base_types.ApiObject):
 
 
 class TrialComponentStatus(_base_types.ApiObject):
-    """TrialComponentStatus"""
+    """Status of the trial component.
+
+    Attributes:
+        primary_status (str): The status of a trial component.
+        message (str): Status message.
+    """
 
     primary_status = None
     message = None
@@ -129,8 +180,20 @@ class TrialComponentStatus(_base_types.ApiObject):
 
 
 class TrialComponentSummary(_base_types.ApiObject):
-    """
-    TrialComponentSummary
+    """Summary model of a trial component.
+
+    Attributes:
+        trial_component_name (str): Name of trial component.
+        trial_component_arn (str): Arn of the trial component.
+        display_name (str): Friendly display name.
+        source_arn (str): Arn of the trial component source.
+        status (str): Status.
+        start_time (datetime): Start time.
+        end_time (datetime): End time.
+        creation_time (datetime): Creation time.
+        created_by (str): Created by.
+        last_modified_time (datetime): Date last modified.
+        last_modified_by (datetime): User last modified.
     """
 
     _custom_boto_types = {
@@ -153,7 +216,11 @@ class TrialComponentSummary(_base_types.ApiObject):
 
 
 class ExperimentSource(_base_types.ApiObject):
-    """ExperimentSource"""
+    """ExperimentSource
+
+    Attributes:
+        source_arn (str): The arn of the source.
+    """
 
     source_arn = None
 
@@ -162,7 +229,11 @@ class ExperimentSource(_base_types.ApiObject):
 
 
 class TrialSource(_base_types.ApiObject):
-    """TrialSource"""
+    """TrialSource
+
+    Attributes:
+        source_arn (str): The arn of the source.
+    """
 
     source_arn = None
 
@@ -171,7 +242,11 @@ class TrialSource(_base_types.ApiObject):
 
 
 class TrialComponentSource(_base_types.ApiObject):
-    """TrialComponentsource"""
+    """TrialComponentsource
+
+    Attributes:
+        source_arn (str): The arn of the source.
+    """
 
     source_arn = None
 
@@ -180,6 +255,15 @@ class TrialComponentSource(_base_types.ApiObject):
 
 
 class BatchPutMetricsError(_base_types.ApiObject):
+    """BatchPutMetricsError
+
+    Attributes:
+        code (str): The error code.
+        message (str): The error message.
+        metric_index (int): The index of the metric.
+
+    """
+
     code = None
     message = None
     metric_index = None

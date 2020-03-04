@@ -23,6 +23,10 @@ class Experiment(_base_types.Record):
     experiments can be reloaded by calling :meth:`~smexperiments.experiment.Experiment.load`. You can
     add a new trial to an Experiment by calling :meth:`~smexperiments.experiment.Experiment.create_trial`.
     To remove a Trial from an experiment, delete the trial.
+
+    Attributes:
+        experiment_name (str): The name of the experiment. The name must be unique within an account.
+        description (str): A description of the experiment.
     """
 
     experiment_name = None
@@ -37,13 +41,20 @@ class Experiment(_base_types.Record):
     _boto_delete_members = ["experiment_name"]
 
     def save(self):
-        """Save the state of this Experiment to SageMaker."""
+        """Save the state of this Experiment to SageMaker.
+
+        Returns:
+            dict: Update experiment API response.
+        """
         return self._invoke_api(self._boto_update_method, self._boto_update_members)
 
     def delete(self):
         """Delete this Experiment from SageMaker.
 
         Deleting an Experiment requires that each Trial in the Experiment is first deleted.
+
+        Returns:
+            dict: Delete experiment API response.
         """
         self._invoke_api(self._boto_delete_method, self._boto_delete_members)
 
@@ -56,6 +67,7 @@ class Experiment(_base_types.Record):
             experiment_name: (str): Name of the experiment
             sagemaker_boto_client (SageMaker.Client, optional): Boto3 client for SageMaker.
                 If not supplied, a default boto3 client will be created and used.
+
         Returns:
             sagemaker.experiments.experiment.Experiment: A SageMaker ``Experiment`` object
         """
@@ -69,10 +81,11 @@ class Experiment(_base_types.Record):
         Create a new experiment in SageMaker and return an ``Experiment`` object.
 
         Args:
-            experiment_name: (str): Name of the experiment. Must be unique.
-            experiment_description: (str): Description of the experiment
+            experiment_name: (str): Name of the experiment. Must be unique. Required.
+            experiment_description: (str, optional): Description of the experiment
             sagemaker_boto_client (SageMaker.Client, optional): Boto3 client for SageMaker. If not
                 supplied, a default boto3 client will be created and used.
+
         Returns:
             sagemaker.experiments.experiment.Experiment: A SageMaker ``Experiment`` object
         """
@@ -100,6 +113,7 @@ class Experiment(_base_types.Record):
             sort_order (str, optional): One of 'Ascending', or 'Descending'.
             sagemaker_boto_client (SageMaker.Client, optional): Boto3 client for SageMaker. If not
                 supplied, a default boto3 client will be used.
+
         Returns:
             collections.Iterator[sagemaker.experiments.api_types.ExperimentSummary] : An iterator
                 over experiment summaries matching the specified criteria.
@@ -124,6 +138,7 @@ class Experiment(_base_types.Record):
             sort_by (str, optional): Which property to sort results by. One of 'Name',
                 'CreationTime'.
             sort_order (str, optional): One of 'Ascending', or 'Descending'.
+
         Returns:
             collections.Iterator[sagemaker.experiments.api_types.TrialSummary] : An iterator over
                 trials matching the criteria.
@@ -148,6 +163,7 @@ class Experiment(_base_types.Record):
             trial_name (str): Name of the trial.
             trial_name_prefix (str): Prefix for the trial name if you want SageMaker to
                 auto-generate the trial name.
+
         Returns:
             sagemaker.experiments.trial.Trial : A SageMaker ``Trial`` object representing the
                 created trial.

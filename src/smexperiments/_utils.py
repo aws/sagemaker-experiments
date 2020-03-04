@@ -20,6 +20,11 @@ import logging
 
 
 def sagemaker_client():
+    """Instantiates a SageMaker client.
+
+    Returns:
+        SageMaker.Client
+    """
     if os.environ.get("SAGEMAKER_ENDPOINT", "").strip():
         return boto_session().client("sagemaker", endpoint_url=os.environ.get("SAGEMAKER_ENDPOINT"))
     else:
@@ -27,6 +32,11 @@ def sagemaker_client():
 
 
 def boto_session():
+    """Instantiates a boto Session.
+
+    Returns:
+        boto3.Session
+    """
     return boto3.Session(region_name=os.environ.get("AWS_REGION"))
 
 
@@ -42,6 +52,16 @@ def name(prefix):
 
 
 def get_or_create_default_bucket(boto_session, default_bucket_prefix="sagemaker"):
+    """Creates a default bucket if not already exists. The bucket name is a combination of a prefix, the region, and
+    account.
+
+    Args:
+        boto_session (boto3.Session): boto session
+        default_bucket_prefix (str): prefix to the bucket name
+
+    Returns:
+        str: The default bucket name.
+    """
     account = boto_session.client("sts").get_caller_identity()["Account"]
     region = boto_session.region_name
     default_bucket = "{}-{}-{}".format(default_bucket_prefix, region, account)
