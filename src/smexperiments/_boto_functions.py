@@ -15,27 +15,45 @@ import re
 
 
 def to_camel_case(snake_case):
-    """Convert a snake case string to camel case"""
+    """Convert a snake case string to camel case.
+
+    Args:
+        snake_case (str): String to convert to camel case.
+
+    Returns:
+        str: String converted to camel case.
+    """
     return "".join([x.title() for x in snake_case.split("_")])
 
 
 def to_snake_case(name):
-    """Convert a camel case string to snake case"""
+    """Convert a camel case string to snake case
+
+    Args:
+        name (str): String to convert to snake case.
+
+    Returns:
+        str: String converted to snake case.
+    """
     # https://stackoverflow.com/questions/1175208/elegant-python-function-to-convert-camelcase-to-snake-case
     s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
     return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
 
 
 def from_boto(boto_dict, boto_name_to_member_name, member_name_to_type):
-    """Convert an UpperCamelCase boto response to a snake case representation.
+    """
+    Convert an UpperCamelCase boto response to a snake case representation.
 
-       Args:
-           boto_dict dict[str, ?]: A boto response dictionary.
-           boto_name_to_member_name dict[str, str]: A map from boto name to snake_case name. If a given boto name is
-               not in the map then a default mapping is applied.
-           member_name_to_type dict[str, (_base_types.ApiObject, boolean)]: A map from snake case name to a type
-              description tuple. The first element of the tuple, a sublcass of ApiObject, is the type of the mapped
-              object. The second element indicates whether the mapped element is a collection or singleton.
+    Args:
+        boto_dict (dict[str, ?]): A boto response dictionary.
+        boto_name_to_member_name (dict[str, str]):  A map from boto name to snake_case name. If a given boto name is
+            not in the map then a default mapping is applied.
+        member_name_to_type (dict[str, (_base_types.ApiObject, boolean)]): A map from snake case name to a type
+            description tuple. The first element of the tuple, a subclass of ApiObject, is the type of the mapped
+            object. The second element indicates whether the mapped element is a collection or singleton.
+
+    Returns:
+        dict: Boto response in snake case.
     """
     from_boto_values = {}
     for boto_name, boto_value in boto_dict.items():
@@ -68,6 +86,10 @@ def to_boto(member_vars, member_name_to_boto_name, member_name_to_type):
        Args:
            member_vars dict[str, ?]: A map from snake case name to value.
            member_name_to_boto_name dict[str, ?]: A map from snake_case name to boto name.
+
+        Returns:
+            dict: boto dict converted to snake case
+
     """
     to_boto_values = {}
     # Strip out all entries in member_vars that have a None value. None values are treated as not having a value

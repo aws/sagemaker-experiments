@@ -26,12 +26,25 @@ logger = logging.getLogger(__name__)
 
 
 class SageMakerFileMetricsWriter(object):
+    """Writes metric data to file."""
+
     def __init__(self, metrics_file_path=None):
         self._metrics_file_path = metrics_file_path
         self._file = None
         self._closed = False
 
     def log_metric(self, metric_name, value, timestamp=None, iteration_number=None):
+        """Write a metric to file.
+
+        Args:
+            metric_name (str): The name of the metric.
+            value (str): The value of the metric.
+            timestamp (datetime): Timestamp of the metric.
+            iteration_number (int):  Iteration number of the metric.
+
+        Raises:
+            SageMakerMetricsWriterException: If the metrics file is closed.
+        """
         raw_metric_data = _RawMetricData(
             metric_name=metric_name, value=value, timestamp=timestamp, iteration_number=iteration_number
         )
@@ -51,6 +64,7 @@ class SageMakerFileMetricsWriter(object):
                 raise
 
     def close(self):
+        """Closes the metric file."""
         if not self._closed and self._file:
             self._file.close()
             self._file = None  # invalidate reference, causing subsequent log_metric to fail.
@@ -74,6 +88,8 @@ class SageMakerFileMetricsWriter(object):
 
 
 class SageMakerMetricsWriterException(Exception):
+    """SageMakerMetricsWriterException"""
+
     def __init__(self, message, errors=None):
         super().__init__(message)
         if errors:

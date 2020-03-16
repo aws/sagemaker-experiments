@@ -20,6 +20,10 @@ class Trial(_base_types.Record):
     An execution of a data-science workflow with an experiment.
 
     Consists of a list of trial component objects, which document individual activities within the workflow.
+
+    Attributes:
+        trial_name (str): The name of the trial.
+        experiment_name (str): The name of the trial's experiment.
     """
 
     trial_name = None
@@ -38,7 +42,11 @@ class Trial(_base_types.Record):
         return super(Trial, cls)._boto_ignore() + ["CreatedBy"]
 
     def save(self):
-        """Save the state of this Trial to SageMaker."""
+        """Save the state of this Trial to SageMaker.
+
+        Returns:
+            dict: Update trial response.
+        """
         return self._invoke_api(self._boto_update_method, self._boto_update_members)
 
     def delete(self):
@@ -46,18 +54,21 @@ class Trial(_base_types.Record):
 
         Requires that this Trial contains no TrialComponents. Individual TrialComponents can be removed by
         calling :meth:`~smexperiments.trial.Trial.remove_trial_component`.
+
+         Returns:
+            dict: Delete trial response.
         """
         self._invoke_api(self._boto_delete_method, self._boto_delete_members)
 
     @classmethod
     def load(cls, trial_name, sagemaker_boto_client=None):
-        """
-        Load an existing trial and return a ``Trial`` object.
+        """Load an existing trial and return a ``Trial`` object.
 
         Args:
             trial_name: (str): Name of the Trial.
             sagemaker_boto_client (SageMaker.Client, optional): Boto3 client for SageMaker.
                 If not supplied, a default boto3 client will be created and used.
+
         Returns:
             smexperiments.trial.Trial: A SageMaker ``Trial`` object
         """
@@ -67,8 +78,7 @@ class Trial(_base_types.Record):
 
     @classmethod
     def create(cls, experiment_name, trial_name=None, sagemaker_boto_client=None, trial_components=None):
-        """
-        Create a new trial and return a ``Trial`` object.
+        """Create a new trial and return a ``Trial`` object.
 
         Args:
             experiment_name: (str): Name of the experiment to create this trial in.
@@ -76,6 +86,7 @@ class Trial(_base_types.Record):
             sagemaker_boto_client (SageMaker.Client, optional): Boto3 client for SageMaker.
                 If not supplied, a default boto3 client will be created and used.
             trial_components (list): A list of trial component names, trial components, or trial component trackers
+
         Returns:
             smexperiments.trial.Trial: A SageMaker ``Trial`` object
         """
@@ -101,8 +112,7 @@ class Trial(_base_types.Record):
         sort_order=None,
         sagemaker_boto_client=None,
     ):
-        """
-        List all trials matching the specified criteria.
+        """List all trials matching the specified criteria.
 
         Args:
             experiment_name (str, optional): Name of the experiment. If specified, only trials in
@@ -114,6 +124,7 @@ class Trial(_base_types.Record):
             sort_order (str, optional): One of 'Ascending', or 'Descending'.
             sagemaker_boto_client (SageMaker.Client, optional): Boto3 client for SageMaker.
                 If not supplied, a default boto3 client will be created and used.
+
         Returns:
             collections.Iterator[smexperiments.trial.TrialSummary]: An iterator over trials
                 matching the specified criteria.
@@ -181,6 +192,7 @@ class Trial(_base_types.Record):
             sort_order (str, optional): One of 'Ascending', or 'Descending'.
             max_results (int, optional): maximum number of trial components to retrieve
             next_token (str, optional): token for next page of results
+
         Returns:
             collections.Iterator[smexperiments.api_types.TrialComponentSummary] : An iterator over
                 trials matching the criteria.

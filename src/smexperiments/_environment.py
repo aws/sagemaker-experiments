@@ -10,11 +10,21 @@ PROCESSING_JOB_CONFIG_PATH = "/opt/ml/config/processingjobconfig.json"
 
 
 class EnvironmentType(enum.Enum):
+    """
+    SageMaker jobs which data can be pulled from the environment.
+    """
+
     SageMakerTrainingJob = 1
     SageMakerProcessingJob = 2
 
 
 class TrialComponentEnvironment(object):
+    """Retrieves job specific data from the environment.
+
+    Attributes:
+        environment_type (EnvironmentType): The environment type.
+        source_arn (str): The arn of the current job.
+    """
 
     environment_type = None
     source_arn = None
@@ -25,6 +35,15 @@ class TrialComponentEnvironment(object):
 
     @classmethod
     def load(cls, training_job_arn_env=TRAINING_JOB_ARN_ENV, processing_job_config_path=PROCESSING_JOB_CONFIG_PATH):
+        """Loads source arn of current job from environment.
+
+        Args:
+            training_job_arn_env (str): The environment key for training job arn.
+            processing_job_config_path (str): The processing job config path.
+
+        Returns:
+            TrialComponentEnvironment: Job data loaded from the environment. None if config does not exist.
+        """
         if training_job_arn_env in os.environ:
             environment_type = EnvironmentType.SageMakerTrainingJob
             source_arn = os.environ.get(training_job_arn_env)
@@ -37,6 +56,14 @@ class TrialComponentEnvironment(object):
             return None
 
     def get_trial_component(self, sagemaker_boto_client):
+        """Retrieves the trial component from the job in the environment.
+
+        Args:
+            sagemaker_boto_client (SageMaker.Client): SageMaker boto client.
+
+        Returns:
+            TrialComponent: The trial component created from the job. None if not found.
+        """
         start = time.time()
         while time.time() - start < 300:
             summaries = list(

@@ -23,3 +23,4 @@ class ReleaseManager:
         repo.create_git_release(tag=tag, name=name, message=message, draft=False, prerelease=False)
         print(f"Created release {name}")
         print(f"See it at https://github.com/{self._repo}/releases")
+        return tag
