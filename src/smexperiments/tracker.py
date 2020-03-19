@@ -115,6 +115,7 @@ class Tracker(object):
         else:
             raise ValueError('Could not load TrialComponent. Specify a trial_component_name or invoke "create"')
 
+        # if running in a SageMaker context write metrics to file
         if not trial_component_name and tce.environment_type == _environment.EnvironmentType.SageMakerTrainingJob:
             metrics_writer = metrics.SageMakerFileMetricsWriter()
         else:
@@ -160,8 +161,13 @@ class Tracker(object):
             display_name=display_name,
             sagemaker_boto_client=sagemaker_boto_client,
         )
+
+        metrics_writer = metrics.SageMakerFileMetricsWriter()
+
         return cls(
-            tc, None, _ArtifactUploader(tc.trial_component_name, artifact_bucket, artifact_prefix, boto3_session)
+            tc,
+            metrics_writer,
+            _ArtifactUploader(tc.trial_component_name, artifact_bucket, artifact_prefix, boto3_session),
         )
 
     def log_parameter(self, name, value):
