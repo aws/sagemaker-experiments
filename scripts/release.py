@@ -69,7 +69,7 @@ def release():
 
     next_version = get_next_version(latest_version, increment_type)
 
-    manager = ReleaseManager(next_version, changes)
+    manager = ReleaseManager(str(next_version), changes)
     tag_created = manager.create_release()
 
     # pull the new tag that was just created
