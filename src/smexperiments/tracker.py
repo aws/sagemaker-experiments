@@ -43,13 +43,6 @@ class Tracker(object):
     end times are automatically set when using the with statement and the trial component is saved to
     SageMaker at the end of the block.
 
-    .. code-block:: python
-
-        with smexperiments.tracker.Tracker.create() as my_tracker:
-            my_tracker.log_parameter('learning_rate', 0.01)
-
-            # Perform data-science code within the with block.
-
     Attributes:
         trial_component (TrialComponent): The trial component tracked.
     """
@@ -78,6 +71,13 @@ class Tracker(object):
         sagemaker_boto_client=None,
     ):
         """Create a new ``Tracker`` by loading an existing trial component.
+
+        Examples:
+            .. code-block:: python
+
+                from smexperiments import tracker
+
+                my_tracker = tracker.Tracker.load(trial_component_name='xgboost')
 
         Args:
             trial_component_name: (str, optional). The name of the trial component to track. If specified, this
@@ -140,6 +140,13 @@ class Tracker(object):
     ):
         """Create a new ``Tracker`` by creating a new trial component.
 
+        Examples
+            .. code-block:: python
+
+                from smexperiments import tracker
+
+                my_tracker = tracker.Tracker.create()
+
         Args:
             display_name: (str, optional). The display name of the trial component to track.
             artifact_bucket: (str, optional) The name of the S3 bucket to store artifacts to.
@@ -175,6 +182,12 @@ class Tracker(object):
 
         Overwrites any previous value recorded for the specified parameter name.
 
+        Examples
+            .. code-block:: python
+
+                # log hyper parameter of learning rate
+                my_tracker.log_parameter('learning_rate', 0.01)
+
         Args:
             name (str): The name of the parameter
             value (str or numbers.Number): The value of the parameter
@@ -183,6 +196,12 @@ class Tracker(object):
 
     def log_parameters(self, parameters):
         """Record a collection of parameter values for this trial component.
+
+        Examples
+            .. code-block:: python
+
+                # log multiple hyper parameters used in training
+                my_tracker.log_parameters({"learning_rate": 1.0, "gamma": 0.9, "dropout": 0.5})
 
         Args:
             parameters (dict[str, str or numbers.Number]): The parameters to record.
@@ -193,6 +212,12 @@ class Tracker(object):
         """Record a single input artifact for this trial component.
 
         Overwrites any previous value recorded for the specified input name.
+
+        Examples
+            .. code-block:: python
+
+                # log input dataset s3 location
+                my_tracker.log_input(name='input', value='s3://inputs/path')
 
         Args:
             name (str): The name of the input value.
@@ -206,6 +231,12 @@ class Tracker(object):
 
         Overwrites any previous value recorded for the specified output name.
 
+        Examples
+            .. code-block:: python
+
+                # log input dataset s3 location
+                my_tracker.log_output(name='prediction', value='s3://outputs/path')
+
         Args:
             name (str): The name of the output value.
             value (str): The value.
@@ -215,6 +246,12 @@ class Tracker(object):
 
     def log_artifact(self, file_path, name=None, media_type=None):
         """Upload a local file to s3 and store it as an artifact in this trial component.
+
+        Examples
+            .. code-block:: python
+
+                # log local artifact
+                my_tracker.log_artifact(file_path='/local/path/artifact.tar.gz')
 
         Args:
             file_path (str): The path of the local file to upload.
@@ -231,6 +268,14 @@ class Tracker(object):
 
     def log_metric(self, metric_name, value, timestamp=None, iteration_number=None):
         """Record a scalar metric value for this TrialComponent.
+
+        Examples
+            .. code-block:: python
+
+                for epoch in range(epochs):
+                    # your training logic and calculate accuracy and loss
+                    my_tracker.log_metric(metric_name='accuracy', value=0.9, iteration_number=epoch)
+                    my_tracker.log_metric(metric_name='loss', value=0.03, iteration_number=epoch)
 
         Args:
             metric_name (str): The name of the metric.

@@ -130,3 +130,10 @@ To run the integration tests, the following prerequisites must be met:
 .. code-block:: bash
 
     tox tests/integ
+
+Generate Docs
+-------------
+
+.. code-block:: bash
+
+    tox -e docs
