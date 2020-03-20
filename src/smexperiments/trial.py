@@ -21,6 +21,25 @@ class Trial(_base_types.Record):
 
     Consists of a list of trial component objects, which document individual activities within the workflow.
 
+    Examples:
+        .. code-block:: python
+
+            from smexperiments import trial, experiment, tracker
+
+            my_experiment = experiment.Experiment.create(experiment_name='AutoML')
+            my_trial = trial.Trial.create('AutoML')
+
+            my_tracker = tracker.Tracker.create()
+            # log hyper parameter of learning rate
+            my_tracker.log_parameter('learning_rate', 0.01)
+            my_trial.add_trial_component(my_tracker)
+
+            for trial_component in my_trial.list_trial_components():
+                print(trial_component)
+
+            my_trial.remove_trial_component(my_tracker)
+            my_trial.delete()
+
     Attributes:
         trial_name (str): The name of the trial.
         experiment_name (str): The name of the trial's experiment.

@@ -24,6 +24,22 @@ class Experiment(_base_types.Record):
     add a new trial to an Experiment by calling :meth:`~smexperiments.experiment.Experiment.create_trial`.
     To remove a Trial from an experiment, delete the trial.
 
+    Examples:
+        .. code-block:: python
+
+            from smexperiments import experiment
+
+            my_experiment = experiment.Experiment.create(experiment_name='AutoML')
+            my_trail = my_experiment.create_trial(trial_name='random-forest')
+
+            for exp in experiment.Experiment.list():
+                print(exp)
+            for trial in my_experiment.list_trials():
+                print(trial)
+
+            my_trail.delete()
+            my_experiment.delete()
+
     Attributes:
         experiment_name (str): The name of the experiment. The name must be unique within an account.
         description (str): A description of the experiment.
