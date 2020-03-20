@@ -9,7 +9,7 @@ on:
     - 'src/**'
     - 'tests/**'
   schedule:
-    # every weekday at 9:00 AM PST
+    # every weekday at 17:00 UTC
     - cron: '0 17 * * 1-5'
 
 jobs:
