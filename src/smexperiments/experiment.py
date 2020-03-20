@@ -30,14 +30,14 @@ class Experiment(_base_types.Record):
             from smexperiments import experiment
 
             my_experiment = experiment.Experiment.create(experiment_name='AutoML')
-            my_trail = my_experiment.create_trial(trial_name='random-forest')
+            my_trial = my_experiment.create_trial(trial_name='random-forest')
 
             for exp in experiment.Experiment.list():
                 print(exp)
             for trial in my_experiment.list_trials():
                 print(trial)
 
-            my_trail.delete()
+            my_trial.delete()
             my_experiment.delete()
 
     Attributes:
