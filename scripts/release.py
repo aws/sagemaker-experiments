@@ -38,8 +38,8 @@ def get_version_increment_type(last_version):
     return parsed_subjects.increment_type()
 
 
-def pull_latest_and_verify(expected_version_tag):
-    check_output(["git", "pull"])
+def fetch_latest_and_verify(expected_version_tag):
+    check_output(["git", "fetch"])
     latest_version = get_current_version()
     if latest_version != expected_version_tag:
         raise ValueError(f"Expected {expected_version_tag} to be latest tag, but was {latest_version}")
@@ -73,7 +73,7 @@ def release():
     tag_created = manager.create_release()
 
     # pull the new tag that was just created
-    pull_latest_and_verify(tag_created)
+    fetch_latest_and_verify(tag_created)
 
 
 def main():
