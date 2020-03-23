@@ -123,6 +123,23 @@ def test_list_trials_with_experiment_name(sagemaker_boto_client, datetime_obj):
     sagemaker_boto_client.list_trials.assert_called_with(ExperimentName="foo")
 
 
+def test_list_trials_with_trial_component_name(sagemaker_boto_client, datetime_obj):
+    sagemaker_boto_client.list_trials.return_value = {
+        "TrialSummaries": [
+            {"TrialName": "trial-1", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj,},
+            {"TrialName": "trial-2", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj,},
+        ]
+    }
+    expected = [
+        api_types.TrialSummary(trial_name="trial-1", creation_time=datetime_obj, last_modified_time=datetime_obj),
+        api_types.TrialSummary(trial_name="trial-2", creation_time=datetime_obj, last_modified_time=datetime_obj),
+    ]
+    assert expected == list(
+        trial.Trial.list(trial_component_name="tc-foo", sagemaker_boto_client=sagemaker_boto_client)
+    )
+    sagemaker_boto_client.list_trials.assert_called_with(TrialComponentName="tc-foo")
+
+
 def test_delete(sagemaker_boto_client):
     obj = trial.Trial(sagemaker_boto_client, trial_name="foo")
     sagemaker_boto_client.delete_trial.return_value = {}

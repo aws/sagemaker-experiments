@@ -125,6 +125,7 @@ class Trial(_base_types.Record):
     def list(
         cls,
         experiment_name=None,
+        trial_component_name=None,
         created_before=None,
         created_after=None,
         sort_by=None,
@@ -136,6 +137,8 @@ class Trial(_base_types.Record):
         Args:
             experiment_name (str, optional): Name of the experiment. If specified, only trials in
                 the experiment will be returned.
+            trial_component_name (str, optional): Name of the trial component. If specified, only
+                trials with this trial component name will be returned.
             created_before (datetime.datetime, optional): Return trials created before this instant.
             created_after (datetime.datetime, optional): Return trials created after this instant.
             sort_by (str, optional): Which property to sort results by. One of 'Name',
@@ -153,6 +156,7 @@ class Trial(_base_types.Record):
             api_types.TrialSummary.from_boto,
             "TrialSummaries",
             experiment_name=experiment_name,
+            trial_component_name=trial_component_name,
             created_before=created_before,
             created_after=created_after,
             sort_by=sort_by,
