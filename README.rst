@@ -105,7 +105,70 @@ Installation
 
 Examples
 --------
-See: `sagemaker-experiments <https://github.com/awslabs/amazon-sagemaker-examples/tree/master/sagemaker-experiments>`_ in `AWS Labs Amazon SageMaker Examples <https://github.com/awslabs/amazon-sagemaker-examples>`_.
+
+.. code-block:: python
+
+    import boto3
+    import pickle, gzip, numpy, urllib.request, json
+    import io
+    import numpy as np
+    import sagemaker.amazon.common as smac
+    import sagemaker
+    from sagemaker import get_execution_role
+    from sagemaker import analytics
+    from smexperiments import experiment
+
+    # Specify training container
+    from sagemaker.amazon.amazon_estimator import get_image_uri
+    container = get_image_uri(boto3.Session().region_name, 'linear-learner')
+
+    # Load the dataset
+    urllib.request.urlretrieve("http://deeplearning.net/data/mnist/mnist.pkl.gz", "mnist.pkl.gz")
+    with gzip.open('mnist.pkl.gz', 'rb') as f:
+        train_set, valid_set, test_set = pickle.load(f, encoding='latin1')
+
+    vectors = np.array([t.tolist() for t in train_set[0]]).astype('float32')
+    labels = np.where(np.array([t.tolist() for t in train_set[1]]) == 0, 1, 0).astype('float32')
+
+    buf = io.BytesIO()
+    smac.write_numpy_to_dense_tensor(buf, vectors, labels)
+    buf.seek(0)
+
+    key = 'recordio-pb-data'
+    bucket = '{YOUR-BUCKET}'
+    prefix = 'sagemaker/DEMO-linear-mnist'
+    boto3.resource('s3').Bucket(bucket).Object(os.path.join(prefix, 'train', key)).upload_fileobj(buf)
+    s3_train_data = 's3://{}/{}/train/{}'.format(bucket, prefix, key)
+    output_location = 's3://{}/{}/output'.format(bucket, prefix)
+
+    my_experiment = experiment.Experiment.create(experiment_name='MNIST')
+    my_trial = my_experiment.create_trial(trial_name='linear-learner')
+
+    role = get_execution_role()
+    sess = sagemaker.Session()
+
+    linear = sagemaker.estimator.Estimator(container,
+                                        role, 
+                                        train_instance_count=1, 
+                                        train_instance_type='ml.c4.xlarge',
+                                        output_path=output_location,
+                                        sagemaker_session=sess)
+    linear.set_hyperparameters(feature_dim=784,
+                            predictor_type='binary_classifier',
+                            mini_batch_size=200)
+
+    linear.fit(inputs={'train': s3_train_data}, experiment_config={
+                "ExperimentName": my_experiment.experiment_name,
+                "TrialName": my_trial.trial_name,
+                "TrialComponentDisplayName": "MNIST-linear-learner",
+            },)
+    
+    trial_component_analytics = analytics.ExperimentAnalytics(experiment_name=my_experiment.experiment_name)
+
+    analytic_table = trial_component_analytics.dataframe()
+    analytic_table
+
+For more examples, check out: `sagemaker-experiments <https://github.com/awslabs/amazon-sagemaker-examples/tree/master/sagemaker-experiments>`_ in `AWS Labs Amazon SageMaker Examples <https://github.com/awslabs/amazon-sagemaker-examples>`_.
 
 License
 -------
