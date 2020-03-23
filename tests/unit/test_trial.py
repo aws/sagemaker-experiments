@@ -134,7 +134,9 @@ def test_list_trials_with_trial_component_name(sagemaker_boto_client, datetime_o
         api_types.TrialSummary(trial_name="trial-1", creation_time=datetime_obj, last_modified_time=datetime_obj),
         api_types.TrialSummary(trial_name="trial-2", creation_time=datetime_obj, last_modified_time=datetime_obj),
     ]
-    assert expected == list(trial.Trial.list(trial_component_name="tc-foo", sagemaker_boto_client=sagemaker_boto_client))
+    assert expected == list(
+        trial.Trial.list(trial_component_name="tc-foo", sagemaker_boto_client=sagemaker_boto_client)
+    )
     sagemaker_boto_client.list_trials.assert_called_with(TrialComponentName="tc-foo")
 
 
