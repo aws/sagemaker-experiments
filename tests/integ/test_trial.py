@@ -35,6 +35,24 @@ def test_list(trials, sagemaker_boto_client):
     assert trial_names_listed  # sanity test
 
 
+def test_list_with_trial_component(trials, trial_component_obj, sagemaker_boto_client):
+    trial_with_component = trials[0]
+    trial_with_component.add_trial_component(trial_component_obj)
+
+    trial_listed = [
+        s.trial_name
+        for s in trial.Trial.list(
+            trial_component_name=trial_component_obj.trial_component_name,
+            sagemaker_boto_client=sagemaker_boto_client
+        )
+    ]
+    assert(len(trial_listed) == 1)
+    assert(trial_with_component.trial_name == trial_listed[0])
+    # clean up
+    trial_with_component.remove_trial_component(trial_component_obj)
+    assert trial_listed
+
+
 def test_list_sort(trials, sagemaker_boto_client):
     slack = datetime.timedelta(minutes=1)
     now = datetime.datetime.now(datetime.timezone.utc)
