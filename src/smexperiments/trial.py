@@ -137,7 +137,7 @@ class Trial(_base_types.Record):
         Args:
             experiment_name (str, optional): Name of the experiment. If specified, only trials in
                 the experiment will be returned.
-            trial_component_name (str, optional): Name of the trial component. If specified, only 
+            trial_component_name (str, optional): Name of the trial component. If specified, only
                 trials with this trial component name will be returned.
             created_before (datetime.datetime, optional): Return trials created before this instant.
             created_after (datetime.datetime, optional): Return trials created after this instant.
