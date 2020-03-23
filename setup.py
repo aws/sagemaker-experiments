@@ -24,7 +24,7 @@ def read(fname):
 
 
 # Declare minimal set for installation
-required_packages = ["boto3>=1.10.32"]
+required_packages = ["boto3>=1.12.8"]
 
 # Open readme with original (i.e. LF) newlines
 # to prevent the all too common "`long_description_content_type` missing"
