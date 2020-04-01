@@ -140,6 +140,20 @@ def test_list_trials_with_trial_component_name(sagemaker_boto_client, datetime_o
     sagemaker_boto_client.list_trials.assert_called_with(TrialComponentName="tc-foo")
 
 
+def test_search(sagemaker_boto_client):
+    sagemaker_boto_client.search.return_value = {
+        "Results": [
+            {"Trial": {"TrialName": "trial-1", "TrialArn": "arn::trial-1", "DisplayName": "Trial1",}},
+            {"Trial": {"TrialName": "trial-2", "TrialArn": "arn::trial-2", "DisplayName": "Trial2",}},
+        ]
+    }
+    expected = [
+        api_types.TrialSearchResult(trial_name="trial-1", trial_arn="arn::trial-1", display_name="Trial1"),
+        api_types.TrialSearchResult(trial_name="trial-2", trial_arn="arn::trial-2", display_name="Trial2"),
+    ]
+    assert expected == list(trial.Trial.search(sagemaker_boto_client=sagemaker_boto_client))
+
+
 def test_delete(sagemaker_boto_client):
     obj = trial.Trial(sagemaker_boto_client, trial_name="foo")
     sagemaker_boto_client.delete_trial.return_value = {}

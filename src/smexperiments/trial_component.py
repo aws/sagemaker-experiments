@@ -179,3 +179,35 @@ class TrialComponent(_base_types.Record):
             max_results=max_results,
             next_token=next_token,
         )
+
+    @classmethod
+    def search(
+        cls, search_expression=None, sort_by=None, sort_order=None, max_results=None, sagemaker_boto_client=None,
+    ):
+        """
+        Search experiments. Returns SearchResults in the account matching the search criteria.
+
+        Args:
+            search_expression: (dict, optional): A Boolean conditional statement. Resource objects
+                must satisfy this condition to be included in search results. You must provide at
+                least one subexpression, filter, or nested filter.
+            sort_by (str, optional): The name of the resource property used to sort the SearchResults.
+                The default is LastModifiedTime
+            sort_order (str, optional): How SearchResults are ordered. Valid values are Ascending or
+                Descending . The default is Descending .
+            max_results (int, optional): The maximum number of results to return in a SearchResponse.
+            sagemaker_boto_client (SageMaker.Client, optional): Boto3 client for SageMaker. If not
+                supplied, a default boto3 client will be used.
+
+        Returns:
+            collections.Iterator[SearchResult] : An iterator over search results matching the search criteria.
+        """
+        return super(TrialComponent, cls)._search(
+            search_resource="ExperimentTrialComponent",
+            search_item_factory=api_types.TrialComponentSearchResult.from_boto,
+            search_expression=search_expression,
+            sort_by=sort_by,
+            sort_order=sort_order,
+            max_results=max_results,
+            sagemaker_boto_client=sagemaker_boto_client,
+        )

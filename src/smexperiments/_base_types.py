@@ -132,6 +132,35 @@ class Record(ApiObject):
             return
 
     @classmethod
+    def _search(
+        cls,
+        search_resource,
+        search_item_factory,
+        boto_next_token_name="NextToken",
+        sagemaker_boto_client=None,
+        **kwargs
+    ):
+        sagemaker_boto_client = sagemaker_boto_client or _utils.sagemaker_client()
+        next_token = None
+        try:
+            while True:
+                search_request_kwargs = _boto_functions.to_boto(kwargs, cls._custom_boto_names, cls._custom_boto_types)
+                search_request_kwargs["Resource"] = search_resource
+                if next_token:
+                    search_request_kwargs[boto_next_token_name] = next_token
+                search_method = getattr(sagemaker_boto_client, "search")
+                search_method_response = search_method(**search_request_kwargs)
+                search_items = search_method_response.get("Results", [])
+                next_token = search_method_response.get(boto_next_token_name)
+                for item in search_items:
+                    if cls.__name__ in item:
+                        yield search_item_factory(item[cls.__name__])
+                if not next_token:
+                    break
+        except StopIteration:
+            return
+
+    @classmethod
     def _construct(cls, boto_method_name, sagemaker_boto_client=None, **kwargs):
         sagemaker_boto_client = sagemaker_boto_client or _utils.sagemaker_client()
         instance = cls(sagemaker_boto_client, **kwargs)
