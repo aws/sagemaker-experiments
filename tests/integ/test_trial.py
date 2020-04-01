@@ -78,7 +78,7 @@ def test_list_sort(trials, sagemaker_boto_client):
 
 def test_search(sagemaker_boto_client):
     trial_names_searched = []
-    for s in trial.Trial.search(sagemaker_boto_client=sagemaker_boto_client):
+    for s in trial.Trial.search(max_results=10, sagemaker_boto_client=sagemaker_boto_client):
         if "smexperiments-integ-" in s.trial_name:
             trial_names_searched.append(s.trial_name)
 

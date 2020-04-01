@@ -87,7 +87,7 @@ def test_list_sort(sagemaker_boto_client, experiments):
 
 def test_search(sagemaker_boto_client):
     experiment_names_searched = []
-    for s in experiment.Experiment.search(sagemaker_boto_client=sagemaker_boto_client):
+    for s in experiment.Experiment.search(max_results=10, sagemaker_boto_client=sagemaker_boto_client):
         if "smexperiments-integ-" in s.experiment_name:
             experiment_names_searched.append(s.experiment_name)
 

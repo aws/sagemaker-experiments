@@ -103,7 +103,7 @@ def test_list_trial_components_by_experiment(experiment_obj, trial_component_obj
 
 def test_search(sagemaker_boto_client):
     trial_component_names_searched = []
-    for s in trial_component.TrialComponent.search(sagemaker_boto_client=sagemaker_boto_client):
+    for s in trial_component.TrialComponent.search(max_results=10, sagemaker_boto_client=sagemaker_boto_client):
         if "smexperiments-integ-" in s.trial_component_name:
             trial_component_names_searched.append(s.trial_component_name)
 
