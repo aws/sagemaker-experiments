@@ -270,3 +270,157 @@ class BatchPutMetricsError(_base_types.ApiObject):
 
     def __init__(self, code=None, message=None, metric_index=None, **kwargs):
         super(BatchPutMetricsError, self).__init__(code=code, message=message, metric_index=metric_index, **kwargs)
+
+
+class ExperimentSearchResult(_base_types.ApiObject):
+    """Summary model of an Experiment search result.
+
+    Attributes:
+        experiment_arn (str): Arn of the experiment.
+        experiment_name (str): Name of the experiment.
+        display_name (str): Display name of the experiment.
+        source (dict): The source of the experiment
+        tags (list): The list of tags that are associated with the experiment.
+    """
+
+    experiment_arn = None
+    experiment_name = None
+    display_name = None
+    source = None
+    tags = None
+
+    def __init__(self, experiment_arn=None, experiment_name=None, display_name=None, source=None, tags=None, **kwargs):
+        super(ExperimentSearchResult, self).__init__(
+            experiment_arn=experiment_arn,
+            experiment_name=experiment_name,
+            display_name=display_name,
+            source=source,
+            tags=tags,
+            **kwargs
+        )
+
+
+class TrialSearchResult(_base_types.ApiObject):
+    """Summary model of an Trial search result.
+
+    Attributes:
+        trial_arn (str): Arn of the trial.
+        trial_name (str): Name of the trial.
+        display_name (str): Display name of the trial.
+        source (dict): The source of the trial.
+        tags (list): The list of tags that are associated with the trial.
+        trial_component_summaries (dict):
+    """
+
+    trial_arn = None
+    trial_name = None
+    display_name = None
+    source = None
+    tags = None
+    trial_component_summaries = None
+
+    def __init__(
+        self,
+        trial_arn=None,
+        trial_name=None,
+        display_name=None,
+        source=None,
+        tags=None,
+        trial_component_summaries=None,
+        **kwargs
+    ):
+        super(TrialSearchResult, self).__init__(
+            trial_arn=trial_arn,
+            trial_name=trial_name,
+            display_name=display_name,
+            source=source,
+            tags=tags,
+            trial_component_summaries=trial_component_summaries,
+            **kwargs
+        )
+
+
+class TrialComponentSearchResult(_base_types.ApiObject):
+    """Summary model of an Trial Component search result.
+
+    Attributes:
+        trial_component_arn (str): Arn of the trial component.
+        trial_component_name (str): Name of the trial component.
+        display_name (str): Display name of the trial component.
+        source (dict): The source of the trial component.
+        status (dict): The status of the trial component.
+        start_time (datetime): Start time.
+        end_time (datetime): End time.
+        creation_time (datetime): Creation time.
+        created_by (str): Created by.
+        last_modified_time (datetime): Date last modified.
+        last_modified_by (datetime): User last modified.
+        parameters (dict): The hyperparameters of the component.
+        input_artifacts (dict): The input artifacts of the component.
+        output_artifacts (dict): The output artifacts of the component.
+        metrics (list): The metrics for the component.
+        source_detail (dict): The source of the trial component.
+        tags (list): The list of tags that are associated with the trial component.
+        parents (dict): The parent of trial component
+    """
+
+    trial_component_arn = None
+    trial_component_name = None
+    display_name = None
+    source = None
+    status = None
+    start_time = None
+    end_time = None
+    creation_time = None
+    created_by = None
+    last_modified_time = None
+    last_modified_by = None
+    parameters = None
+    input_artifacts = None
+    output_artifacts = None
+    metrics = None
+    source_detail = None
+    tags = None
+    parents = None
+
+    def __init__(
+        self,
+        trial_component_arn=None,
+        trial_component_name=None,
+        start_time=None,
+        end_time=None,
+        display_name=None,
+        source=None,
+        status=None,
+        creation_time=None,
+        created_by=None,
+        last_modified_time=None,
+        last_modified_by=None,
+        parameters=None,
+        input_artifacts=None,
+        output_artifacts=None,
+        metrics=None,
+        source_detail=None,
+        tags=None,
+        parents=None,
+    ):
+        super(TrialComponentSearchResult, self).__init__(
+            trial_component_arn=trial_component_arn,
+            trial_component_name=trial_component_name,
+            display_name=display_name,
+            source=source,
+            status=status,
+            start_time=start_time,
+            end_time=end_time,
+            creation_time=creation_time,
+            created_by=created_by,
+            last_modified_by=last_modified_by,
+            last_modified_time=last_modified_time,
+            parameters=parameters,
+            input_artifacts=input_artifacts,
+            output_artifacts=output_artifacts,
+            metrics=metrics,
+            source_detail=source_detail,
+            tags=tags,
+            parents=parents,
+        )

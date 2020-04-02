@@ -129,6 +129,36 @@ def test_list_trials_call_args(sagemaker_boto_client):
     sagemaker_boto_client.list_trials.assert_called_with(CreatedBefore=created_before, CreatedAfter=created_after)
 
 
+def test_search(sagemaker_boto_client):
+    sagemaker_boto_client.search.return_value = {
+        "Results": [
+            {
+                "Experiment": {
+                    "ExperimentName": "experiment-1",
+                    "ExperimentArn": "arn::experiment-1",
+                    "DisplayName": "Experiment1",
+                }
+            },
+            {
+                "Experiment": {
+                    "ExperimentName": "experiment-2",
+                    "ExperimentArn": "arn::experiment-2",
+                    "DisplayName": "Experiment2",
+                }
+            },
+        ]
+    }
+    expected = [
+        api_types.ExperimentSearchResult(
+            experiment_name="experiment-1", experiment_arn="arn::experiment-1", display_name="Experiment1"
+        ),
+        api_types.ExperimentSearchResult(
+            experiment_name="experiment-2", experiment_arn="arn::experiment-2", display_name="Experiment2",
+        ),
+    ]
+    assert expected == list(experiment.Experiment.search(sagemaker_boto_client=sagemaker_boto_client))
+
+
 def test_experiment_create_trial_with_name(sagemaker_boto_client):
     experiment_obj = experiment.Experiment(sagemaker_boto_client=sagemaker_boto_client)
     experiment_obj.experiment_name = "someExperimentName"

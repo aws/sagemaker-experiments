@@ -85,6 +85,16 @@ def test_list_sort(sagemaker_boto_client, experiments):
     assert experiment_names  # sanity test
 
 
+def test_search(sagemaker_boto_client):
+    experiment_names_searched = []
+    for s in experiment.Experiment.search(max_results=10, sagemaker_boto_client=sagemaker_boto_client):
+        if "smexperiments-integ-" in s.experiment_name:
+            experiment_names_searched.append(s.experiment_name)
+
+    assert len(experiment_names_searched) > 0
+    assert experiment_names_searched  # sanity test
+
+
 def test_create_trial(experiment_obj, sagemaker_boto_client):
     trial_obj = experiment_obj.create_trial()
     try:

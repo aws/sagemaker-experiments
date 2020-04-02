@@ -194,6 +194,24 @@ def test_list_trial_components_call_args(sagemaker_boto_client):
     assert expected_calls == sagemaker_boto_client.list_trial_components.mock_calls
 
 
+def test_search(sagemaker_boto_client):
+    sagemaker_boto_client.search.return_value = {
+        "Results": [
+            {"TrialComponent": {"TrialComponentName": "tc-1", "TrialComponentArn": "arn::tc-1", "DisplayName": "TC1",}},
+            {"TrialComponent": {"TrialComponentName": "tc-2", "TrialComponentArn": "arn::tc-2", "DisplayName": "TC2",}},
+        ]
+    }
+    expected = [
+        api_types.TrialComponentSearchResult(
+            trial_component_name="tc-1", trial_component_arn="arn::tc-1", display_name="TC1"
+        ),
+        api_types.TrialComponentSearchResult(
+            trial_component_name="tc-2", trial_component_arn="arn::tc-2", display_name="TC2"
+        ),
+    ]
+    assert expected == list(trial_component.TrialComponent.search(sagemaker_boto_client=sagemaker_boto_client))
+
+
 def test_save(sagemaker_boto_client):
     obj = trial_component.TrialComponent(sagemaker_boto_client, trial_component_name="foo", display_name="bar")
     sagemaker_boto_client.update_trial_component.return_value = {}

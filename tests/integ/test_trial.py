@@ -76,6 +76,16 @@ def test_list_sort(trials, sagemaker_boto_client):
         assert trial_names_listed  # sanity test
 
 
+def test_search(sagemaker_boto_client):
+    trial_names_searched = []
+    for s in trial.Trial.search(max_results=10, sagemaker_boto_client=sagemaker_boto_client):
+        if "smexperiments-integ-" in s.trial_name:
+            trial_names_searched.append(s.trial_name)
+
+    assert len(trial_names_searched) > 0
+    assert trial_names_searched  # sanity test
+
+
 def test_add_remove_trial_component(trial_obj, trial_component_obj):
     trial_obj.add_trial_component(trial_component_obj)
     trial_components = list(trial_obj.list_trial_components())
