@@ -67,6 +67,7 @@ def sagemaker_endpoint(request):
 def sagemaker_region(request):
     return request.config.getoption("--region")
 
+
 @pytest.fixture
 def sagemaker_boto_client(sagemaker_endpoint, sagemaker_region):
     if sagemaker_endpoint is None:
