@@ -194,6 +194,12 @@ To run the integration tests, the following prerequisites must be met:
 
     tox tests/integ
 
+- Test against different regions
+
+.. code-block:: bash
+
+    tox -e py37 -- --region cn-north-1
+
 Generate Docs
 -------------
 

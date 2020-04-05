@@ -36,6 +36,7 @@ def pytest_addoption(parser):
     parser.addoption("--boto-model-file", action="store", default=None)
     parser.addoption("--runslow", action="store_true", default=False, help="run slow tests")
     parser.addoption("--sagemaker-endpoint", action="store", default=None)
+    parser.addoption("--region", action="store", default="us-west-2")
 
 
 def pytest_configure(config):
@@ -62,12 +63,17 @@ def sagemaker_endpoint(request):
     return request.config.getoption("--sagemaker-endpoint")
 
 
+@pytest.fixture(scope="session")
+def sagemaker_region(request):
+    return request.config.getoption("--region")
+
+
 @pytest.fixture
-def sagemaker_boto_client(sagemaker_endpoint):
+def sagemaker_boto_client(sagemaker_endpoint, sagemaker_region):
     if sagemaker_endpoint is None:
-        return boto3.client("sagemaker")
+        return boto3.client("sagemaker", region_name=sagemaker_region)
     else:
-        return boto3.client("sagemaker", endpoint_url=sagemaker_endpoint)
+        return boto3.client("sagemaker", region_name=sagemaker_region, endpoint_url=sagemaker_endpoint)
 
 
 @pytest.fixture(scope="session")
