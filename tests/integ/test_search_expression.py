@@ -20,7 +20,7 @@ def test_search(sagemaker_boto_client):
     search_filter = Filter(name="ExperimentName", operator=Operator.CONTAINS, value="smexperiments-integ-")
     search_expression = SearchExpression(filters=[search_filter])
     for s in Experiment.search(
-        search_expression=search_expression.to_boto(), max_results=10, sagemaker_boto_client=sagemaker_boto_client
+        search_expression=search_expression, max_results=10, sagemaker_boto_client=sagemaker_boto_client
     ):
         experiment_names_searched.append(s.experiment_name)
 
@@ -35,7 +35,7 @@ def test_nested_search(sagemaker_boto_client):
     nested_filter = NestedFilter(property_name="ExperimentName", filters=[search_filter])
     search_expression = SearchExpression(nested_filters=[nested_filter])
     for s in Experiment.search(
-        search_expression=search_expression.to_boto(), max_results=10, sagemaker_boto_client=sagemaker_boto_client
+        search_expression=search_expression, max_results=10, sagemaker_boto_client=sagemaker_boto_client
     ):
         experiment_names_searched.append(s.experiment_name)
 
@@ -49,7 +49,7 @@ def test_sub_expression(sagemaker_boto_client):
     sub_expression = SearchExpression(filters=[search_filter])
     search_expression = SearchExpression(sub_expressions=[sub_expression])
     for s in Experiment.search(
-        search_expression=search_expression.to_boto(), max_results=10, sagemaker_boto_client=sagemaker_boto_client
+        search_expression=search_expression, max_results=10, sagemaker_boto_client=sagemaker_boto_client
     ):
         experiment_names_searched.append(s.experiment_name)
 

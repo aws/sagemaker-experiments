@@ -107,7 +107,7 @@ def test_search(sagemaker_boto_client):
     search_filter = Filter(name="TrialComponentName", operator=Operator.CONTAINS, value="smexperiments-integ-")
     search_expression = SearchExpression(filters=[search_filter])
     for s in trial_component.TrialComponent.search(
-        search_expression=search_expression.to_boto(), max_results=10, sagemaker_boto_client=sagemaker_boto_client
+        search_expression=search_expression, max_results=10, sagemaker_boto_client=sagemaker_boto_client
     ):
         trial_component_names_searched.append(s.trial_component_name)
 

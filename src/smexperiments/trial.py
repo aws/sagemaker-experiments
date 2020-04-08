@@ -189,7 +189,7 @@ class Trial(_base_types.Record):
         return super(Trial, cls)._search(
             search_resource="ExperimentTrial",
             search_item_factory=api_types.TrialSearchResult.from_boto,
-            search_expression=search_expression,
+            search_expression=None if search_expression is None else search_expression.to_boto(),
             sort_by=sort_by,
             sort_order=sort_order,
             max_results=max_results,

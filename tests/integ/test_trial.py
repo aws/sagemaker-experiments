@@ -82,7 +82,7 @@ def test_search(sagemaker_boto_client):
     search_filter = Filter(name="ExperimentName", operator=Operator.CONTAINS, value="smexperiments-integ-")
     search_expression = SearchExpression(filters=[search_filter])
     for s in trial.Trial.search(
-        search_expression=search_expression.to_boto(), max_results=10, sagemaker_boto_client=sagemaker_boto_client
+        search_expression=search_expression, max_results=10, sagemaker_boto_client=sagemaker_boto_client
     ):
         trial_names_searched.append(s.trial_name)
 
