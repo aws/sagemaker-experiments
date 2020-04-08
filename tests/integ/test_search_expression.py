@@ -28,7 +28,7 @@ def test_search(sagemaker_boto_client):
     assert experiment_names_searched  # sanity test
 
 
-@pytest.mark.skip(reason="failed validation, I think there is a bug somewhere in SageMaker")
+@pytest.mark.skip(reason="failed validation, need to wait for NestedFilter bug to be fixed")
 def test_nested_search(sagemaker_boto_client):
     experiment_names_searched = []
     search_filter = Filter(name="ExperimentName", operator=Operator.CONTAINS, value="smexperiments-integ-")
