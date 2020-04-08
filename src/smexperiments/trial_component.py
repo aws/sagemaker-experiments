@@ -205,7 +205,7 @@ class TrialComponent(_base_types.Record):
         return super(TrialComponent, cls)._search(
             search_resource="ExperimentTrialComponent",
             search_item_factory=api_types.TrialComponentSearchResult.from_boto,
-            search_expression=search_expression,
+            search_expression=None if search_expression is None else search_expression.to_boto(),
             sort_by=sort_by,
             sort_order=sort_order,
             max_results=max_results,

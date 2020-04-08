@@ -14,6 +14,7 @@ import datetime
 
 from tests.helpers import name
 from smexperiments import experiment, trial
+from smexperiments.search_expression import SearchExpression, Filter, Operator
 
 
 def test_create_delete(experiment_obj):
@@ -87,9 +88,12 @@ def test_list_sort(sagemaker_boto_client, experiments):
 
 def test_search(sagemaker_boto_client):
     experiment_names_searched = []
-    for s in experiment.Experiment.search(max_results=10, sagemaker_boto_client=sagemaker_boto_client):
-        if "smexperiments-integ-" in s.experiment_name:
-            experiment_names_searched.append(s.experiment_name)
+    search_filter = Filter(name="ExperimentName", operator=Operator.CONTAINS, value="smexperiments-integ-")
+    search_expression = SearchExpression(filters=[search_filter])
+    for s in experiment.Experiment.search(
+        search_expression=search_expression, max_results=10, sagemaker_boto_client=sagemaker_boto_client
+    ):
+        experiment_names_searched.append(s.experiment_name)
 
     assert len(experiment_names_searched) > 0
     assert experiment_names_searched  # sanity test
