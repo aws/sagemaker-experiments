@@ -264,10 +264,7 @@ def training_job_name(sagemaker_boto_client, training_role_arn, docker_image, tr
                 "DataSource": {"S3DataSource": {"S3Uri": training_s3_uri, "S3DataType": "S3Prefix"}},
             }
         ],
-        AlgorithmSpecification={
-            "TrainingImage": docker_image,
-            "TrainingInputMode": "File",
-        },
+        AlgorithmSpecification={"TrainingImage": docker_image, "TrainingInputMode": "File",},
         RoleArn=training_role_arn,
         ResourceConfig={"InstanceType": "ml.m5.large", "InstanceCount": 1, "VolumeSizeInGB": 10},
         StoppingCondition={"MaxRuntimeInSeconds": 900},

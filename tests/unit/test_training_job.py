@@ -52,6 +52,4 @@ def test_search(sagemaker_boto_client):
             hyper_parameters={"learning_rate": "0.2"},
         ),
     ]
-    assert expected == list(
-        training_job.TrainingJob.search(sagemaker_boto_client=sagemaker_boto_client)
-    )
+    assert expected == list(training_job.TrainingJob.search(sagemaker_boto_client=sagemaker_boto_client))
