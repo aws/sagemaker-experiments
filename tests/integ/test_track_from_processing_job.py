@@ -20,12 +20,12 @@ from smexperiments import trial_component, api_types
 
 @pytest.mark.slow
 def test_track_from_processing_job(sagemaker_boto_client, processing_job_name):
-
+    processing_job_name = "smexperiments-integ-549de818-b4bd-42d0-8ce7-1cb4cb3573d9"
     get_job = lambda: sagemaker_boto_client.describe_processing_job(ProcessingJobName=processing_job_name)
     processing_job = get_job()
 
     source_arn = processing_job["ProcessingJobArn"]
-    # wait_for_job(processing_job_name, get_job, "ProcessingJobStatus")
+    wait_for_job(processing_job_name, get_job, "ProcessingJobStatus")
 
     print(processing_job)
     if "ProcessingStartTime" in processing_job:

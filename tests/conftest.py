@@ -267,7 +267,6 @@ def training_job_name(sagemaker_boto_client, training_role_arn, docker_image, tr
         AlgorithmSpecification={
             "TrainingImage": docker_image,
             "TrainingInputMode": "File",
-            "EnableSageMakerMetricsTimeSeries": True,
         },
         RoleArn=training_role_arn,
         ResourceConfig={"InstanceType": "ml.m5.large", "InstanceCount": 1, "VolumeSizeInGB": 10},
