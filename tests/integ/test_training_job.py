@@ -21,14 +21,10 @@ from tests.helpers import retry
 def test_search(sagemaker_boto_client, training_job_name, docker_image):
     def validate():
         training_job_searched = []
-        search_filter = Filter(
-            name="TrainingJobName", operator=Operator.EQUALS, value=training_job_name
-        )
+        search_filter = Filter(name="TrainingJobName", operator=Operator.EQUALS, value=training_job_name)
         search_expression = SearchExpression(filters=[search_filter])
         for s in TrainingJob.search(
-            search_expression=search_expression,
-            max_results=10,
-            sagemaker_boto_client=sagemaker_boto_client,
+            search_expression=search_expression, max_results=10, sagemaker_boto_client=sagemaker_boto_client,
         ):
             training_job_searched.append(s)
 
@@ -44,9 +40,7 @@ def test_search(sagemaker_boto_client, training_job_name, docker_image):
             "InstanceCount": 1,
             "VolumeSizeInGB": 10,
         }
-        assert training_job_searched[0].stopping_condition == {
-            "MaxRuntimeInSeconds": 900
-        }
+        assert training_job_searched[0].stopping_condition == {"MaxRuntimeInSeconds": 900}
         assert training_job_searched  # sanity test
 
     retry(validate)
