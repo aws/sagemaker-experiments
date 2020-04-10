@@ -18,17 +18,35 @@ from tests.helpers import retry
 
 
 @pytest.mark.slow
-def test_search(sagemaker_boto_client, training_job_name):
+def test_search(sagemaker_boto_client, training_job_name, docker_image):
     def validate():
-        training_job_names_searched = []
-        search_filter = Filter(name="TrainingJobName", operator=Operator.EQUALS, value=training_job_name)
+        training_job_searched = []
+        search_filter = Filter(
+            name="TrainingJobName", operator=Operator.EQUALS, value=training_job_name
+        )
         search_expression = SearchExpression(filters=[search_filter])
         for s in TrainingJob.search(
-            search_expression=search_expression, max_results=10, sagemaker_boto_client=sagemaker_boto_client
+            search_expression=search_expression,
+            max_results=10,
+            sagemaker_boto_client=sagemaker_boto_client,
         ):
-            training_job_names_searched.append(s.training_job_name)
+            training_job_searched.append(s)
 
-        assert len(training_job_names_searched) == 1
-        assert training_job_names_searched  # sanity test
+        assert len(training_job_searched) == 1
+        assert training_job_searched[0].training_job_name == training_job_name
+        assert training_job_searched[0].input_data_config[0]["ChannelName"] == "train"
+        assert training_job_searched[0].algorithm_specification == {
+            "TrainingImage": docker_image,
+            "TrainingInputMode": "File",
+        }
+        assert training_job_searched[0].resource_config == {
+            "InstanceType": "ml.m5.large",
+            "InstanceCount": 1,
+            "VolumeSizeInGB": 10,
+        }
+        assert training_job_searched[0].stopping_condition == {
+            "MaxRuntimeInSeconds": 900
+        }
+        assert training_job_searched  # sanity test
 
     retry(validate)
