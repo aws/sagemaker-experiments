@@ -272,6 +272,85 @@ class BatchPutMetricsError(_base_types.ApiObject):
         super(BatchPutMetricsError, self).__init__(code=code, message=message, metric_index=metric_index, **kwargs)
 
 
+class TrainingJobSearchResult(_base_types.ApiObject):
+    """Summary model of an Training Job search result.
+
+    Attributes:
+        training_job_name (str): The name of the training job.
+        training_job_arn (str): The Amazon Resource Name (ARN) of the training job.
+        tuning_job_arn (str): The Amazon Resource Name (ARN) of the associated.
+        hyperparameter tuning job if the training job was launched by a hyperparameter tuning job.
+        labeling_job_arn (str): The Amazon Resource Name (ARN) of the labeling job.
+        autoML_job_arn (str): The Amazon Resource Name (ARN) of the job.
+        model_artifacts (dict): Information about the Amazon S3 location that is configured for storing model artifacts.
+        training_job_status (str): The status of the training job
+        hyper_parameters (dict): Algorithm-specific parameters.
+        algorithm_specification (dict): Information about the algorithm used for training, and algorithm metadata.
+        input_data_config (dict): An array of Channel objects that describes each data input channel.
+        output_data_config (dict): The S3 path where model artifacts that you configured when creating the job are
+        stored. Amazon SageMaker creates subfolders for model artifacts.
+        resource_config (dict): Resources, including ML compute instances and ML storage volumes, that are configured
+        for model training.
+        debug_hook_config (dict): Configuration information for the debug hook parameters, collection configuration,
+        and storage paths.
+        debug_rule_config (dict): Information about the debug rule configuration.
+    """
+
+    training_job_name = None
+    training_job_arn = None
+    tuning_job_arn = None
+    labeling_job_arn = None
+    autoML_job_arn = None
+    model_artifacts = None
+    training_job_status = None
+    hyper_parameters = None
+    algorithm_specification = None
+    input_data_config = None
+    output_data_config = None
+    resource_config = None
+    debug_hook_config = None
+    experiment_config = None
+    debug_rule_config = None
+
+    def __init__(
+        self,
+        training_job_arn=None,
+        training_job_name=None,
+        tuning_job_arn=None,
+        labeling_job_arn=None,
+        autoML_job_arn=None,
+        model_artifacts=None,
+        training_job_status=None,
+        hyper_parameters=None,
+        algorithm_specification=None,
+        input_data_config=None,
+        output_data_config=None,
+        resource_config=None,
+        debug_hook_config=None,
+        experiment_config=None,
+        debug_rule_config=None,
+        **kwargs
+    ):
+        super(TrainingJobSearchResult, self).__init__(
+            training_job_arn=training_job_arn,
+            training_job_name=training_job_name,
+            tuning_job_arn=tuning_job_arn,
+            labeling_job_arn=labeling_job_arn,
+            autoML_job_arn=autoML_job_arn,
+            model_artifacts=model_artifacts,
+            training_job_status=training_job_status,
+            hyper_parameters=hyper_parameters,
+            algorithm_specification=algorithm_specification,
+            input_data_config=input_data_config,
+            output_data_config=output_data_config,
+            resource_config=resource_config,
+            debug_hook_config=debug_hook_config,
+            experiment_config=experiment_config,
+            debug_rule_config=debug_rule_config,
+            **kwargs
+        )
+
+
 class ExperimentSearchResult(_base_types.ApiObject):
     """Summary model of an Experiment search result.
 
@@ -369,12 +448,6 @@ class TrialComponentSearchResult(_base_types.ApiObject):
     display_name = None
     source = None
     status = None
-    start_time = None
-    end_time = None
-    creation_time = None
-    created_by = None
-    last_modified_time = None
-    last_modified_by = None
     parameters = None
     input_artifacts = None
     output_artifacts = None
@@ -392,10 +465,6 @@ class TrialComponentSearchResult(_base_types.ApiObject):
         display_name=None,
         source=None,
         status=None,
-        creation_time=None,
-        created_by=None,
-        last_modified_time=None,
-        last_modified_by=None,
         parameters=None,
         input_artifacts=None,
         output_artifacts=None,
@@ -403,6 +472,7 @@ class TrialComponentSearchResult(_base_types.ApiObject):
         source_detail=None,
         tags=None,
         parents=None,
+        **kwargs
     ):
         super(TrialComponentSearchResult, self).__init__(
             trial_component_arn=trial_component_arn,
@@ -410,12 +480,6 @@ class TrialComponentSearchResult(_base_types.ApiObject):
             display_name=display_name,
             source=source,
             status=status,
-            start_time=start_time,
-            end_time=end_time,
-            creation_time=creation_time,
-            created_by=created_by,
-            last_modified_by=last_modified_by,
-            last_modified_time=last_modified_time,
             parameters=parameters,
             input_artifacts=input_artifacts,
             output_artifacts=output_artifacts,
@@ -423,4 +487,5 @@ class TrialComponentSearchResult(_base_types.ApiObject):
             source_detail=source_detail,
             tags=tags,
             parents=parents,
+            **kwargs
         )

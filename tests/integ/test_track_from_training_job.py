@@ -1,4 +1,4 @@
-# Copyright 019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"). You
 # may not use this file except in compliance with the License. A copy of
@@ -21,7 +21,6 @@ from smexperiments import trial_component
 
 @pytest.mark.slow
 def test_track_from_training_job(sagemaker_boto_client, training_job_name):
-    training_job_name = "smexperiments-integ-eca5c064-3a64-433e-a30a-2963338d71d8"
     get_job = lambda: sagemaker_boto_client.describe_training_job(TrainingJobName=training_job_name)
     tj = get_job()
     source_arn = tj["TrainingJobArn"]
