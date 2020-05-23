@@ -118,7 +118,7 @@ class Trial(_base_types.Record):
         )
         if trial_components:
             for tc in trial_components:
-                trial.add_trial_components(*trial_components)
+                trial.add_trial_component(tc)
         return trial
 
     @classmethod

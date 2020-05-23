@@ -57,6 +57,28 @@ def test_create_no_name(sagemaker_boto_client):
     assert kwargs["TrialName"]  # confirm that a TrialName was passed
 
 
+def test_create_with_trial_components(sagemaker_boto_client):
+    sagemaker_boto_client.create_trial.return_value = {
+        "Arn": "arn:aws:1234",
+        "TrialName": "name-value",
+    }
+    tc = trial_component.TrialComponent(trial_component_name="tc-foo", sagemaker_boto_client=sagemaker_boto_client)
+
+    trial_obj = trial.Trial.create(
+        trial_name="name-value",
+        experiment_name="experiment-name-value",
+        trial_components=[tc],
+        sagemaker_boto_client=sagemaker_boto_client,
+    )
+    assert trial_obj.trial_name == "name-value"
+    sagemaker_boto_client.create_trial.assert_called_with(
+        TrialName="name-value", ExperimentName="experiment-name-value"
+    )
+    sagemaker_boto_client.associate_trial_component.assert_called_with(
+        TrialName="name-value", TrialComponentName=tc.trial_component_name
+    )
+
+
 def test_add_trial_component(sagemaker_boto_client):
     t = trial.Trial(sagemaker_boto_client)
     t.trial_name = "bar"
