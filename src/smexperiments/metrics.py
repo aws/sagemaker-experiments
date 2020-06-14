@@ -52,8 +52,7 @@ class SageMakerFileMetricsWriter(object):
             logging.debug("Writing metric: %s", raw_metric_data)
             self._file.write(json.dumps(raw_metric_data.to_record()))
             self._file.write("\n")
-        except AttributeError as e:
-            logging.error(e)
+        except AttributeError:
             if self._closed:
                 raise SageMakerMetricsWriterException("log_metric called on a closed writer")
             elif not self._file:
@@ -84,7 +83,9 @@ class SageMakerFileMetricsWriter(object):
 
     def _get_metrics_file_path(self):
         pid_filename = "{}.json".format(str(os.getpid()))
-        return self._metrics_file_path or os.path.join(METRICS_DIR, pid_filename)
+        metrics_file_path = self._metrics_file_path or os.path.join(METRICS_DIR, pid_filename)
+        logging.debug("metrics_file_path=" + metrics_file_path)
+        return metrics_file_path
 
 
 class SageMakerMetricsWriterException(Exception):
