@@ -43,6 +43,8 @@ class Tracker(object):
     end times are automatically set when using the with statement and the trial component is saved to
     SageMaker at the end of the block.
 
+    Note that only parameters, input artifacts, and output artifacts are saved to SageMaker. Metrics are saved to file.
+
     Attributes:
         trial_component (TrialComponent): The trial component tracked.
     """
@@ -267,7 +269,7 @@ class Tracker(object):
         )
 
     def log_metric(self, metric_name, value, timestamp=None, iteration_number=None):
-        """Record a scalar metric value for this TrialComponent.
+        """Record a scalar metric value for this TrialComponent to file, not SageMaker.
 
         Examples
             .. code-block:: python
