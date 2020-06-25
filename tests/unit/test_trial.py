@@ -106,6 +106,15 @@ def test_remove_trial_component(sagemaker_boto_client):
     sagemaker_boto_client.disassociate_trial_component.assert_called_with(TrialName="bar", TrialComponentName="foo")
 
 
+def test_remove_trial_component_from_trial_component_summary(sagemaker_boto_client):
+    t = trial.Trial(sagemaker_boto_client)
+    t.trial_name = "bar"
+    tcs = api_types.TrialComponentSummary()
+    tcs.trial_component_name = "tcs-foo"
+    t.remove_trial_component(tcs)
+    sagemaker_boto_client.disassociate_trial_component.assert_called_with(TrialName="bar", TrialComponentName="tcs-foo")
+
+
 def test_remove_trial_component_from_tracker(sagemaker_boto_client):
     t = trial.Trial(sagemaker_boto_client)
     t.trial_name = "bar"
