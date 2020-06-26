@@ -31,6 +31,8 @@ import docker
 from smexperiments import experiment, trial, trial_component
 from tests.helpers import name, names
 
+TAGS = [{"Key": "some-key", "Value": "some-value"}]
+
 
 def pytest_addoption(parser):
     parser.addoption("--boto-model-file", action="store", default=None)
@@ -93,7 +95,7 @@ def experiment_obj(sagemaker_boto_client):
     description = "{}-{}".format("description", str(uuid.uuid4()))
     boto3.set_stream_logger("", logging.INFO)
     experiment_obj = experiment.Experiment.create(
-        experiment_name=name(), description=description, sagemaker_boto_client=sagemaker_boto_client
+        experiment_name=name(), description=description, sagemaker_boto_client=sagemaker_boto_client, tags=TAGS
     )
     yield experiment_obj
     time.sleep(0.5)
@@ -103,7 +105,10 @@ def experiment_obj(sagemaker_boto_client):
 @pytest.fixture
 def trial_obj(sagemaker_boto_client, experiment_obj):
     trial_obj = trial.Trial.create(
-        trial_name=name(), experiment_name=experiment_obj.experiment_name, sagemaker_boto_client=sagemaker_boto_client
+        trial_name=name(),
+        experiment_name=experiment_obj.experiment_name,
+        tags=TAGS,
+        sagemaker_boto_client=sagemaker_boto_client,
     )
     yield trial_obj
     time.sleep(0.5)
@@ -113,7 +118,7 @@ def trial_obj(sagemaker_boto_client, experiment_obj):
 @pytest.fixture
 def trial_component_obj(sagemaker_boto_client):
     trial_component_obj = trial_component.TrialComponent.create(
-        trial_component_name=name(), sagemaker_boto_client=sagemaker_boto_client
+        trial_component_name=name(), sagemaker_boto_client=sagemaker_boto_client, tags=TAGS,
     )
     yield trial_component_obj
     time.sleep(0.5)

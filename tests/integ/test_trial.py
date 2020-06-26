@@ -22,6 +22,14 @@ def test_create_delete(trial_obj):
     assert trial_obj.trial_name
 
 
+def test_create_tags(trial_obj, sagemaker_boto_client):
+    while True:
+        actual_tags = sagemaker_boto_client.list_tags(ResourceArn=trial_obj.trial_arn)["Tags"]
+        if actual_tags:
+            break
+    assert actual_tags == trial_obj.tags
+
+
 def test_list(trials, sagemaker_boto_client):
     slack = datetime.timedelta(minutes=1)
     now = datetime.datetime.now(datetime.timezone.utc)

@@ -23,6 +23,14 @@ def test_create_delete(trial_component_obj):
     assert trial_component_obj.trial_component_name
 
 
+def test_create_tags(trial_component_obj, sagemaker_boto_client):
+    while True:
+        actual_tags = sagemaker_boto_client.list_tags(ResourceArn=trial_component_obj.trial_component_arn)["Tags"]
+        if actual_tags:
+            break
+    assert actual_tags == trial_component_obj.tags
+
+
 def test_save(trial_component_obj, sagemaker_boto_client):
     trial_component_obj.display_name = str(uuid.uuid4())
     trial_component_obj.status = api_types.TrialComponentStatus(primary_status="InProgress", message="Message")
