@@ -22,6 +22,14 @@ def test_create_delete(experiment_obj):
     assert experiment_obj.experiment_name
 
 
+def test_create_tags(experiment_obj, sagemaker_boto_client):
+    while True:
+        actual_tags = sagemaker_boto_client.list_tags(ResourceArn=experiment_obj.experiment_arn)["Tags"]
+        if actual_tags:
+            break
+    assert actual_tags == experiment_obj.tags
+
+
 def test_save(experiment_obj):
     description = name()
     experiment_obj.description = description

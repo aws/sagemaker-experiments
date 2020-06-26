@@ -35,6 +35,19 @@ def test_create(sagemaker_boto_client):
     assert "bazz" == obj.trial_component_arn
 
 
+def test_create_with_tags(sagemaker_boto_client):
+    sagemaker_boto_client.create_trial_component.return_value = {
+        "TrialComponentArn": "bazz",
+    }
+    tags = [{"Key": "foo", "Value": "bar"}]
+    obj = trial_component.TrialComponent.create(
+        trial_component_name="foo", display_name="bar", sagemaker_boto_client=sagemaker_boto_client, tags=tags
+    )
+    sagemaker_boto_client.create_trial_component.assert_called_with(
+        TrialComponentName="foo", DisplayName="bar", Tags=[{"Key": "foo", "Value": "bar"}]
+    )
+
+
 def test_load(sagemaker_boto_client):
     now = datetime.datetime.now(datetime.timezone.utc)
 
