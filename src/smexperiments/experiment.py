@@ -43,10 +43,12 @@ class Experiment(_base_types.Record):
     Attributes:
         experiment_name (str): The name of the experiment. The name must be unique within an account.
         description (str): A description of the experiment.
+        tags (List[dict[str, str]]): A list of tags to associate with the experiment.
     """
 
     experiment_name = None
     description = None
+    tags = None
 
     _boto_create_method = "create_experiment"
     _boto_load_method = "describe_experiment"
@@ -92,7 +94,7 @@ class Experiment(_base_types.Record):
         )
 
     @classmethod
-    def create(cls, experiment_name=None, description=None, sagemaker_boto_client=None):
+    def create(cls, experiment_name=None, description=None, tags=None, sagemaker_boto_client=None):
         """
         Create a new experiment in SageMaker and return an ``Experiment`` object.
 
@@ -101,6 +103,7 @@ class Experiment(_base_types.Record):
             experiment_description: (str, optional): Description of the experiment
             sagemaker_boto_client (SageMaker.Client, optional): Boto3 client for SageMaker. If not
                 supplied, a default boto3 client will be created and used.
+            tags (List[dict[str, str]]): A list of tags to associate with the experiment.
 
         Returns:
             sagemaker.experiments.experiment.Experiment: A SageMaker ``Experiment`` object
@@ -109,6 +112,7 @@ class Experiment(_base_types.Record):
             cls._boto_create_method,
             experiment_name=experiment_name,
             description=description,
+            tags=tags,
             sagemaker_boto_client=sagemaker_boto_client,
         )
 

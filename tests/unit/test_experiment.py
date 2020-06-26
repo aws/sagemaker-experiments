@@ -40,11 +40,23 @@ def test_load(sagemaker_boto_client):
 
 def test_create(sagemaker_boto_client):
     sagemaker_boto_client.create_experiment.return_value = {"Arn": "arn:aws:1234"}
+    tags = {"Key": "foo", "Value": "bar"}
     experiment_obj = experiment.Experiment.create(
         experiment_name="name-value", sagemaker_boto_client=sagemaker_boto_client
     )
     assert experiment_obj.experiment_name == "name-value"
     sagemaker_boto_client.create_experiment.assert_called_with(ExperimentName="name-value")
+
+
+def test_create_with_tags(sagemaker_boto_client):
+    sagemaker_boto_client.create_experiment.return_value = {"Arn": "arn:aws:1234"}
+    tags = [{"Key": "foo", "Value": "bar"}]
+    experiment_obj = experiment.Experiment.create(
+        experiment_name="name-value", sagemaker_boto_client=sagemaker_boto_client, tags=tags
+    )
+    assert experiment_obj.experiment_name == "name-value"
+    sagemaker_boto_client.create_experiment.assert_called_with(ExperimentName='name-value',
+                                                               Tags=[{"Key": "foo", "Value": "bar"}])
 
 
 def test_list(sagemaker_boto_client, datetime_obj):

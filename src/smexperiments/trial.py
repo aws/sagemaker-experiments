@@ -43,10 +43,12 @@ class Trial(_base_types.Record):
     Attributes:
         trial_name (str): The name of the trial.
         experiment_name (str): The name of the trial's experiment.
+        tags (List[dict[str, str]]): A list of tags to associate with the trial.
     """
 
     trial_name = None
     experiment_name = None
+    tags = None
 
     _boto_create_method = "create_trial"
     _boto_load_method = "describe_trial"
@@ -96,7 +98,7 @@ class Trial(_base_types.Record):
         )
 
     @classmethod
-    def create(cls, experiment_name, trial_name=None, sagemaker_boto_client=None, trial_components=None):
+    def create(cls, experiment_name, trial_name=None, sagemaker_boto_client=None, trial_components=None, tags=None):
         """Create a new trial and return a ``Trial`` object.
 
         Args:
@@ -104,7 +106,8 @@ class Trial(_base_types.Record):
             trial_name: (str, optional): Name of the Trial. If not specified, an auto-generated name will be used.
             sagemaker_boto_client (SageMaker.Client, optional): Boto3 client for SageMaker.
                 If not supplied, a default boto3 client will be created and used.
-            trial_components (list): A list of trial component names, trial components, or trial component trackers
+            trial_components (list): A list of trial component names, trial components, or trial component trackers.
+            tags (List[dict[str, str]]): A list of tags to associate with the trial.
 
         Returns:
             smexperiments.trial.Trial: A SageMaker ``Trial`` object
@@ -114,6 +117,7 @@ class Trial(_base_types.Record):
             cls._boto_create_method,
             trial_name=trial_name,
             experiment_name=experiment_name,
+            tags=tags,
             sagemaker_boto_client=sagemaker_boto_client,
         )
         if trial_components:

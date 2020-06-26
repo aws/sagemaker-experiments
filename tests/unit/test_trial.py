@@ -50,6 +50,21 @@ def test_create(sagemaker_boto_client):
     )
 
 
+def test_create_with_tags(sagemaker_boto_client):
+    sagemaker_boto_client.create_trial.return_value = {
+        "Arn": "arn:aws:1234",
+        "TrialName": "name-value",
+    }
+    tags = [{"Key": "foo", "Value": "bar"}]
+    trial_obj = trial.Trial.create(
+        trial_name="name-value", experiment_name="experiment-name-value", sagemaker_boto_client=sagemaker_boto_client,
+        tags=tags
+    )
+    assert trial_obj.trial_name == "name-value"
+    sagemaker_boto_client.create_trial.assert_called_with(
+        TrialName="name-value", ExperimentName="experiment-name-value", Tags=[{"Key": "foo", "Value": "bar"}])
+
+
 def test_create_no_name(sagemaker_boto_client):
     sagemaker_boto_client.create_trial.return_value = {}
     trial.Trial.create(experiment_name="experiment-name-value", sagemaker_boto_client=sagemaker_boto_client)

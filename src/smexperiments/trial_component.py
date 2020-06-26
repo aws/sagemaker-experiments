@@ -40,6 +40,7 @@ class TrialComponent(_base_types.Record):
         input_artiacts (dict): Dictionary of input artifacts.
         output_artiacts (dict): Dictionary of output artifacts.
         metrics (obj): Aggregated metrics for the job.
+        tags (List[dict[str, str]]): A list of tags to associate with the trial component.
     """
 
     trial_component_name = None
@@ -57,6 +58,7 @@ class TrialComponent(_base_types.Record):
     input_artifacts = None
     output_artifacts = None
     metrics = None
+    tags = None
 
     _boto_load_method = "describe_trial_component"
     _boto_create_method = "create_trial_component"
@@ -116,7 +118,7 @@ class TrialComponent(_base_types.Record):
         return trial_component
 
     @classmethod
-    def create(cls, trial_component_name, display_name=None, sagemaker_boto_client=None):
+    def create(cls, trial_component_name, display_name=None, tags=None, sagemaker_boto_client=None):
         """Create a trial component and return a ``TrialComponent`` object representing it.
 
         Returns:
@@ -127,6 +129,7 @@ class TrialComponent(_base_types.Record):
             cls._boto_create_method,
             trial_component_name=trial_component_name,
             display_name=display_name,
+            tags=tags,
             sagemaker_boto_client=sagemaker_boto_client,
         )
 

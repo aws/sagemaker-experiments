@@ -22,6 +22,10 @@ def test_create_delete(experiment_obj):
     assert experiment_obj.experiment_name
 
 
+def test_create_tags(experiment_obj):
+    assert experiment_obj.tags
+
+
 def test_save(experiment_obj):
     description = name()
     experiment_obj.description = description
