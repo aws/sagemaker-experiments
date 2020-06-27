@@ -15,6 +15,7 @@ from smexperiments import trial_component, api_types
 import datetime
 import pytest
 import unittest.mock
+from unittest.mock import MagicMock
 
 
 @pytest.fixture
@@ -223,6 +224,21 @@ def test_delete(sagemaker_boto_client):
     obj = trial_component.TrialComponent(sagemaker_boto_client, trial_component_name="foo", display_name="bar")
     sagemaker_boto_client.delete_trial_component.return_value = {}
     obj.delete()
+    sagemaker_boto_client.delete_trial_component.assert_called_with(TrialComponentName="foo")
+
+
+def test_delete_with_disassociate(sagemaker_boto_client):
+    obj = trial_component.TrialComponent(sagemaker_boto_client, trial_component_name="foo", display_name="bar")
+    sagemaker_boto_client.delete_trial_component.return_value = {}
+    sagemaker_boto_client.list_trials.return_value = {
+        "TrialSummaries": [{"TrialName": "trial-1"}, {"TrialName": "trial-2"},]
+    }
+    obj.delete(disassociate=True)
+    expected_calls = [
+        unittest.mock.call(TrialName="trial-1", TrialComponentName="foo"),
+        unittest.mock.call(TrialName="trial-2", TrialComponentName="foo"),
+    ]
+    assert expected_calls == sagemaker_boto_client.disassociate_trial_component.mock_calls
     sagemaker_boto_client.delete_trial_component.assert_called_with(TrialComponentName="foo")
 
 

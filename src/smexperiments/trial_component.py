@@ -92,8 +92,22 @@ class TrialComponent(_base_types.Record):
         """Save the state of this TrialComponent to SageMaker."""
         return self._invoke_api(self._boto_update_method, self._boto_update_members)
 
-    def delete(self):
-        """Delete this TrialComponent from SageMaker."""
+    def delete(self, disassociate=None):
+        """Delete this TrialComponent from SageMaker.
+
+        Args:
+            disassociate (boolean): Indicates whether to disassociate the trial component with the trials before deletion.
+            If set to true, disassociate the trial component with associated trials first, then delete the trial component.
+            If it's not set or set to false, it will delete the trial component directory without disassociation.
+        """
+        if disassociate:
+            trials = self.sagemaker_boto_client.list_trials(TrialComponentName=self.trial_component_name)[
+                "TrialSummaries"
+            ]
+            for trial in trials:
+                self.sagemaker_boto_client.disassociate_trial_component(
+                    TrialName=trial["TrialName"], TrialComponentName=self.trial_component_name
+                )
         self._invoke_api(self._boto_delete_method, self._boto_delete_members)
 
     @classmethod

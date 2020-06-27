@@ -23,6 +23,16 @@ def test_create_delete(trial_component_obj):
     assert trial_component_obj.trial_component_name
 
 
+def test_delete_with_disassociate(trial_component_with_disassociation_obj, sagemaker_boto_client):
+    assert trial_component_with_disassociation_obj.trial_component_name
+    trials = sagemaker_boto_client.list_trials(
+        TrialComponentName=trial_component_with_disassociation_obj.trial_component_name
+    )["TrialSummaries"]
+    assert len(trials) == 3
+
+    # trial_component_obj.delete(disassociate=True)
+
+
 def test_save(trial_component_obj, sagemaker_boto_client):
     trial_component_obj.display_name = str(uuid.uuid4())
     trial_component_obj.status = api_types.TrialComponentStatus(primary_status="InProgress", message="Message")
