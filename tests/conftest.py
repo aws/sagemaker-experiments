@@ -126,6 +126,20 @@ def trial_component_obj(sagemaker_boto_client):
 
 
 @pytest.fixture
+def trial_component_with_force_disassociation_obj(trials, sagemaker_boto_client):
+    trial_component_obj = trial_component.TrialComponent.create(
+        trial_component_name=name(), sagemaker_boto_client=sagemaker_boto_client
+    )
+    for trial in trials:
+        sagemaker_boto_client.associate_trial_component(
+            TrialName=trial.trial_name, TrialComponentName=trial_component_obj.trial_component_name
+        )
+    yield trial_component_obj
+    time.sleep(0.5)
+    trial_component_obj.delete(force_disassociate=True)
+
+
+@pytest.fixture
 def trials(experiment_obj, sagemaker_boto_client):
     trial_objs = []
     for trial_name in names():

@@ -103,8 +103,39 @@ class TrialComponent(_base_types.Record):
         """Save the state of this TrialComponent to SageMaker."""
         return self._invoke_api(self._boto_update_method, self._boto_update_members)
 
-    def delete(self):
-        """Delete this TrialComponent from SageMaker."""
+    def delete(self, force_disassociate=None):
+        """Delete this TrialComponent from SageMaker.
+
+        Args:
+            force_disassociate (boolean): Indicates whether to force disassociate the trial component with the trials
+            before deletion. If set to true, force disassociate the trial component with associated trials first, then
+            delete the trial component. If it's not set or set to false, it will delete the trial component directory
+             without disassociation.
+        """
+        if force_disassociate:
+            next_token = None
+
+            while True:
+                if next_token:
+                    list_trials_response = self.sagemaker_boto_client.list_trials(
+                        TrialComponentName=self.trial_component_name, NextToken=next_token
+                    )
+                else:
+                    list_trials_response = self.sagemaker_boto_client.list_trials(
+                        TrialComponentName=self.trial_component_name
+                    )
+
+                # Disassociate the trials and trial components
+                for trial in list_trials_response["TrialSummaries"]:
+                    self.sagemaker_boto_client.disassociate_trial_component(
+                        TrialName=trial["TrialName"], TrialComponentName=self.trial_component_name
+                    )
+
+                if "NextToken" in list_trials_response:
+                    next_token = list_trials_response["NextToken"]
+                else:
+                    break
+
         self._invoke_api(self._boto_delete_method, self._boto_delete_members)
 
     @classmethod
