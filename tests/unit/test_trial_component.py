@@ -253,6 +253,26 @@ def test_delete(sagemaker_boto_client):
     sagemaker_boto_client.delete_trial_component.assert_called_with(TrialComponentName="foo")
 
 
+def test_delete_with_force_disassociate(sagemaker_boto_client):
+    obj = trial_component.TrialComponent(sagemaker_boto_client, trial_component_name="foo", display_name="bar")
+    sagemaker_boto_client.delete_trial_component.return_value = {}
+
+    sagemaker_boto_client.list_trials.side_effect = [
+        {"TrialSummaries": [{"TrialName": "trial-1"}, {"TrialName": "trial-2"}], "NextToken": "a"},
+        {"TrialSummaries": [{"TrialName": "trial-3"}, {"TrialName": "trial-4"}]},
+    ]
+
+    obj.delete(force_disassociate=True)
+    expected_calls = [
+        unittest.mock.call(TrialName="trial-1", TrialComponentName="foo"),
+        unittest.mock.call(TrialName="trial-2", TrialComponentName="foo"),
+        unittest.mock.call(TrialName="trial-3", TrialComponentName="foo"),
+        unittest.mock.call(TrialName="trial-4", TrialComponentName="foo"),
+    ]
+    assert expected_calls == sagemaker_boto_client.disassociate_trial_component.mock_calls
+    sagemaker_boto_client.delete_trial_component.assert_called_with(TrialComponentName="foo")
+
+
 def test_boto_ignore():
     obj = trial_component.TrialComponent(sagemaker_boto_client, trial_component_name="foo", display_name="bar")
     assert obj._boto_ignore() == ["ResponseMetadata", "CreatedBy"]
