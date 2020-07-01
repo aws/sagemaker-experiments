@@ -202,13 +202,15 @@ class Trial(_base_types.Record):
         A trial component may belong to many trials and a trial may have many trial components.
 
         Args:
-           tc: (tracker.Tracker|trial_component.TrialComponent|str) The trial component to add. Can be
-           one of a Tracker instance, a TrialComponent instance, or a string containing the name of
+           tc: (tracker.Tracker|trial_component.TrialComponent|api_types.TrialComponentSummary|str) The trial component
+           to add. Can be one of a Tracker instance, a TrialComponent instance, or a string containing the name of
            the trial component to add.
         """
         if isinstance(tc, tracker.Tracker):
             trial_component_name = tc.trial_component.trial_component_name
         elif isinstance(tc, trial_component.TrialComponent):
+            trial_component_name = tc.trial_component_name
+        elif isinstance(tc, api_types.TrialComponentSummary):
             trial_component_name = tc.trial_component_name
         else:
             trial_component_name = str(tc)
@@ -220,13 +222,15 @@ class Trial(_base_types.Record):
         """Remove the specified trial component from this trial.
 
         Args:
-            tc: (tracker.Tracker|trial_component.TrialComponent|str) The trial component to remove. Can be
-            one of a Tracker instance, a TrialComponent instance, or a string containing the name of
-            the trial component to remove.
+            tc: (tracker.Tracker|trial_component.TrialComponent|api_types.TrialComponentSummary|str) The trial
+            component to remove. Can be one of a Tracker instance, a TrialComponent instance, or a string containing
+            the name of the trial component to remove.
         """
         if isinstance(tc, tracker.Tracker):
             trial_component_name = tc.trial_component.trial_component_name
         elif isinstance(tc, trial_component.TrialComponent):
+            trial_component_name = tc.trial_component_name
+        elif isinstance(tc, api_types.TrialComponentSummary):
             trial_component_name = tc.trial_component_name
         else:
             trial_component_name = str(tc)
