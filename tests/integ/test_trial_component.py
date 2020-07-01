@@ -30,11 +30,17 @@ def test_save(trial_component_obj, sagemaker_boto_client):
     trial_component_obj.end_time = datetime.datetime.now(datetime.timezone.utc)
     trial_component_obj.parameters = {"foo": "bar", "whizz": 100.1}
     trial_component_obj.input_artifacts = {
-        "snizz": api_types.TrialComponentArtifact(value="s3:/foo/bar", media_type="text/plain")
+        "snizz": api_types.TrialComponentArtifact(value="s3:/foo/bar", media_type="text/plain"),
+        "snizz1": api_types.TrialComponentArtifact(value="s3:/foo/bar2", media_type="text/plain2"),
     }
     trial_component_obj.output_artifacts = {
-        "fly": api_types.TrialComponentArtifact(value="s3:/sky/far", media_type="away/tomorrow")
+        "fly": api_types.TrialComponentArtifact(value="s3:/sky/far", media_type="away/tomorrow"),
+        "fly2": api_types.TrialComponentArtifact(value="s3:/sky/far2", media_type="away/tomorrow2"),
     }
+    trial_component_obj.parameters_to_remove = ["foo"]
+    trial_component_obj.input_artifacts_to_remove = ["snizz"]
+    trial_component_obj.output_artifacts_to_remove = ["fly2"]
+
     trial_component_obj.save()
 
     loaded = trial_component.TrialComponent.load(
@@ -47,9 +53,13 @@ def test_save(trial_component_obj, sagemaker_boto_client):
     assert trial_component_obj.start_time - loaded.start_time < datetime.timedelta(seconds=1)
     assert trial_component_obj.end_time - loaded.end_time < datetime.timedelta(seconds=1)
 
-    assert trial_component_obj.parameters == loaded.parameters
-    assert trial_component_obj.input_artifacts == loaded.input_artifacts
-    assert trial_component_obj.output_artifacts == loaded.output_artifacts
+    assert loaded.parameters == {"whizz": 100.1}
+    assert loaded.input_artifacts == {
+        "snizz1": api_types.TrialComponentArtifact(value="s3:/foo/bar2", media_type="text/plain2")
+    }
+    assert loaded.output_artifacts == {
+        "fly": api_types.TrialComponentArtifact(value="s3:/sky/far", media_type="away/tomorrow")
+    }
 
 
 def test_load(trial_component_obj, sagemaker_boto_client):
