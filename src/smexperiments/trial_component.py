@@ -40,6 +40,9 @@ class TrialComponent(_base_types.Record):
         input_artiacts (dict): Dictionary of input artifacts.
         output_artiacts (dict): Dictionary of output artifacts.
         metrics (obj): Aggregated metrics for the job.
+        parameters_to_remove (list): The hyperparameters to remove from the component.
+        input_artifacts_to_remove (list): The input artifacts to remove from the component.
+        output_artifacts_to_remove (list): The output artifacts to remove from the component.
     """
 
     trial_component_name = None
@@ -57,6 +60,9 @@ class TrialComponent(_base_types.Record):
     input_artifacts = None
     output_artifacts = None
     metrics = None
+    parameters_to_remove = None
+    input_artifacts_to_remove = None
+    output_artifacts_to_remove = None
 
     _boto_load_method = "describe_trial_component"
     _boto_create_method = "create_trial_component"
@@ -81,6 +87,9 @@ class TrialComponent(_base_types.Record):
         "parameters",
         "input_artifacts",
         "output_artifacts",
+        "parameters_to_remove",
+        "input_artifacts_to_remove",
+        "output_artifacts_to_remove",
     ]
     _boto_delete_members = ["trial_component_name"]
 

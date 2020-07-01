@@ -213,10 +213,24 @@ def test_search(sagemaker_boto_client):
 
 
 def test_save(sagemaker_boto_client):
-    obj = trial_component.TrialComponent(sagemaker_boto_client, trial_component_name="foo", display_name="bar")
+    obj = trial_component.TrialComponent(
+        sagemaker_boto_client,
+        trial_component_name="foo",
+        display_name="bar",
+        parameters_to_remove=["E"],
+        input_artifacts_to_remove=["F"],
+        output_artifacts_to_remove=["G"],
+    )
     sagemaker_boto_client.update_trial_component.return_value = {}
     obj.save()
-    sagemaker_boto_client.update_trial_component.assert_called_with(TrialComponentName="foo", DisplayName="bar")
+
+    sagemaker_boto_client.update_trial_component.assert_called_with(
+        TrialComponentName="foo",
+        DisplayName="bar",
+        ParametersToRemove=["E"],
+        InputArtifactsToRemove=["F"],
+        OutputArtifactsToRemove=["G"],
+    )
 
 
 def test_delete(sagemaker_boto_client):
