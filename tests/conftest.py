@@ -94,12 +94,75 @@ def tempdir():
 def experiment_obj(sagemaker_boto_client):
     description = "{}-{}".format("description", str(uuid.uuid4()))
     boto3.set_stream_logger("", logging.INFO)
+    experiment_name = name()
     experiment_obj = experiment.Experiment.create(
-        experiment_name=name(), description=description, sagemaker_boto_client=sagemaker_boto_client, tags=TAGS
+        experiment_name=experiment_name, description=description, sagemaker_boto_client=sagemaker_boto_client, tags=TAGS
     )
     yield experiment_obj
     time.sleep(0.5)
     experiment_obj.delete()
+    with pytest.raises(sagemaker_boto_client.exceptions.ResourceNotFound):
+        sagemaker_boto_client.describe_experiment(ExperimentName=experiment_name)
+
+
+@pytest.fixture
+def complex_experiment_obj(sagemaker_boto_client):
+    description = "{}-{}".format("description", str(uuid.uuid4()))
+    boto3.set_stream_logger("", logging.INFO)
+
+    # create experiment
+    experiment_obj_name = name()
+    experiment_obj = experiment.Experiment.create(
+        experiment_name=experiment_obj_name, description=description, sagemaker_boto_client=sagemaker_boto_client
+    )
+
+    # create trials
+    trial_objs = []
+    trial_name1 = name()
+    trial_name2 = name()
+    trial_name3 = name()
+
+    next_trial1 = trial.Trial.create(
+        trial_name=trial_name1, experiment_name=experiment_obj_name, sagemaker_boto_client=sagemaker_boto_client,
+    )
+    trial_objs.append(next_trial1)
+    next_trial2 = trial.Trial.create(
+        trial_name=trial_name2, experiment_name=experiment_obj_name, sagemaker_boto_client=sagemaker_boto_client,
+    )
+    trial_objs.append(next_trial2)
+    next_trial3 = trial.Trial.create(
+        trial_name=trial_name3, experiment_name=experiment_obj_name, sagemaker_boto_client=sagemaker_boto_client,
+    )
+    trial_objs.append(next_trial3)
+
+    # create trial components
+    trial_component_name = name()
+    trial_component_obj = trial_component.TrialComponent.create(
+        trial_component_name=trial_component_name, sagemaker_boto_client=sagemaker_boto_client,
+    )
+
+    # associate the trials with trial components
+    for trial_obj in trial_objs:
+        sagemaker_boto_client.associate_trial_component(
+            TrialName=trial_obj.trial_name, TrialComponentName=trial_component_obj.trial_component_name
+        )
+    time.sleep(1.0)
+    yield experiment_obj
+    experiment_obj.delete_all(action="--force")
+
+    # load experiment and verify experiment got deleted
+    with pytest.raises(sagemaker_boto_client.exceptions.ResourceNotFound):
+        sagemaker_boto_client.describe_experiment(ExperimentName=experiment_obj_name)
+    # load trials and verify trials got deleted
+    with pytest.raises(sagemaker_boto_client.exceptions.ResourceNotFound):
+        sagemaker_boto_client.describe_trial(TrialName=trial_name1)
+    with pytest.raises(sagemaker_boto_client.exceptions.ResourceNotFound):
+        sagemaker_boto_client.describe_trial(TrialName=trial_name2)
+    with pytest.raises(sagemaker_boto_client.exceptions.ResourceNotFound):
+        sagemaker_boto_client.describe_trial(TrialName=trial_name3)
+    # load trial component and verify trial component got deleted
+    with pytest.raises(sagemaker_boto_client.exceptions.ResourceNotFound):
+        sagemaker_boto_client.describe_trial_component(TrialComponentName=trial_component_name)
 
 
 @pytest.fixture
