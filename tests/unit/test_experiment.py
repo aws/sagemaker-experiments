@@ -210,3 +210,89 @@ def test_delete(sagemaker_boto_client):
     sagemaker_boto_client.delete_experiment.return_value = {}
     obj.delete()
     sagemaker_boto_client.delete_experiment.assert_called_with(ExperimentName="foo")
+
+
+def test_delete_all_with_incorrect_action_name(sagemaker_boto_client):
+    obj = experiment.Experiment(sagemaker_boto_client, experiment_name="foo", description="bar")
+    with pytest.raises(ValueError):
+        obj.delete_all(action="abc")
+
+
+def test_delete_all(sagemaker_boto_client):
+    obj = experiment.Experiment(sagemaker_boto_client, experiment_name="foo", description="bar")
+    sagemaker_boto_client.list_trials.return_value = {
+        "TrialSummaries": [
+            {"TrialName": "trial-1", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj},
+            {"TrialName": "trial-2", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj},
+        ]
+    }
+    sagemaker_boto_client.describe_trial.side_effect = [
+        {"Trialname": "trial-1", "ExperimentName": "experiment-name-value"},
+        {"Trialname": "trial-2", "ExperimentName": "experiment-name-value"},
+    ]
+    sagemaker_boto_client.list_trial_components.side_effect = [
+        {
+            "TrialComponentSummaries": [
+                {
+                    "TrialComponentName": "trial-component-1",
+                    "CreationTime": datetime_obj,
+                    "LastModifiedTime": datetime_obj,
+                },
+                {
+                    "TrialComponentName": "trial-component-2",
+                    "CreationTime": datetime_obj,
+                    "LastModifiedTime": datetime_obj,
+                },
+            ]
+        },
+        {
+            "TrialComponentSummaries": [
+                {
+                    "TrialComponentName": "trial-component-3",
+                    "CreationTime": datetime_obj,
+                    "LastModifiedTime": datetime_obj,
+                },
+                {
+                    "TrialComponentName": "trial-component-4",
+                    "CreationTime": datetime_obj,
+                    "LastModifiedTime": datetime_obj,
+                },
+            ]
+        },
+    ]
+
+    sagemaker_boto_client.describe_trial_component.side_effect = [
+        {"TrialComponentName": "trial-component-1"},
+        {"TrialComponentName": "trial-component-2"},
+        {"TrialComponentName": "trial-component-3"},
+        {"TrialComponentName": "trial-component-4"},
+    ]
+
+    sagemaker_boto_client.delete_trial_component.return_value = {}
+    sagemaker_boto_client.delete_trial.return_value = {}
+    sagemaker_boto_client.delete_experiment.return_value = {}
+
+    obj.delete_all(action="--force")
+
+    sagemaker_boto_client.delete_experiment.assert_called_with(ExperimentName="foo")
+
+    delete_trial_expected_calls = [
+        unittest.mock.call(TrialName="trial-1"),
+        unittest.mock.call(TrialName="trial-2"),
+    ]
+    assert delete_trial_expected_calls == sagemaker_boto_client.delete_trial.mock_calls
+
+    delete_trial_component_expected_calls = [
+        unittest.mock.call(TrialComponentName="trial-component-1"),
+        unittest.mock.call(TrialComponentName="trial-component-2"),
+        unittest.mock.call(TrialComponentName="trial-component-3"),
+        unittest.mock.call(TrialComponentName="trial-component-4"),
+    ]
+    assert delete_trial_component_expected_calls == sagemaker_boto_client.delete_trial_component.mock_calls
+
+
+def test_delete_all_fail(sagemaker_boto_client):
+    obj = experiment.Experiment(sagemaker_boto_client, experiment_name="foo", description="bar")
+    sagemaker_boto_client.list_trials.side_effect = Exception
+    with pytest.raises(Exception):
+        obj.delete_all(action="--force")

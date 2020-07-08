@@ -12,7 +12,8 @@
 # language governing permissions and limitations under the License.
 
 """Contains the SageMaker Experiment class."""
-from smexperiments import _base_types, api_types, trial, _utils
+from smexperiments import _base_types, api_types, trial, _utils, trial_component
+import time
 
 
 class Experiment(_base_types.Record):
@@ -227,3 +228,44 @@ class Experiment(_base_types.Record):
             experiment_name=self.experiment_name,
             sagemaker_boto_client=self.sagemaker_boto_client,
         )
+
+    def delete_all(self, action):
+        """
+        Force to delete the experiment and associated trials, trial components under the experiment.
+
+        Args:
+            action (str): pass in string '--force' to confirm recursively delete all the experiments, trials,
+            and trial components.
+        """
+        if action != "--force":
+            raise ValueError(
+                "Must confirm with string '--force' in order to delete the experiment and "
+                "associated trials, trial components."
+            )
+
+        delete_count = 0
+        last_exception_message = None
+        while True:
+            if delete_count == 3:
+                raise Exception("Fail to delete because" + last_exception_message + ", please try again.")
+            try:
+                for trial_summary in self.list_trials():
+                    t = trial.Trial.load(
+                        sagemaker_boto_client=self.sagemaker_boto_client, trial_name=trial_summary.trial_name
+                    )
+                    for trial_component_summary in t.list_trial_components():
+                        tc = trial_component.TrialComponent.load(
+                            sagemaker_boto_client=self.sagemaker_boto_client,
+                            trial_component_name=trial_component_summary.trial_component_name,
+                        )
+                        tc.delete(force_disassociate=True)
+                        t.remove_trial_component(tc)
+                        # to prevent throttling
+                        time.sleep(0.2)
+                    t.delete()
+                self.delete()
+                break
+            except Exception as ex:
+                last_exception_message = ex
+            finally:
+                delete_count = delete_count + 1

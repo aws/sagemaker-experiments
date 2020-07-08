@@ -11,6 +11,7 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 import datetime
+import pytest
 
 from tests.helpers import name
 from smexperiments import experiment, trial
@@ -125,3 +126,12 @@ def test_list_trials(experiment_obj, trials):
     trial_names = [trial_obj.trial_name for trial_obj in trials]
     assert set(trial_names) == set([s.trial_name for s in experiment_obj.list_trials()])
     assert trial_names  # sanity test
+
+
+def test_delete_all(complex_experiment_obj):
+    assert complex_experiment_obj.experiment_name
+
+
+def test_delete_all_fails(experiment_obj):
+    with pytest.raises(ValueError):
+        experiment_obj.delete_all(action="test")
