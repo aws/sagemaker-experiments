@@ -23,7 +23,8 @@ class Experiment(_base_types.Record):
     New experiments are created by calling :meth:`~smexperiments.experiment.Experiment.create`. Existing
     experiments can be reloaded by calling :meth:`~smexperiments.experiment.Experiment.load`. You can
     add a new trial to an Experiment by calling :meth:`~smexperiments.experiment.Experiment.create_trial`.
-    To remove a Trial from an experiment, delete the trial.
+    To remove an experiment and associated trials, trial components by calling :meth:`~smexperiments.experiment
+    .Experiment.delete_all`.
 
     Examples:
         .. code-block:: python
@@ -38,8 +39,7 @@ class Experiment(_base_types.Record):
             for trial in my_experiment.list_trials():
                 print(trial)
 
-            my_trial.delete()
-            my_experiment.delete()
+            my_experiment.delete_all(action="--force")
 
     Attributes:
         experiment_name (str): The name of the experiment. The name must be unique within an account.
