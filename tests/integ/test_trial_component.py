@@ -31,10 +31,6 @@ def test_create_tags(trial_component_obj, sagemaker_boto_client):
     assert actual_tags == trial_component_obj.tags
 
 
-def test_delete_with_disassociate(trial_component_with_disassociation_obj, sagemaker_boto_client):
-    assert trial_component_with_disassociation_obj.trial_component_name
-
-
 def test_delete_with_force_disassociate(trial_component_with_force_disassociation_obj, sagemaker_boto_client):
     assert trial_component_with_force_disassociation_obj.trial_component_name
     trials = sagemaker_boto_client.list_trials(
