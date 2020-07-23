@@ -294,5 +294,6 @@ def test_delete_all(sagemaker_boto_client):
 def test_delete_all_fail(sagemaker_boto_client):
     obj = experiment.Experiment(sagemaker_boto_client, experiment_name="foo", description="bar")
     sagemaker_boto_client.list_trials.side_effect = Exception
-    with pytest.raises(Exception):
+    with pytest.raises(Exception) as e:
         obj.delete_all(action="--force")
+    assert str(e.value) == "Fail to delete, please try again."

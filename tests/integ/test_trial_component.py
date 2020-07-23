@@ -28,6 +28,9 @@ def test_create_tags(trial_component_obj, sagemaker_boto_client):
         actual_tags = sagemaker_boto_client.list_tags(ResourceArn=trial_component_obj.trial_component_arn)["Tags"]
         if actual_tags:
             break
+    for tag in actual_tags:
+        if "aws:tag" in tag.get("Key"):
+            actual_tags.remove(tag)
     assert actual_tags == trial_component_obj.tags
 
 
