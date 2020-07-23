@@ -28,6 +28,9 @@ def test_create_tags(experiment_obj, sagemaker_boto_client):
         actual_tags = sagemaker_boto_client.list_tags(ResourceArn=experiment_obj.experiment_arn)["Tags"]
         if actual_tags:
             break
+    for tag in actual_tags:
+        if "aws:tag" in tag.get("Key"):
+            actual_tags.remove(tag)
     assert actual_tags == experiment_obj.tags
 
 
@@ -133,5 +136,5 @@ def test_delete_all(complex_experiment_obj):
 
 
 def test_delete_all_fails(experiment_obj):
-    with pytest.raises(ValueError):
+    with pytest.raises(Exception):
         experiment_obj.delete_all(action="test")

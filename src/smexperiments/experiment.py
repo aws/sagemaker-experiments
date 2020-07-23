@@ -244,10 +244,10 @@ class Experiment(_base_types.Record):
             )
 
         delete_count = 0
-        last_exception_message = None
+        last_exception = None
         while True:
             if delete_count == 3:
-                raise Exception("Fail to delete because" + last_exception_message + ", please try again.")
+                raise Exception("Fail to delete, please try again.") from last_exception
             try:
                 for trial_summary in self.list_trials():
                     t = trial.Trial.load(
@@ -266,6 +266,6 @@ class Experiment(_base_types.Record):
                 self.delete()
                 break
             except Exception as ex:
-                last_exception_message = ex
+                last_exception = ex
             finally:
                 delete_count = delete_count + 1
