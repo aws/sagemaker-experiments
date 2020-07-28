@@ -38,8 +38,8 @@ class TrialComponent(_base_types.Record):
         last_modified_time (datetime): When the trial component was last modified.
         last_modified_by (obj): Contextual info on which account last modified the trial component.
         parameters (dict): Dictionary of parameters to the source job.
-        input_artiacts (dict): Dictionary of input artifacts.
-        output_artiacts (dict): Dictionary of output artifacts.
+        input_artifacts (dict): Dictionary of input artifacts.
+        output_artifacts (dict): Dictionary of output artifacts.
         metrics (obj): Aggregated metrics for the job.
         parameters_to_remove (list): The hyperparameters to remove from the component.
         input_artifacts_to_remove (list): The input artifacts to remove from the component.
