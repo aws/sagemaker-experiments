@@ -12,6 +12,7 @@
 # language governing permissions and limitations under the License.
 """Contains the TrialComponent class."""
 from smexperiments import _base_types, api_types
+import time
 
 
 class TrialComponent(_base_types.Record):
@@ -127,6 +128,8 @@ class TrialComponent(_base_types.Record):
 
                 # Disassociate the trials and trial components
                 for trial in list_trials_response["TrialSummaries"]:
+                    # to prevent DisassociateTrialComponent throttling
+                    time.sleep(1.2)
                     self.sagemaker_boto_client.disassociate_trial_component(
                         TrialName=trial["TrialName"], TrialComponentName=self.trial_component_name
                     )
