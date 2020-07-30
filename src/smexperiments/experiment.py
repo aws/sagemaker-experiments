@@ -259,10 +259,11 @@ class Experiment(_base_types.Record):
                             trial_component_name=trial_component_summary.trial_component_name,
                         )
                         tc.delete(force_disassociate=True)
-                        t.remove_trial_component(tc)
                         # to prevent throttling
-                        time.sleep(0.2)
+                        time.sleep(1.2)
                     t.delete()
+                    # to prevent throttling
+                    time.sleep(1.2)
                 self.delete()
                 break
             except Exception as ex:
