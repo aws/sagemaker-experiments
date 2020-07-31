@@ -111,6 +111,31 @@ def test_file_metrics_writer_log_metric(timestamp, filepath):
     assert 2 == entry_four["IterationNumber"]
 
 
+def test_file_metrics_writer_flushes_buffer_every_line_log_metric(filepath):
+    writer = metrics.SageMakerFileMetricsWriter(filepath)
+
+    writer.log_metric(metric_name="foo", value=1.0)
+
+    lines = [x for x in open(filepath).read().split("\n") if x]
+    [entry_one] = [json.loads(line) for line in lines]
+    assert "foo" == entry_one["MetricName"]
+    assert 1.0 == entry_one["Value"]
+
+    writer.log_metric(metric_name="bar", value=2.0)
+    lines = [x for x in open(filepath).read().split("\n") if x]
+    [entry_one, entry_two] = [json.loads(line) for line in lines]
+    assert "bar" == entry_two["MetricName"]
+    assert 2.0 == entry_two["Value"]
+
+    writer.log_metric(metric_name="biz", value=3.0)
+    lines = [x for x in open(filepath).read().split("\n") if x]
+    [entry_one, entry_two, entry_three] = [json.loads(line) for line in lines]
+    assert "biz" == entry_three["MetricName"]
+    assert 3.0 == entry_three["Value"]
+
+    writer.close()
+
+
 def test_file_metrics_writer_context_manager(timestamp, filepath):
     with metrics.SageMakerFileMetricsWriter(filepath) as writer:
         writer.log_metric("foo", value=1.0, timestamp=timestamp)
