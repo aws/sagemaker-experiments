@@ -56,7 +56,7 @@ class SageMakerFileMetricsWriter(object):
             if self._closed:
                 raise SageMakerMetricsWriterException("log_metric called on a closed writer")
             elif not self._file:
-                self._file = open(self._get_metrics_file_path(), "a")
+                self._file = open(self._get_metrics_file_path(), "a", buffering=1)
                 self._file.write(json.dumps(raw_metric_data.to_record()))
                 self._file.write("\n")
             else:
