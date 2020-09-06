@@ -24,7 +24,9 @@ def test_search(sagemaker_boto_client, training_job_name, docker_image):
         search_filter = Filter(name="TrainingJobName", operator=Operator.EQUALS, value=training_job_name)
         search_expression = SearchExpression(filters=[search_filter])
         for s in TrainingJob.search(
-            search_expression=search_expression, max_results=10, sagemaker_boto_client=sagemaker_boto_client,
+            search_expression=search_expression,
+            max_results=10,
+            sagemaker_boto_client=sagemaker_boto_client,
         ):
             training_job_searched.append(s)
 

@@ -83,12 +83,12 @@ def from_boto(boto_dict, boto_name_to_member_name, member_name_to_type):
 def to_boto(member_vars, member_name_to_boto_name, member_name_to_type):
     """Convert a dict of of snake case names to values into a boto UpperCamelCase representation.
 
-       Args:
-           member_vars dict[str, ?]: A map from snake case name to value.
-           member_name_to_boto_name dict[str, ?]: A map from snake_case name to boto name.
+    Args:
+        member_vars dict[str, ?]: A map from snake case name to value.
+        member_name_to_boto_name dict[str, ?]: A map from snake_case name to boto name.
 
-        Returns:
-            dict: boto dict converted to snake case
+     Returns:
+         dict: boto dict converted to snake case
 
     """
     to_boto_values = {}

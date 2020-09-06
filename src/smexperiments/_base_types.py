@@ -21,7 +21,7 @@ class ApiObject(object):
     to dicts into/from a Python object with standard python members. Clients invoke to_boto on an instance
      of ApiObject to transform the ApiObject into a boto representation. Clients invoke from_boto on a sub-class of
      ApiObject to instantiate an instance of that class from a boto representation.
-     """
+    """
 
     # A map from boto 'UpperCamelCase' name to member name. If a boto name does not appear in this dict then
     # it is converted to lower_snake_case.
@@ -81,7 +81,8 @@ class ApiObject(object):
     def __repr__(self):
         """Returns a string representation of this ApiObject."""
         return "{}({})".format(
-            type(self).__name__, ",".join(["{}={}".format(k, repr(v)) for k, v in vars(self).items()]),
+            type(self).__name__,
+            ",".join(["{}={}".format(k, repr(v)) for k, v in vars(self).items()]),
         )
 
 

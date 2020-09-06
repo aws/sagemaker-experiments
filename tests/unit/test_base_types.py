@@ -125,7 +125,10 @@ def test_list_empty(sagemaker_boto_client):
     sagemaker_boto_client.list.return_value = {"TestRecordSummaries": []}
     assert [] == list(
         DummyRecord._list(
-            "list", DummyRecordSummary.from_boto, "TestRecordSummaries", sagemaker_boto_client=sagemaker_boto_client,
+            "list",
+            DummyRecordSummary.from_boto,
+            "TestRecordSummaries",
+            sagemaker_boto_client=sagemaker_boto_client,
         )
     )
 
@@ -134,7 +137,10 @@ def test_list_with_items(sagemaker_boto_client):
     sagemaker_boto_client.list.return_value = {"TestRecordSummaries": [{"Foo": "bar"}]}
     assert [DummyRecordSummary(foo="bar")] == list(
         DummyRecord._list(
-            "list", DummyRecordSummary.from_boto, "TestRecordSummaries", sagemaker_boto_client=sagemaker_boto_client,
+            "list",
+            DummyRecordSummary.from_boto,
+            "TestRecordSummaries",
+            sagemaker_boto_client=sagemaker_boto_client,
         )
     )
 
@@ -147,7 +153,10 @@ def test_list_with_next_token(sagemaker_boto_client):
 
     assert [DummyRecordSummary(a=i) for i in range(1, 5)] == list(
         DummyRecord._list(
-            "list", DummyRecordSummary.from_boto, "TestRecordSummaries", sagemaker_boto_client=sagemaker_boto_client,
+            "list",
+            DummyRecordSummary.from_boto,
+            "TestRecordSummaries",
+            sagemaker_boto_client=sagemaker_boto_client,
         )
     )
 

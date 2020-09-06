@@ -210,8 +210,20 @@ def test_list_trial_components_call_args(sagemaker_boto_client):
 def test_search(sagemaker_boto_client):
     sagemaker_boto_client.search.return_value = {
         "Results": [
-            {"TrialComponent": {"TrialComponentName": "tc-1", "TrialComponentArn": "arn::tc-1", "DisplayName": "TC1",}},
-            {"TrialComponent": {"TrialComponentName": "tc-2", "TrialComponentArn": "arn::tc-2", "DisplayName": "TC2",}},
+            {
+                "TrialComponent": {
+                    "TrialComponentName": "tc-1",
+                    "TrialComponentArn": "arn::tc-1",
+                    "DisplayName": "TC1",
+                }
+            },
+            {
+                "TrialComponent": {
+                    "TrialComponentName": "tc-2",
+                    "TrialComponentArn": "arn::tc-2",
+                    "DisplayName": "TC2",
+                }
+            },
         ]
     }
     expected = [

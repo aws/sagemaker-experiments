@@ -123,22 +123,29 @@ def complex_experiment_obj(sagemaker_boto_client):
     trial_name3 = name()
 
     next_trial1 = trial.Trial.create(
-        trial_name=trial_name1, experiment_name=experiment_obj_name, sagemaker_boto_client=sagemaker_boto_client,
+        trial_name=trial_name1,
+        experiment_name=experiment_obj_name,
+        sagemaker_boto_client=sagemaker_boto_client,
     )
     trial_objs.append(next_trial1)
     next_trial2 = trial.Trial.create(
-        trial_name=trial_name2, experiment_name=experiment_obj_name, sagemaker_boto_client=sagemaker_boto_client,
+        trial_name=trial_name2,
+        experiment_name=experiment_obj_name,
+        sagemaker_boto_client=sagemaker_boto_client,
     )
     trial_objs.append(next_trial2)
     next_trial3 = trial.Trial.create(
-        trial_name=trial_name3, experiment_name=experiment_obj_name, sagemaker_boto_client=sagemaker_boto_client,
+        trial_name=trial_name3,
+        experiment_name=experiment_obj_name,
+        sagemaker_boto_client=sagemaker_boto_client,
     )
     trial_objs.append(next_trial3)
 
     # create trial components
     trial_component_name = name()
     trial_component_obj = trial_component.TrialComponent.create(
-        trial_component_name=trial_component_name, sagemaker_boto_client=sagemaker_boto_client,
+        trial_component_name=trial_component_name,
+        sagemaker_boto_client=sagemaker_boto_client,
     )
 
     # associate the trials with trial components
@@ -181,7 +188,9 @@ def trial_obj(sagemaker_boto_client, experiment_obj):
 @pytest.fixture
 def trial_component_obj(sagemaker_boto_client):
     trial_component_obj = trial_component.TrialComponent.create(
-        trial_component_name=name(), sagemaker_boto_client=sagemaker_boto_client, tags=TAGS,
+        trial_component_name=name(),
+        sagemaker_boto_client=sagemaker_boto_client,
+        tags=TAGS,
     )
     yield trial_component_obj
     time.sleep(0.5)
@@ -346,7 +355,10 @@ def training_job_name(sagemaker_boto_client, training_role_arn, docker_image, tr
                 "DataSource": {"S3DataSource": {"S3Uri": training_s3_uri, "S3DataType": "S3Prefix"}},
             }
         ],
-        AlgorithmSpecification={"TrainingImage": docker_image, "TrainingInputMode": "File",},
+        AlgorithmSpecification={
+            "TrainingImage": docker_image,
+            "TrainingInputMode": "File",
+        },
         RoleArn=training_role_arn,
         ResourceConfig={"InstanceType": "ml.m5.large", "InstanceCount": 1, "VolumeSizeInGB": 10},
         StoppingCondition={"MaxRuntimeInSeconds": 900},

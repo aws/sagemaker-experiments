@@ -59,6 +59,8 @@ class Experiment(_base_types.Record):
     _boto_update_members = ["experiment_name", "description", "display_name"]
     _boto_delete_members = ["experiment_name"]
 
+    MAX_DELETE_ALL_ATTEMPTS = 3
+
     def save(self):
         """Save the state of this Experiment to SageMaker.
 
@@ -91,7 +93,9 @@ class Experiment(_base_types.Record):
             sagemaker.experiments.experiment.Experiment: A SageMaker ``Experiment`` object
         """
         return cls._construct(
-            cls._boto_load_method, experiment_name=experiment_name, sagemaker_boto_client=sagemaker_boto_client,
+            cls._boto_load_method,
+            experiment_name=experiment_name,
+            sagemaker_boto_client=sagemaker_boto_client,
         )
 
     @classmethod
@@ -119,7 +123,12 @@ class Experiment(_base_types.Record):
 
     @classmethod
     def list(
-        cls, created_before=None, created_after=None, sort_by=None, sort_order=None, sagemaker_boto_client=None,
+        cls,
+        created_before=None,
+        created_after=None,
+        sort_by=None,
+        sort_order=None,
+        sagemaker_boto_client=None,
     ):
         """
         List experiments. Returns experiments in the account matching the specified criteria.
@@ -152,7 +161,12 @@ class Experiment(_base_types.Record):
 
     @classmethod
     def search(
-        cls, search_expression=None, sort_by=None, sort_order=None, max_results=None, sagemaker_boto_client=None,
+        cls,
+        search_expression=None,
+        sort_by=None,
+        sort_order=None,
+        max_results=None,
+        sagemaker_boto_client=None,
     ):
         """
         Search experiments. Returns SearchResults in the account matching the search criteria.
@@ -243,11 +257,11 @@ class Experiment(_base_types.Record):
                 "associated trials, trial components."
             )
 
-        delete_count = 0
+        delete_attempt_count = 0
         last_exception = None
         while True:
-            if delete_count == 3:
-                raise Exception("Fail to delete, please try again.") from last_exception
+            if delete_attempt_count == self.MAX_DELETE_ALL_ATTEMPTS:
+                raise Exception("Failed to delete, please try again.") from last_exception
             try:
                 for trial_summary in self.list_trials():
                     t = trial.Trial.load(
@@ -269,4 +283,4 @@ class Experiment(_base_types.Record):
             except Exception as ex:
                 last_exception = ex
             finally:
-                delete_count = delete_count + 1
+                delete_attempt_count = delete_attempt_count + 1

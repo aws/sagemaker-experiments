@@ -24,7 +24,7 @@ from smexperiments import api_types, metrics, trial_component, _utils, _environm
 
 
 class Tracker(object):
-    """"A SageMaker Experiments Tracker.
+    """A SageMaker Experiments Tracker.
 
     Use a tracker object to record experiment information to a SageMaker trial component.
 

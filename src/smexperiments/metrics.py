@@ -137,5 +137,6 @@ class _RawMetricData(object):
 
     def __repr__(self):
         return "{}({})".format(
-            type(self).__name__, ",".join(["{}={}".format(k, repr(v)) for k, v in vars(self).items()]),
+            type(self).__name__,
+            ",".join(["{}={}".format(k, repr(v)) for k, v in vars(self).items()]),
         )

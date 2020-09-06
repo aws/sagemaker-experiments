@@ -154,8 +154,16 @@ def test_remove_trial_component_from_tracker(sagemaker_boto_client):
 def test_list_trials_without_experiment_name(sagemaker_boto_client, datetime_obj):
     sagemaker_boto_client.list_trials.return_value = {
         "TrialSummaries": [
-            {"TrialName": "trial-1", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj,},
-            {"TrialName": "trial-2", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj,},
+            {
+                "TrialName": "trial-1",
+                "CreationTime": datetime_obj,
+                "LastModifiedTime": datetime_obj,
+            },
+            {
+                "TrialName": "trial-2",
+                "CreationTime": datetime_obj,
+                "LastModifiedTime": datetime_obj,
+            },
         ]
     }
     expected = [
@@ -169,8 +177,16 @@ def test_list_trials_without_experiment_name(sagemaker_boto_client, datetime_obj
 def test_list_trials_with_experiment_name(sagemaker_boto_client, datetime_obj):
     sagemaker_boto_client.list_trials.return_value = {
         "TrialSummaries": [
-            {"TrialName": "trial-1", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj,},
-            {"TrialName": "trial-2", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj,},
+            {
+                "TrialName": "trial-1",
+                "CreationTime": datetime_obj,
+                "LastModifiedTime": datetime_obj,
+            },
+            {
+                "TrialName": "trial-2",
+                "CreationTime": datetime_obj,
+                "LastModifiedTime": datetime_obj,
+            },
         ]
     }
     expected = [
@@ -184,8 +200,16 @@ def test_list_trials_with_experiment_name(sagemaker_boto_client, datetime_obj):
 def test_list_trials_with_trial_component_name(sagemaker_boto_client, datetime_obj):
     sagemaker_boto_client.list_trials.return_value = {
         "TrialSummaries": [
-            {"TrialName": "trial-1", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj,},
-            {"TrialName": "trial-2", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj,},
+            {
+                "TrialName": "trial-1",
+                "CreationTime": datetime_obj,
+                "LastModifiedTime": datetime_obj,
+            },
+            {
+                "TrialName": "trial-2",
+                "CreationTime": datetime_obj,
+                "LastModifiedTime": datetime_obj,
+            },
         ]
     }
     expected = [
@@ -201,8 +225,20 @@ def test_list_trials_with_trial_component_name(sagemaker_boto_client, datetime_o
 def test_search(sagemaker_boto_client):
     sagemaker_boto_client.search.return_value = {
         "Results": [
-            {"Trial": {"TrialName": "trial-1", "TrialArn": "arn::trial-1", "DisplayName": "Trial1",}},
-            {"Trial": {"TrialName": "trial-2", "TrialArn": "arn::trial-2", "DisplayName": "Trial2",}},
+            {
+                "Trial": {
+                    "TrialName": "trial-1",
+                    "TrialArn": "arn::trial-1",
+                    "DisplayName": "Trial1",
+                }
+            },
+            {
+                "Trial": {
+                    "TrialName": "trial-2",
+                    "TrialArn": "arn::trial-2",
+                    "DisplayName": "Trial2",
+                }
+            },
         ]
     }
     expected = [
@@ -212,6 +248,11 @@ def test_search(sagemaker_boto_client):
     assert expected == list(trial.Trial.search(sagemaker_boto_client=sagemaker_boto_client))
 
 
+def test_boto_ignore():
+    obj = trial.Trial(sagemaker_boto_client, trial_name="foo")
+    assert obj._boto_ignore() == ["ResponseMetadata", "CreatedBy"]
+
+
 def test_delete(sagemaker_boto_client):
     obj = trial.Trial(sagemaker_boto_client, trial_name="foo")
     sagemaker_boto_client.delete_trial.return_value = {}
@@ -219,6 +260,75 @@ def test_delete(sagemaker_boto_client):
     sagemaker_boto_client.delete_trial.assert_called_with(TrialName="foo")
 
 
-def test_boto_ignore():
+def test_delete_all_with_incorrect_action_name(sagemaker_boto_client):
     obj = trial.Trial(sagemaker_boto_client, trial_name="foo")
-    assert obj._boto_ignore() == ["ResponseMetadata", "CreatedBy"]
+    with pytest.raises(ValueError):
+        obj.delete_all(action="abc")
+
+
+def test_delete_all(sagemaker_boto_client):
+    obj = trial.Trial(sagemaker_boto_client, trial_name="foo")
+
+    sagemaker_boto_client.list_trials.return_value = {
+        "TrialSummaries": [
+            {"TrialName": "trial-1", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj},
+            {"TrialName": "trial-2", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj},
+        ]
+    }
+
+    sagemaker_boto_client.list_trial_components.side_effect = [
+        {
+            "TrialComponentSummaries": [
+                {
+                    "TrialComponentName": "trial-component-1",
+                    "CreationTime": datetime_obj,
+                    "LastModifiedTime": datetime_obj,
+                },
+                {
+                    "TrialComponentName": "trial-component-2",
+                    "CreationTime": datetime_obj,
+                    "LastModifiedTime": datetime_obj,
+                },
+                {
+                    "TrialComponentName": "trial-component-3",
+                    "CreationTime": datetime_obj,
+                    "LastModifiedTime": datetime_obj,
+                },
+                {
+                    "TrialComponentName": "trial-component-4",
+                    "CreationTime": datetime_obj,
+                    "LastModifiedTime": datetime_obj,
+                },
+            ]
+        },
+    ]
+
+    sagemaker_boto_client.describe_trial_component.side_effect = [
+        {"TrialComponentName": "trial-component-1"},
+        {"TrialComponentName": "trial-component-2"},
+        {"TrialComponentName": "trial-component-3"},
+        {"TrialComponentName": "trial-component-4"},
+    ]
+
+    sagemaker_boto_client.delete_trial_component.return_value = {}
+    sagemaker_boto_client.delete_trial.return_value = {}
+
+    obj.delete_all(action="--force")
+
+    sagemaker_boto_client.delete_trial.assert_called_with(TrialName="foo")
+
+    delete_trial_component_expected_calls = [
+        unittest.mock.call(TrialComponentName="trial-component-1"),
+        unittest.mock.call(TrialComponentName="trial-component-2"),
+        unittest.mock.call(TrialComponentName="trial-component-3"),
+        unittest.mock.call(TrialComponentName="trial-component-4"),
+    ]
+    assert delete_trial_component_expected_calls == sagemaker_boto_client.delete_trial_component.mock_calls
+
+
+def test_delete_all_fail(sagemaker_boto_client):
+    obj = trial.Trial(sagemaker_boto_client, trial_name="foo")
+    sagemaker_boto_client.list_trials.side_effect = Exception
+    with pytest.raises(Exception) as e:
+        obj.delete_all(action="--force")
+    assert str(e.value) == "Failed to delete, please try again."
