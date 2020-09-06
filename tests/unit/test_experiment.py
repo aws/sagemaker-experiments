@@ -63,16 +63,28 @@ def test_create_with_tags(sagemaker_boto_client):
 def test_list(sagemaker_boto_client, datetime_obj):
     sagemaker_boto_client.list_experiments.return_value = {
         "ExperimentSummaries": [
-            {"ExperimentName": "experiment-1", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj,},
-            {"ExperimentName": "experiment-2", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj,},
+            {
+                "ExperimentName": "experiment-1",
+                "CreationTime": datetime_obj,
+                "LastModifiedTime": datetime_obj,
+            },
+            {
+                "ExperimentName": "experiment-2",
+                "CreationTime": datetime_obj,
+                "LastModifiedTime": datetime_obj,
+            },
         ]
     }
     expected = [
         api_types.ExperimentSummary(
-            experiment_name="experiment-1", creation_time=datetime_obj, last_modified_time=datetime_obj,
+            experiment_name="experiment-1",
+            creation_time=datetime_obj,
+            last_modified_time=datetime_obj,
         ),
         api_types.ExperimentSummary(
-            experiment_name="experiment-2", creation_time=datetime_obj, last_modified_time=datetime_obj,
+            experiment_name="experiment-2",
+            creation_time=datetime_obj,
+            last_modified_time=datetime_obj,
         ),
     ]
     assert expected == list(experiment.Experiment.list(sagemaker_boto_client=sagemaker_boto_client))
@@ -115,12 +127,28 @@ def test_next_token(sagemaker_boto_client, datetime_obj):
     sagemaker_boto_client.list_trials.side_effect = [
         {
             "TrialSummaries": [
-                {"Name": "trial-foo-1", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj,},
-                {"Name": "trial-foo-2", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj,},
+                {
+                    "Name": "trial-foo-1",
+                    "CreationTime": datetime_obj,
+                    "LastModifiedTime": datetime_obj,
+                },
+                {
+                    "Name": "trial-foo-2",
+                    "CreationTime": datetime_obj,
+                    "LastModifiedTime": datetime_obj,
+                },
             ],
             "NextToken": "foo",
         },
-        {"TrialSummaries": [{"Name": "trial-foo-3", "CreationTime": datetime_obj, "LastModifiedTime": datetime_obj,}]},
+        {
+            "TrialSummaries": [
+                {
+                    "Name": "trial-foo-3",
+                    "CreationTime": datetime_obj,
+                    "LastModifiedTime": datetime_obj,
+                }
+            ]
+        },
     ]
 
     assert list(experiment_obj.list_trials()) == [
@@ -166,7 +194,9 @@ def test_search(sagemaker_boto_client):
             experiment_name="experiment-1", experiment_arn="arn::experiment-1", display_name="Experiment1"
         ),
         api_types.ExperimentSearchResult(
-            experiment_name="experiment-2", experiment_arn="arn::experiment-2", display_name="Experiment2",
+            experiment_name="experiment-2",
+            experiment_arn="arn::experiment-2",
+            display_name="Experiment2",
         ),
     ]
     assert expected == list(experiment.Experiment.search(sagemaker_boto_client=sagemaker_boto_client))
@@ -296,4 +326,4 @@ def test_delete_all_fail(sagemaker_boto_client):
     sagemaker_boto_client.list_trials.side_effect = Exception
     with pytest.raises(Exception) as e:
         obj.delete_all(action="--force")
-    assert str(e.value) == "Fail to delete, please try again."
+    assert str(e.value) == "Failed to delete, please try again."

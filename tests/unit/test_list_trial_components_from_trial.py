@@ -44,10 +44,14 @@ def test_list_trial_components(sagemaker_boto_client, datetime_obj):
     }
     expected = [
         api_types.TrialComponentSummary(
-            trial_component_name="trial-component-1", creation_time=datetime_obj, last_modified_time=datetime_obj,
+            trial_component_name="trial-component-1",
+            creation_time=datetime_obj,
+            last_modified_time=datetime_obj,
         ),
         api_types.TrialComponentSummary(
-            trial_component_name="trial-component-2", creation_time=datetime_obj, last_modified_time=datetime_obj,
+            trial_component_name="trial-component-2",
+            creation_time=datetime_obj,
+            last_modified_time=datetime_obj,
         ),
     ]
 

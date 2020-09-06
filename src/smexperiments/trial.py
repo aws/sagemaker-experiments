@@ -13,6 +13,7 @@
 """Contains the Trial class."""
 
 from smexperiments import api_types, _base_types, trial_component, _utils, tracker
+import time
 
 
 class Trial(_base_types.Record):
@@ -57,6 +58,8 @@ class Trial(_base_types.Record):
 
     _boto_update_members = ["trial_name", "display_name"]
     _boto_delete_members = ["trial_name"]
+
+    MAX_DELETE_ALL_ATTEMPTS = 3
 
     @classmethod
     def _boto_ignore(cls):
@@ -170,7 +173,12 @@ class Trial(_base_types.Record):
 
     @classmethod
     def search(
-        cls, search_expression=None, sort_by=None, sort_order=None, max_results=None, sagemaker_boto_client=None,
+        cls,
+        search_expression=None,
+        sort_by=None,
+        sort_order=None,
+        max_results=None,
+        sagemaker_boto_client=None,
     ):
         """
         Search experiments. Returns SearchResults in the account matching the search criteria.
@@ -270,3 +278,36 @@ class Trial(_base_types.Record):
             next_token=next_token,
             sagemaker_boto_client=self.sagemaker_boto_client,
         )
+
+    def delete_all(self, action):
+        """
+        Force to delete the trial and associated trial components under.
+
+        Args:
+            action (str): pass in string '--force' to confirm delete the trial and all associated trial components.
+        """
+        if action != "--force":
+            raise ValueError(
+                "Must confirm with string '--force' in order to delete the trial and " "associated trial components."
+            )
+
+        delete_attempt_count = 0
+        last_exception = None
+        while True:
+            if delete_attempt_count == self.MAX_DELETE_ALL_ATTEMPTS:
+                raise Exception("Failed to delete, please try again.") from last_exception
+            try:
+                for trial_component_summary in self.list_trial_components():
+                    tc = trial_component.TrialComponent.load(
+                        sagemaker_boto_client=self.sagemaker_boto_client,
+                        trial_component_name=trial_component_summary.trial_component_name,
+                    )
+                    tc.delete(force_disassociate=True)
+                    # to prevent throttling
+                    time.sleep(1.2)
+                self.delete()
+                break
+            except Exception as ex:
+                last_exception = ex
+            finally:
+                delete_attempt_count = delete_attempt_count + 1

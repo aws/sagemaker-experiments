@@ -228,7 +228,12 @@ class TrialComponent(_base_types.Record):
 
     @classmethod
     def search(
-        cls, search_expression=None, sort_by=None, sort_order=None, max_results=None, sagemaker_boto_client=None,
+        cls,
+        search_expression=None,
+        sort_by=None,
+        sort_order=None,
+        max_results=None,
+        sagemaker_boto_client=None,
     ):
         """
         Search experiments. Returns SearchResults in the account matching the search criteria.

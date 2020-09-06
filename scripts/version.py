@@ -49,7 +49,11 @@ def parse(version):
     if not match:
         raise ValueError(f"invalid version: {version}")
 
-    return Version(int(match.group("major") or 0), int(match.group("minor") or 0), int(match.group("patch") or 0),)
+    return Version(
+        int(match.group("major") or 0),
+        int(match.group("minor") or 0),
+        int(match.group("patch") or 0),
+    )
 
 
 def next_version_from_current_version(current_version, increment_type):
