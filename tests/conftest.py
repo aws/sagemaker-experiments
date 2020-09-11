@@ -153,6 +153,7 @@ def complex_experiment_obj(sagemaker_boto_client):
         sagemaker_boto_client.associate_trial_component(
             TrialName=trial_obj.trial_name, TrialComponentName=trial_component_obj.trial_component_name
         )
+        time.sleep(0.5)
     time.sleep(1.0)
     yield experiment_obj
     experiment_obj.delete_all(action="--force")
