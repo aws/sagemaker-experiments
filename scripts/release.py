@@ -8,7 +8,7 @@ from release_manager import ReleaseManager
 
 
 def recent_changes_to_src(last_version):
-    stdout = check_output(["git", "log", "{}..HEAD".format(last_version), "--name-only", "--pretty=format: master"])
+    stdout = check_output(["git", "log", "{}..HEAD".format(last_version), "--name-only", "--pretty=format: main"])
     stdout = stdout.decode("utf-8")
     lines = stdout.splitlines()
     src_lines = list(filter(lambda l: l.startswith("src"), lines))

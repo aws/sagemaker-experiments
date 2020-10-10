@@ -3,7 +3,7 @@ name: Test and Release
 on:
   pull_request:
     branches:
-      - master
+      - main
   push:
     paths:
     - 'src/**'
