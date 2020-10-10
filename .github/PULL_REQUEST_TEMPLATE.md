@@ -10,9 +10,9 @@ _Put an `x` in the boxes that apply. You can also fill these out after creating 
 
 #### General
 
-- [ ] I have read the [CONTRIBUTING](https://github.com/aws/sagemaker-experiments/blob/master/CONTRIBUTING.md) doc
-- [ ] I used the commit message format described in [CONTRIBUTING](https://github.com/aws/sagemaker-experiments/blob/master/CONTRIBUTING.md#committing-your-change)
-- [ ] I have updated any necessary documentation, including [READMEs](https://github.com/aws/sagemaker-experiments/blob/master/README.rst) and [API docs](https://github.com/aws/sagemaker-experiments/tree/master/doc) (if appropriate)
+- [ ] I have read the [CONTRIBUTING](https://github.com/aws/sagemaker-experiments/blob/main/CONTRIBUTING.md) doc
+- [ ] I used the commit message format described in [CONTRIBUTING](https://github.com/aws/sagemaker-experiments/blob/main/CONTRIBUTING.md#committing-your-change)
+- [ ] I have updated any necessary documentation, including [READMEs](https://github.com/aws/sagemaker-experiments/blob/main/README.rst) and [API docs](https://github.com/aws/sagemaker-experiments/tree/main/doc) (if appropriate)
 
 #### Tests
 

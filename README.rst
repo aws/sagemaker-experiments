@@ -1,4 +1,4 @@
-.. image:: https://github.com/aws/sagemaker-experiments/raw/master/branding/icon/sagemaker-banner.png
+.. image:: https://github.com/aws/sagemaker-experiments/raw/main/branding/icon/sagemaker-banner.png
     :height: 100px
     :alt: SageMaker
     :target: https://aws.amazon.com/sagemaker/
@@ -16,14 +16,14 @@ SageMaker Experiments Python SDK
     :alt: Supported Python Versions
 
 .. image:: https://img.shields.io/pypi/l/sagemaker-experiments
-    :target: https://github.com/aws/sagemaker-experiments/blob/master/LICENSE
+    :target: https://github.com/aws/sagemaker-experiments/blob/main/LICENSE
     :alt: License
 
 .. image:: https://img.shields.io/pypi/dm/sagemaker-experiments
     :target: https://pypi.python.org/pypi/sagemaker-experiments
     :alt: PyPI - Downloads
 
-.. image:: https://codecov.io/gh/aws/sagemaker-experiments/branch/master/graph/badge.svg
+.. image:: https://codecov.io/gh/aws/sagemaker-experiments/branch/main/graph/badge.svg
    :target: https://codecov.io/gh/aws/sagemaker-experiments
    :alt: CodeCov
 
@@ -64,7 +64,7 @@ SageMaker Experiments Python SDK
     :alt: Read the Docs - Sagemaker Experiments
 
 .. image:: https://mybinder.org/badge_logo.svg
-    :target: https://mybinder.org/v2/gh/awslabs/amazon-sagemaker-examples/master?filepath=sagemaker-experiments%2Fmnist-handwritten-digits-classification-experiment.ipynb
+    :target: https://mybinder.org/v2/gh/aws/amazon-sagemaker-examples/main?filepath=sagemaker-experiments%2Fmnist-handwritten-digits-classification-experiment.ipynb
 
 
 
@@ -168,7 +168,7 @@ Examples
     analytic_table = trial_component_analytics.dataframe()
     analytic_table
 
-For more examples, check out: `sagemaker-experiments <https://github.com/awslabs/amazon-sagemaker-examples/tree/master/sagemaker-experiments>`_ in `AWS Labs Amazon SageMaker Examples <https://github.com/awslabs/amazon-sagemaker-examples>`_.
+For more examples, check out: `sagemaker-experiments <https://github.com/aws/amazon-sagemaker-examples/tree/master/sagemaker-experiments>`_ in `AWS Labs Amazon SageMaker Examples <https://github.com/aws/amazon-sagemaker-examples>`_.
 
 License
 -------
