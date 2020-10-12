@@ -16,6 +16,8 @@ from smexperiments import _base_types, api_types
 
 
 class TrainingJob(_base_types.Record):
+    """Search for training jobs"""
+    
     @classmethod
     def search(
         cls,

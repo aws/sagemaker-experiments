@@ -104,6 +104,7 @@ class TrialComponentParameterValue(_base_types.ApiObject):
         )
 
     def __str__(self):
+        """String representation of TrialComponentParameterValue"""
         if self.string_value is not None:
             return self.string_value
         if self.number_value is not None:

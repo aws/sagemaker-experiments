@@ -10,9 +10,7 @@ PROCESSING_JOB_CONFIG_PATH = "/opt/ml/config/processingjobconfig.json"
 
 
 class EnvironmentType(enum.Enum):
-    """
-    SageMaker jobs which data can be pulled from the environment.
-    """
+    """SageMaker jobs which data can be pulled from the environment."""
 
     SageMakerTrainingJob = 1
     SageMakerProcessingJob = 2
