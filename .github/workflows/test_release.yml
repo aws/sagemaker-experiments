@@ -27,6 +27,8 @@ jobs:
         run: tox -e black-check
       - name: Pylint
         run: tox -e pylint
+      - name: Docstyle
+        run: tox -e docstyle
 
   test:
     runs-on: ubuntu-latest

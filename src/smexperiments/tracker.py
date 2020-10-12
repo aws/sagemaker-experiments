@@ -298,6 +298,7 @@ class Tracker(object):
                 raise
 
     def __enter__(self):
+        """Updates the start time of the tracked trial component."""
         self._start_time = datetime.datetime.now(dateutil.tz.tzlocal())
         if not self._in_sagemaker_job:
             self.trial_component.start_time = self._start_time
@@ -305,6 +306,7 @@ class Tracker(object):
         return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
+        """Updates the end time of the tracked trial component."""
         self._end_time = datetime.datetime.now(dateutil.tz.tzlocal())
         if not self._in_sagemaker_job:
             self.trial_component.end_time = self._end_time

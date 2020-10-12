@@ -17,6 +17,8 @@ from enum import Enum, unique
 
 @unique
 class Operator(Enum):
+    """Search operators"""
+    
     EQUALS = "Equals"
     NOT_EQUALS = "NotEquals"
     GREATER_THAN = "GreaterThan"
@@ -30,19 +32,22 @@ class Operator(Enum):
 
 @unique
 class BooleanOperator(Enum):
+    """Boolean search operation enum"""
+    
     AND = "And"
     OR = "Or"
 
 
 class SearchObject(ApiObject):
+    """SearchObject"""
+    
     def to_boto(self):
+        """Convert a search object to boto"""
         return ApiObject.to_boto(self)
 
 
 class Filter(SearchObject):
-    """
-    A Python class represent a Search Filter object.
-    """
+    """A Python class represent a Search Filter object."""
 
     name = None
     operator = None
@@ -62,9 +67,7 @@ class Filter(SearchObject):
 
 
 class NestedFilter(SearchObject):
-    """
-    A Python class represent a Nested Filter object.
-    """
+    """A Python class represent a Nested Filter object."""
 
     nested_property_name = None
     filters = None
