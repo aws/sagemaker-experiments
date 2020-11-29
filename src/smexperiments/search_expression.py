@@ -1,4 +1,4 @@
-# Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"). You
 # may not use this file except in compliance with the License. A copy of
@@ -18,7 +18,7 @@ from enum import Enum, unique
 @unique
 class Operator(Enum):
     """Search operators"""
-    
+
     EQUALS = "Equals"
     NOT_EQUALS = "NotEquals"
     GREATER_THAN = "GreaterThan"
@@ -33,14 +33,14 @@ class Operator(Enum):
 @unique
 class BooleanOperator(Enum):
     """Boolean search operation enum"""
-    
+
     AND = "And"
     OR = "Or"
 
 
 class SearchObject(ApiObject):
     """SearchObject"""
-    
+
     def to_boto(self):
         """Convert a search object to boto"""
         return ApiObject.to_boto(self)
@@ -101,7 +101,7 @@ class SearchExpression(SearchObject):
             filters (list): list of Filter objects
             nested_filters (list): list of Nested Filters objects
             sub_expressions (list): list of Search Expresssion objects
-            operator (dict): one of the boolean operator enums
+            boolean_operator (dict): one of the boolean operator enums
         """
         if filters is None and nested_filters is None and sub_expressions is None:
             raise ValueError("You must specify at least one subexpression, filter, or nested filter")

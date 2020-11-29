@@ -1,4 +1,4 @@
-# Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"). You
 # may not use this file except in compliance with the License. A copy of
@@ -10,7 +10,7 @@
 # distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
-"""Contains api objects for SageMaker experiments."""
+"""Contains API objects for SageMaker experiments."""
 import numbers
 
 from smexperiments import _base_types
@@ -20,7 +20,7 @@ class ExperimentSummary(_base_types.ApiObject):
     """Summary model of an experiment.
 
     Attributes:
-        experiment_arn (str): Arn of the experiment.
+        experiment_arn (str): ARN of the experiment.
         experiment_name (str): Name of the experiment.
         creation_time (datetime): Date experiment was created.
         last_modified_time (datetime): Date experiment was last modified.
@@ -72,7 +72,7 @@ class TrialSummary(_base_types.ApiObject):
     """Summary model of a trial.
 
     Attributes:
-        trial_arn (str): The arn of the trial.
+        trial_arn (str): The ARN of the trial.
         trial_name (str): The name of the trial.
         creation_time (datetime):  When the trial was created.
         last_modified_time (datetime): When the trial was last modified.
@@ -185,9 +185,9 @@ class TrialComponentSummary(_base_types.ApiObject):
 
     Attributes:
         trial_component_name (str): Name of trial component.
-        trial_component_arn (str): Arn of the trial component.
+        trial_component_arn (str): ARN of the trial component.
         display_name (str): Friendly display name.
-        source_arn (str): Arn of the trial component source.
+        source_arn (str): ARN of the trial component source.
         status (str): Status.
         start_time (datetime): Start time.
         end_time (datetime): End time.
@@ -220,7 +220,7 @@ class ExperimentSource(_base_types.ApiObject):
     """ExperimentSource
 
     Attributes:
-        source_arn (str): The arn of the source.
+        source_arn (str): The ARN of the source.
     """
 
     source_arn = None
@@ -233,7 +233,7 @@ class TrialSource(_base_types.ApiObject):
     """TrialSource
 
     Attributes:
-        source_arn (str): The arn of the source.
+        source_arn (str): The ARN of the source.
     """
 
     source_arn = None
@@ -246,7 +246,7 @@ class TrialComponentSource(_base_types.ApiObject):
     """TrialComponentsource
 
     Attributes:
-        source_arn (str): The arn of the source.
+        source_arn (str): The ARN of the source.
     """
 
     source_arn = None
@@ -356,7 +356,7 @@ class ExperimentSearchResult(_base_types.ApiObject):
     """Summary model of an Experiment search result.
 
     Attributes:
-        experiment_arn (str): Arn of the experiment.
+        experiment_arn (str): ARN of the experiment.
         experiment_name (str): Name of the experiment.
         display_name (str): Display name of the experiment.
         source (dict): The source of the experiment
@@ -384,7 +384,7 @@ class TrialSearchResult(_base_types.ApiObject):
     """Summary model of an Trial search result.
 
     Attributes:
-        trial_arn (str): Arn of the trial.
+        trial_arn (str): ARN of the trial.
         trial_name (str): Name of the trial.
         display_name (str): Display name of the trial.
         source (dict): The source of the trial.
@@ -424,7 +424,7 @@ class TrialComponentSearchResult(_base_types.ApiObject):
     """Summary model of an Trial Component search result.
 
     Attributes:
-        trial_component_arn (str): Arn of the trial component.
+        trial_component_arn (str): ARN of the trial component.
         trial_component_name (str): Name of the trial component.
         display_name (str): Display name of the trial component.
         source (dict): The source of the trial component.

@@ -1,3 +1,15 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
 import enum
 import json
 import os
@@ -21,7 +33,7 @@ class TrialComponentEnvironment(object):
 
     Attributes:
         environment_type (EnvironmentType): The environment type.
-        source_arn (str): The arn of the current job.
+        source_arn (str): The ARN of the current job.
     """
 
     environment_type = None
@@ -36,7 +48,7 @@ class TrialComponentEnvironment(object):
         """Loads source arn of current job from environment.
 
         Args:
-            training_job_arn_env (str): The environment key for training job arn.
+            training_job_arn_env (str): The environment key for training job ARN.
             processing_job_config_path (str): The processing job config path.
 
         Returns:

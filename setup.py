@@ -1,10 +1,10 @@
-# Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"). You
 # may not use this file except in compliance with the License. A copy of
 # the License is located at
 #
-#     http://aws.amazon.com/apache2.0/
+#   http://aws.amazon.com/apache2.0/
 #
 # or in the "license" file accompanying this file. This file is
 # distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
@@ -24,7 +24,7 @@ def read(fname):
 
 
 # Declare minimal set for installation
-required_packages = ["boto3>=1.12.8"]
+required_packages = ["boto3>=1.16.27"]
 
 # Open readme with original (i.e. LF) newlines
 # to prevent the all too common "`long_description_content_type` missing"
@@ -68,6 +68,8 @@ setup(
             "pytest-rerunfailures",
             "pytest-xdist",
             "docker",
+            "pandas",
+            "sklearn",
         ]
     },
 )

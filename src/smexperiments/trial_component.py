@@ -1,4 +1,4 @@
-# Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"). You
 # may not use this file except in compliance with the License. A copy of
@@ -112,6 +112,9 @@ class TrialComponent(_base_types.Record):
             before deletion. If set to true, force disassociate the trial component with associated trials first, then
             delete the trial component. If it's not set or set to false, it will delete the trial component directory
              without disassociation.
+
+          Returns:
+            dict: Delete trial component response.
         """
         if force_disassociate:
             next_token = None
@@ -139,7 +142,7 @@ class TrialComponent(_base_types.Record):
                 else:
                     break
 
-        self._invoke_api(self._boto_delete_method, self._boto_delete_members)
+        return self._invoke_api(self._boto_delete_method, self._boto_delete_members)
 
     @classmethod
     def load(cls, trial_component_name, sagemaker_boto_client=None):
@@ -163,6 +166,13 @@ class TrialComponent(_base_types.Record):
     @classmethod
     def create(cls, trial_component_name, display_name=None, tags=None, sagemaker_boto_client=None):
         """Create a trial component and return a ``TrialComponent`` object representing it.
+
+        Args:
+            trial_component_name (str): The name of the trial component.
+            display_name (str): Display name of the trial component used by Studio. Defaults to
+                None.
+            tags (dict): Tags to add to the trial component. Defaults to None.
+            sagemaker_boto_client (obj): SageMaker boto client. Defaults to None.
 
         Returns:
             smexperiments.trial_component.TrialComponent: A SageMaker ``TrialComponent``
@@ -251,7 +261,8 @@ class TrialComponent(_base_types.Record):
                 supplied, a default boto3 client will be used.
 
         Returns:
-            collections.Iterator[SearchResult] : An iterator over search results matching the search criteria.
+            collections.Iterator[SearchResult] : An iterator over search results matching the
+            search criteria.
         """
         return super(TrialComponent, cls)._search(
             search_resource="ExperimentTrialComponent",

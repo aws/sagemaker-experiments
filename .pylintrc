@@ -3,7 +3,7 @@
 # * https://github.com/google/seq2seq/blob/master/pylintrc
 # * https://github.com/google/pygtrie/blob/master/.pylintrc
 
-[MASTER]
+[MAIN]
 
 # Specify a configuration file.
 #rcfile=
@@ -289,7 +289,7 @@ spelling-dict=
 spelling-ignore-words=
 
 # A path to a file that contains private dictionary; one word per line.
-spelling-private-dict-file=
+spelling-private-dict-file=.dictionary
 
 # Tells whether to store unknown words to indicated private dictionary in
 # --spelling-private-dict-file option instead of raising a message.

@@ -1,4 +1,4 @@
-# Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"). You
 # may not use this file except in compliance with the License. A copy of
@@ -45,6 +45,7 @@ class SageMakerFileMetricsWriter(object):
 
         Raises:
             SageMakerMetricsWriterException: If the metrics file is closed.
+            AttributeError: If file has been initialized and the writer hasn't been closed.
         """
         raw_metric_data = _RawMetricData(
             metric_name=metric_name, value=value, timestamp=timestamp, iteration_number=iteration_number

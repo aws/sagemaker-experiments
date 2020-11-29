@@ -1,4 +1,4 @@
-# Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"). You
 # may not use this file except in compliance with the License. A copy of
@@ -82,7 +82,7 @@ class Trial(_base_types.Record):
          Returns:
             dict: Delete trial response.
         """
-        self._invoke_api(self._boto_delete_method, self._boto_delete_members)
+        return self._invoke_api(self._boto_delete_method, self._boto_delete_members)
 
     @classmethod
     def load(cls, trial_name, sagemaker_boto_client=None):
@@ -214,9 +214,9 @@ class Trial(_base_types.Record):
         A trial component may belong to many trials and a trial may have many trial components.
 
         Args:
-           tc: (tracker.Tracker|trial_component.TrialComponent|api_types.TrialComponentSummary|str) The trial component
-           to add. Can be one of a Tracker instance, a TrialComponent instance, or a string containing the name of
-           the trial component to add.
+           tc (str or Tracker or TrialComponent or TrialComponentSummary): The trial component to
+           add. Can be one of a Tracker instance, a TrialComponent instance, or a string containing
+           the name of the trial component to add.
         """
         if isinstance(tc, tracker.Tracker):
             trial_component_name = tc.trial_component.trial_component_name
@@ -234,9 +234,9 @@ class Trial(_base_types.Record):
         """Remove the specified trial component from this trial.
 
         Args:
-            tc: (tracker.Tracker|trial_component.TrialComponent|api_types.TrialComponentSummary|str) The trial
-            component to remove. Can be one of a Tracker instance, a TrialComponent instance, or a string containing
-            the name of the trial component to remove.
+            tc (str or Tracker or TrialComponent or TrialComponentSummary): The trial component to
+            remove. Can be one of a Tracker instance, a TrialComponent instance, or a string
+            containing the name of the trial component to remove.
         """
         if isinstance(tc, tracker.Tracker):
             trial_component_name = tc.trial_component.trial_component_name

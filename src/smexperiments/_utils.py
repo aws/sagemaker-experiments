@@ -1,4 +1,4 @@
-# Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"). You
 # may not use this file except in compliance with the License. A copy of
@@ -17,6 +17,7 @@ import time
 import boto3
 import botocore
 import logging
+from importlib import import_module
 
 
 def sagemaker_client():
@@ -90,3 +91,15 @@ def get_or_create_default_bucket(boto_session, default_bucket_prefix="sagemaker"
         else:
             raise
     return default_bucket
+
+
+def get_module(module_name):
+    """Imports an module.
+
+    Args:
+        module_name (str): Name of the module to importt.
+
+    Returns:
+        [obj]: The imported module
+    """
+    return import_module(module_name)

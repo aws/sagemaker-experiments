@@ -73,14 +73,14 @@ def sagemaker_region(request):
 @pytest.fixture
 def sagemaker_boto_client(sagemaker_endpoint, sagemaker_region):
     if sagemaker_endpoint is None:
-        return boto3.client("sagemaker", region_name=sagemaker_region)
+        return boto3.client("sagemaker", region_name="us-east-2")
     else:
-        return boto3.client("sagemaker", region_name=sagemaker_region, endpoint_url=sagemaker_endpoint)
+        return boto3.client("sagemaker", region_name="us-east-2", endpoint_url=sagemaker_endpoint)
 
 
 @pytest.fixture(scope="session")
 def boto3_session():
-    return boto3.Session()
+    return boto3.Session(region_name="us-east-2")
 
 
 @pytest.fixture
@@ -195,7 +195,22 @@ def trial_component_obj(sagemaker_boto_client):
     )
     yield trial_component_obj
     time.sleep(0.5)
+    delete_associations(trial_component_obj.trial_component_arn, sagemaker_boto_client)
     trial_component_obj.delete()
+
+
+def delete_associations(arn, sagemaker_boto_client):
+    outgoing_associations = sagemaker_boto_client.list_associations(SourceArn=arn)["AssociationSummaries"]
+    incoming_associations = sagemaker_boto_client.list_associations(DestinationArn=arn)["AssociationSummaries"]
+    associations = []
+    if outgoing_associations:
+        associations.extend(outgoing_associations)
+    if incoming_associations:
+        associations.extend(incoming_associations)
+    for association in associations:
+        source_arn = association["SourceArn"]
+        destination_arn = association["DestinationArn"]
+        sagemaker_boto_client.delete_association(SourceArn=source_arn, DestinationArn=destination_arn)
 
 
 @pytest.fixture
@@ -384,6 +399,7 @@ def processing_job_name(sagemaker_boto_client, training_role_arn, docker_image):
 
 @pytest.fixture(scope="session")
 def docker_image(boto_model_file, sagemaker_endpoint):
+    # requires docker to be running
     client = docker.from_env()
     ecr_client = boto3.client("ecr")
     token = ecr_client.get_authorization_token()
@@ -392,6 +408,7 @@ def docker_image(boto_model_file, sagemaker_endpoint):
     repository_name = "smexperiments-test"
     image_version = "1.0.0"
     tag = "{}/{}:{}".format(registry, repository_name, image_version)[8:]
+    docker_dir = "tests/integ/docker"
 
     # initialize the docker image repository
     try:
@@ -411,19 +428,26 @@ def docker_image(boto_model_file, sagemaker_endpoint):
     except docker.errors.NotFound:
         pass
 
+    os.makedirs(os.path.join(docker_dir, "boto"), exist_ok=True)
+
     if boto_model_file is None:
         print("boto_model_file is None, using default model.")
     else:
-        shutil.copy(boto_model_file, "tests/integ-jobs/docker/boto/sagemaker-experiments-2017-07-24.normal.json")
+        shutil.copy(boto_model_file, os.path.join(docker_dir, "boto/sagemaker-experiments-2017-07-24.normal.json"))
 
     subprocess.check_call([sys.executable, "setup.py", "sdist"])
     [sdist_path] = glob.glob("dist/sagemaker-experiments*")
-    shutil.copy(sdist_path, "tests/integ-jobs/docker/smexperiments-0.1.0.tar.gz")
 
-    os.makedirs("tests/integ-jobs/docker/boto", exist_ok=True)
+    shutil.copy(sdist_path, os.path.join(docker_dir, "smexperiments-0.1.0.tar.gz"))
 
+    # may need to configure cred helper in ~/.docker/config.json
+    # {
+    # 	"credHelpers": {
+    # 		"aws_account_id.dkr.ecr.region.amazonaws.com": "ecr-login"
+    # 	}
+    # }
     client.images.build(
-        path="tests/integ-jobs/docker",
+        path=docker_dir,
         dockerfile="Dockerfile",
         tag=tag,
         cache_from=[tag],
