@@ -1,4 +1,4 @@
-# Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"). You
 # may not use this file except in compliance with the License. A copy of
@@ -17,6 +17,7 @@ import tempfile
 import os
 import datetime
 from smexperiments import api_types, tracker, trial_component, _utils, _environment
+import pandas as pd
 
 
 @pytest.fixture
@@ -117,6 +118,30 @@ def test_load(boto3_session, sagemaker_boto_client):
     )
 
 
+def test_load_by_training_job_name(boto3_session, sagemaker_boto_client):
+    training_job_name = "foo-training-job"
+    trial_component_name = training_job_name + "-aws-training-job"
+    sagemaker_boto_client.describe_trial_component.return_value = {"TrialComponentName": trial_component_name}
+    assert (
+        trial_component_name
+        == tracker.Tracker.load(
+            training_job_name=training_job_name, sagemaker_boto_client=sagemaker_boto_client
+        ).trial_component.trial_component_name
+    )
+
+
+def test_load_by_processing_job_name(boto3_session, sagemaker_boto_client):
+    processing_job_name = "foo-processing-job"
+    trial_component_name = processing_job_name + "-aws-processing-job"
+    sagemaker_boto_client.describe_trial_component.return_value = {"TrialComponentName": trial_component_name}
+    assert (
+        trial_component_name
+        == tracker.Tracker.load(
+            processing_job_name=processing_job_name, sagemaker_boto_client=sagemaker_boto_client
+        ).trial_component.trial_component_name
+    )
+
+
 def test_create(boto3_session, sagemaker_boto_client):
     trial_component_name = "foo-trial-component"
     trial_component_display_name = "foo-trial-component-display-name"
@@ -141,7 +166,7 @@ def trial_component_obj(sagemaker_boto_client):
 
 @pytest.fixture
 def under_test(trial_component_obj):
-    return tracker.Tracker(trial_component_obj, unittest.mock.Mock(), unittest.mock.Mock())
+    return tracker.Tracker(trial_component_obj, unittest.mock.Mock(), unittest.mock.Mock(), unittest.mock.Mock())
 
 
 def test_log_parameter(under_test):
@@ -235,15 +260,62 @@ def test_log_metric_attribute_error_warned(under_test):
     assert under_test._warned_on_metrics == True
 
 
-def test_log_artifact(under_test):
-    under_test.log_artifact("foo.txt", "name", "whizz/bang")
+def test_log_output_artifact(under_test):
+    under_test._artifact_uploader.upload_artifact.return_value = ("s3uri_value", "etag_value")
+
+    under_test.log_output_artifact("foo.txt", "name", "whizz/bang")
     under_test._artifact_uploader.upload_artifact.assert_called_with("foo.txt")
     assert "whizz/bang" == under_test.trial_component.output_artifacts["name"].media_type
 
-    under_test.log_artifact("foo.txt")
+    under_test.log_output_artifact("foo.txt")
     under_test._artifact_uploader.upload_artifact.assert_called_with("foo.txt")
+    under_test._lineage_artifact_tracker.add_output_artifact.assert_called_with(
+        "foo.txt", "s3uri_value", "etag_value", "text/plain"
+    )
     assert "foo.txt" in under_test.trial_component.output_artifacts
     assert "text/plain" == under_test.trial_component.output_artifacts["foo.txt"].media_type
+
+
+def test_log_input_artifact(under_test):
+    under_test._artifact_uploader.upload_artifact.return_value = ("s3uri_value", "etag_value")
+
+    under_test.log_input_artifact("foo.txt", "name", "whizz/bang")
+    under_test._artifact_uploader.upload_artifact.assert_called_with("foo.txt")
+    assert "whizz/bang" == under_test.trial_component.input_artifacts["name"].media_type
+
+    under_test.log_input_artifact("foo.txt")
+    under_test._artifact_uploader.upload_artifact.assert_called_with("foo.txt")
+    under_test._lineage_artifact_tracker.add_input_artifact.assert_called_with(
+        "foo.txt", "s3uri_value", "etag_value", "text/plain"
+    )
+    assert "foo.txt" in under_test.trial_component.input_artifacts
+    assert "text/plain" == under_test.trial_component.input_artifacts["foo.txt"].media_type
+
+
+def test_log_pr_curve(under_test):
+
+    y_true = [0, 0, 1, 1]
+    y_scores = [0.1, 0.4, 0.35, 0.8]
+
+    under_test._artifact_uploader.upload_object_artifact.return_value = ("s3uri_value", "etag_value")
+
+    under_test._log_precision_recall(y_true, y_scores, title="TestPRCurve")
+
+    expected_data = {
+        "type": "PrecisionRecallCurve",
+        "version": 0,
+        "title": "TestPRCurve",
+        "precision": [0.6666666666666666, 0.5, 1.0, 1.0],
+        "recall": [1.0, 0.5, 0.5, 0.0],
+        "averagePrecisionScore": 0.8333333333333333,
+    }
+    under_test._artifact_uploader.upload_object_artifact.assert_called_with(
+        "TestPRCurve", expected_data, file_extension="json"
+    )
+
+    under_test._lineage_artifact_tracker.add_input_artifact(
+        "TestPRCurve", "s3uri_value", "etag_value", "PrecisionRecallCurve"
+    )
 
 
 def test_resolve_artifact_name():
@@ -275,6 +347,7 @@ def test_artifact_uploader_init(artifact_uploader):
 
 
 def test_artifact_uploader_upload_artifact_file_not_exists(tempdir, artifact_uploader):
+
     not_exist_file = os.path.join(tempdir, "not.exists")
     with pytest.raises(ValueError):
         artifact_uploader.upload_artifact(not_exist_file)
@@ -286,7 +359,9 @@ def test_artifact_uploader_s3(tempdir, artifact_uploader):
         f.write("boo")
 
     name = tracker._resolve_artifact_name(path)
-    s3_uri = artifact_uploader.upload_artifact(path)
+    artifact_uploader.s3_client.head_object.return_value = {"ETag": "etag_value"}
+
+    s3_uri, etag = artifact_uploader.upload_artifact(path)
     expected_key = "{}/{}/{}".format(artifact_uploader.artifact_prefix, artifact_uploader.trial_component_name, name)
 
     artifact_uploader.s3_client.upload_file.assert_called_with(path, artifact_uploader.artifact_bucket, expected_key)
@@ -297,3 +372,168 @@ def test_artifact_uploader_s3(tempdir, artifact_uploader):
 
 def test_guess_media_type():
     assert "text/plain" == tracker._guess_media_type("foo.txt")
+
+
+@pytest.fixture
+def lineage_artifact_tracker(sagemaker_boto_client):
+    return tracker._LineageArtifactTracker("test_trial_component_arn", sagemaker_boto_client)
+
+
+def test_lineage_artifact_tracker(lineage_artifact_tracker, sagemaker_boto_client):
+    lineage_artifact_tracker.add_input_artifact("input_name", "input_source_uri", "input_etag", "text/plain")
+    lineage_artifact_tracker.add_output_artifact("output_name", "output_source_uri", "output_etag", "text/plain")
+    sagemaker_boto_client.create_artifact.side_effect = [
+        {"ArtifactArn": "created_arn_1"},
+        {"ArtifactArn": "created_arn_2"},
+    ]
+
+    lineage_artifact_tracker.save()
+
+    expected_calls = [
+        unittest.mock.call(
+            ArtifactName="input_name",
+            ArtifactType="text/plain",
+            Source={
+                "SourceUri": "input_source_uri",
+                "SourceTypes": [{"SourceIdType": "S3ETag", "Value": "input_etag"}],
+            },
+        ),
+        unittest.mock.call(
+            ArtifactName="output_name",
+            ArtifactType="text/plain",
+            Source={
+                "SourceUri": "output_source_uri",
+                "SourceTypes": [{"SourceIdType": "S3ETag", "Value": "output_etag"}],
+            },
+        ),
+    ]
+    assert expected_calls == sagemaker_boto_client.create_artifact.mock_calls
+
+    expected_calls = [
+        unittest.mock.call(
+            SourceArn="created_arn_1", DestinationArn="test_trial_component_arn", AssociationType="ContributedTo"
+        ),
+        unittest.mock.call(
+            SourceArn="test_trial_component_arn", DestinationArn="created_arn_2", AssociationType="Produced"
+        ),
+    ]
+    assert expected_calls == sagemaker_boto_client.add_association.mock_calls
+
+
+def test_convert_dict_to_fields():
+    values = {"x": [1, 2, 3], "y": [4, 5, 6]}
+    fields = tracker._ArtifactConverter.convert_dict_to_fields(values)
+
+    expected_fields = [
+        {"name": "x", "type": "string"},
+        {"name": "y", "type": "string"},
+    ]
+
+    assert expected_fields == fields
+
+
+def test_convert_data_frame_to_values():
+    df = pd.DataFrame({"col1": [1, 2], "col2": [0.5, 0.75]})
+
+    values = tracker._ArtifactConverter.convert_data_frame_to_values(df)
+
+    expected_values = {"col1": [1, 2], "col2": [0.5, 0.75]}
+
+    assert expected_values == values
+
+
+def test_convert_data_frame_to_fields():
+    df = pd.DataFrame({"col1": [1, 2], "col2": [0.5, 0.75]})
+
+    fields = tracker._ArtifactConverter.convert_data_frame_to_fields(df)
+
+    expected_fields = [{"name": "col1", "type": "number"}, {"name": "col2", "type": "number"}]
+
+    assert expected_fields == fields
+
+
+def test_convert_df_type_to_simple_type():
+    actual = tracker._ArtifactConverter.convert_df_type_to_simple_type("float64")
+    assert actual == "number"
+
+    actual = tracker._ArtifactConverter.convert_df_type_to_simple_type("int32")
+    assert actual == "number"
+
+    actual = tracker._ArtifactConverter.convert_df_type_to_simple_type("uint32")
+    assert actual == "number"
+
+    actual = tracker._ArtifactConverter.convert_df_type_to_simple_type("datetime64")
+    assert actual == "datetime"
+
+    actual = tracker._ArtifactConverter.convert_df_type_to_simple_type("boolean")
+    assert actual == "boolean"
+
+    actual = tracker._ArtifactConverter.convert_df_type_to_simple_type("category")
+    assert actual == "string"
+
+    actual = tracker._ArtifactConverter.convert_df_type_to_simple_type("sometype")
+    assert actual == "string"
+
+
+def test_log_table_both_specified(under_test):
+    with pytest.raises(ValueError):
+        under_test.log_table(title="test", values={"foo": "bar"}, data_frame={"foo": "bar"})
+
+
+def test_log_table_neither_specified(under_test):
+    with pytest.raises(ValueError):
+        under_test.log_table(title="test")
+
+
+def test_log_table_invalid_values(under_test):
+    values = {"x": "foo", "y": [4, 5, 6]}
+
+    with pytest.raises(ValueError):
+        under_test.log_table(title="test", values=values)
+
+
+def test_log_table(under_test):
+
+    values = {"x": [1, 2, 3], "y": [4, 5, 6]}
+
+    under_test._artifact_uploader.upload_object_artifact.return_value = ("s3uri_value", "etag_value")
+
+    under_test.log_table(title="TestTable", values=values)
+    expected_data = {
+        "type": "Table",
+        "version": 0,
+        "title": "TestTable",
+        "fields": [
+            {"name": "x", "type": "string"},
+            {"name": "y", "type": "string"},
+        ],
+        "data": {"x": [1, 2, 3], "y": [4, 5, 6]},
+    }
+    under_test._artifact_uploader.upload_object_artifact.assert_called_with(
+        "TestTable", expected_data, file_extension="json"
+    )
+
+    under_test._lineage_artifact_tracker.add_input_artifact("TestTable", "s3uri_value", "etag_value", "Table")
+
+
+def test_log_roc_curve(under_test):
+    y_true = [0, 0, 1, 1]
+    y_scores = [0.1, 0.4, 0.35, 0.8]
+
+    under_test._artifact_uploader.upload_object_artifact.return_value = ("s3uri_value", "etag_value")
+
+    under_test.log_roc_curve(y_true, y_scores, title="TestROCCurve")
+
+    expected_data = {
+        "type": "ROCCurve",
+        "version": 0,
+        "title": "TestROCCurve",
+        "falsePositiveRate": [0.0, 0.0, 0.5, 0.5, 1.0],
+        "truePositiveRate": [0.0, 0.5, 0.5, 1.0, 1.0],
+        "areaUnderCurve": 0.75,
+    }
+    under_test._artifact_uploader.upload_object_artifact.assert_called_with(
+        "TestROCCurve", expected_data, file_extension="json"
+    )
+
+    under_test._lineage_artifact_tracker.add_input_artifact("TestROCCurve", "s3uri_value", "etag_value", "ROCCurve")

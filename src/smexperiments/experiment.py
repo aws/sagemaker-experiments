@@ -1,4 +1,4 @@
-# Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"). You
 # may not use this file except in compliance with the License. A copy of
@@ -10,7 +10,6 @@
 # distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
-
 """Contains the SageMaker Experiment class."""
 from smexperiments import _base_types, api_types, trial, _utils, trial_component
 import time
@@ -77,7 +76,7 @@ class Experiment(_base_types.Record):
         Returns:
             dict: Delete experiment API response.
         """
-        self._invoke_api(self._boto_delete_method, self._boto_delete_members)
+        return self._invoke_api(self._boto_delete_method, self._boto_delete_members)
 
     @classmethod
     def load(cls, experiment_name, sagemaker_boto_client=None):

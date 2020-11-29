@@ -1,0 +1,34 @@
+{
+  "$id": "https://amazon.com/sagemaker.graph.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ROC Curve",
+  "type": "object",
+  "description": "Describes serialized ROC curve data in json format.",
+  "properties": {
+    "type": {
+      "description": "Constant value that provides an indicator on how to interpret this data.",
+      "const": "ROCCurve"
+    },
+    "version": {
+      "description": "Version of the schema",
+      "const": "0"
+    },
+    "title": {
+      "description": "Title of the plot",
+      "type": "string"
+    },
+    "falsePositiveRate": {
+      "description": "Increasing false positive rates such that element i is the false positive rate of predictions with score >= thresholds[i]",
+      "type": "array"
+    },
+    "truePositiveRate": {
+      "description": "Increasing true positive rates such that element i is the true postive rate of predictions with score >= thresholds[i]",
+      "type": "array"
+    },
+    "areaUnderCurve": {
+      "description": "The area under the curve",
+      "type": "number"
+    }
+  },
+  "additionalProperties": false
+}

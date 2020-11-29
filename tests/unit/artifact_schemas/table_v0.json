@@ -1,0 +1,58 @@
+{
+  "$id": "https://amazon.com/sagemaker.graph.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Table",
+  "type": "object",
+  "description": "Describes serialized table data in json format.",
+  "properties": {
+    "type": {
+      "description": "Constant value that provides an indicator on how to interpret this data.",
+      "const": "Table"
+    },
+    "version": {
+      "description": "Version of the schema",
+      "const": "0"
+    },
+    "title": {
+      "description": "Title of the plot",
+      "type": "string"
+    },
+    "fields": {
+      "description": "A description of each of the fields/column headers of the data.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/field"
+      },
+      "default": []
+    },
+    "data": {
+      "description": "The raw data of the table. Key is the field name, value is an array of values.",
+      "type": "object"
+    }
+  },
+  "definitions": {
+    "field": {
+      "description": "An individual table field.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "string",
+            "number",
+            "integer",
+            "boolean",
+            "date"
+          ]
+        }
+      },
+      "required": [
+        "name"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

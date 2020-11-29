@@ -1,4 +1,4 @@
-# Copyright 019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"). You
 # may not use this file except in compliance with the License. A copy of
@@ -11,6 +11,7 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 import os
+import logging
 
 import pytest
 
@@ -24,6 +25,13 @@ def test_load_trial_component(trial_component_obj, sagemaker_boto_client):
     )
     assert tracker_obj
     assert tracker_obj.trial_component.trial_component_name == trial_component_obj.trial_component_name
+
+
+@pytest.mark.docker
+def test_load_training_job(training_job_name, sagemaker_boto_client):
+    tracker_obj = tracker.Tracker.load(training_job_name=training_job_name, sagemaker_boto_client=sagemaker_boto_client)
+    assert tracker_obj
+    assert tracker_obj.trial_component.trial_component_name == training_job_name + "-aws-training-job"
 
 
 def test_load_trial_component_fails(sagemaker_boto_client):
@@ -95,3 +103,54 @@ def test_create_default_bucket(boto3_session):
         s3_client.head_bucket(Bucket=bucket)
     finally:
         s3_client.delete_bucket(Bucket=bucket)
+
+
+def test_create_lineage_artifacts(trial_component_obj, bucket, tempdir, sagemaker_boto_client):
+
+    prefix = name()
+    file_contents = "test lineage artifact"
+    file_path = os.path.join(tempdir, "bar.txt")
+    artifact_name = "goonies"
+
+    with open(file_path, "w") as foo_file:
+        foo_file.write(file_contents)
+
+    with tracker.Tracker.load(
+        trial_component_obj.trial_component_name,
+        artifact_bucket=bucket,
+        artifact_prefix=prefix,
+        sagemaker_boto_client=sagemaker_boto_client,
+    ) as tracker_obj:
+        tracker_obj.log_output_artifact(file_path, name=artifact_name)
+
+    response = sagemaker_boto_client.list_associations(SourceArn=trial_component_obj.trial_component_arn)
+    associations = response["AssociationSummaries"]
+    assert len(associations) == 1
+    summary = associations[0]
+    logging.info(summary)
+    assert summary["SourceArn"] == trial_component_obj.trial_component_arn
+    assert summary["DestinationName"] == artifact_name
+
+
+def test_log_table_artifact(trial_component_obj, bucket, sagemaker_boto_client):
+
+    prefix = name()
+    artifact_name = "TestTableTitle"
+
+    values = {"x": [1, 2, 3], "y": [4, 5, 6]}
+
+    with tracker.Tracker.load(
+        trial_component_obj.trial_component_name,
+        artifact_bucket=bucket,
+        artifact_prefix=prefix,
+        sagemaker_boto_client=sagemaker_boto_client,
+    ) as tracker_obj:
+        tracker_obj.log_table(title=artifact_name, values=values)
+
+    response = sagemaker_boto_client.list_associations(SourceArn=trial_component_obj.trial_component_arn)
+    associations = response["AssociationSummaries"]
+    assert len(associations) == 1
+    summary = associations[0]
+    logging.info(summary)
+    assert summary["SourceArn"] == trial_component_obj.trial_component_arn
+    assert summary["DestinationName"] == artifact_name
