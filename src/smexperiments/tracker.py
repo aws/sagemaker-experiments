@@ -302,7 +302,6 @@ class Tracker(object):
             name (str, optional): The name of the artifact.
             media_type (str, optional): The MediaType (MIME type) of the file. If not specified, this library
                 will attempt to infer the media type from the file extension of ``file_path``.
-            artifact_prefix (str): Sub path within the bucket to organize the artifact in.
         """
         media_type = media_type or _guess_media_type(file_path)
         name = name or _resolve_artifact_name(file_path)
@@ -370,6 +369,10 @@ class Tracker(object):
     def log_table(self, title=None, values=None, data_frame=None, output_artifact=True):
         """Record a table of values that will be rendered in Studio.
 
+        Note that this method must be run from a SageMaker context such as studio or training job
+        due to restrictions on the CreateArtifact API.
+
+
         Examples
             .. code-block:: python
 
@@ -429,6 +432,9 @@ class Tracker(object):
         """Log a precision recall graph artifact which will be displayed in studio.
             Requires sklearn.  Not yet supported by studio.
 
+        Note that this method must be run from a SageMaker context such as studio or training job
+        due to restrictions on the CreateArtifact API.
+
         Examples
             .. code-block:: python
 
@@ -483,6 +489,9 @@ class Tracker(object):
     ):
         """Log a receiver operating characteristic (ROC) artifact which will be displayed in
         studio.  Requires sklearn.
+
+        Note that this method must be run from a SageMaker context such as studio or training job
+        due to restrictions on the CreateArtifact API.
 
         Examples
             .. code-block:: python
