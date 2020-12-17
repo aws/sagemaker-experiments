@@ -73,14 +73,14 @@ def sagemaker_region(request):
 @pytest.fixture
 def sagemaker_boto_client(sagemaker_endpoint, sagemaker_region):
     if sagemaker_endpoint is None:
-        return boto3.client("sagemaker", region_name="us-east-2")
+        return boto3.client("sagemaker", region_name=sagemaker_region)
     else:
-        return boto3.client("sagemaker", region_name="us-east-2", endpoint_url=sagemaker_endpoint)
+        return boto3.client("sagemaker", region_name=sagemaker_region, endpoint_url=sagemaker_endpoint)
 
 
 @pytest.fixture(scope="session")
 def boto3_session():
-    return boto3.Session(region_name="us-east-2")
+    return boto3.Session()
 
 
 @pytest.fixture
