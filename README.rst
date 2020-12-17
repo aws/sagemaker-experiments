@@ -199,6 +199,41 @@ To run the integration tests, the following prerequisites must be met:
 .. code-block:: bash
 
     tox -e py37 -- --region cn-north-1
+    
+**Docker Based Integration Tests**
+
+Several integration tests rely on docker to push an image to ECR which is then used for training.
+
+Docker Setup
+
+1. Install docker
+2. set aws cred helper in docker config (~/.docker/config.json)
+
+.. code-block:: javascript
+
+    # docker config example
+    {
+        "stackOrchestrator": "swarm",
+        "credsStore": "desktop",
+        "auths": {
+            "https://index.docker.io/v1/": {}
+        },
+        "credHelpers": {
+            "aws_account_id.dkr.ecr.region.amazonaws.com": "ecr-login"
+        },
+        "experimental": "disabled"
+    }
+
+
+.. code-block:: bash
+
+    # run only docker based tests
+    tox -e py38 -- tests/integ -m 'docker'
+    
+    # exclude docker based tests
+    tox -e py38 -- tests/integ -m 'not docker'
+
+
 
 Generate Docs
 -------------
