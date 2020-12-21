@@ -380,6 +380,7 @@ def training_job_name(sagemaker_boto_client, training_role_arn, docker_image, tr
         StoppingCondition={"MaxRuntimeInSeconds": 900},
         OutputDataConfig={"S3OutputPath": training_output_s3_uri},
     )
+    time.sleep(1)
     return training_job_name
 
 
