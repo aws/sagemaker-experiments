@@ -20,6 +20,7 @@ import logging
 import botocore
 import json
 from smexperiments._utils import get_module
+from os.path import join
 
 import dateutil
 
@@ -264,7 +265,7 @@ class Tracker(object):
         Examples
             .. code-block:: python
 
-                # log input dataset s3 location
+                # log output dataset s3 location
                 my_tracker.log_output(name='prediction', value='s3://outputs/path')
 
         Args:
@@ -275,6 +276,26 @@ class Tracker(object):
         if len(self.trial_component.output_artifacts) >= 30:
             raise ValueError("Cannot add more than 30 output_artifacts under tracker trial_component")
         self.trial_component.output_artifacts[name] = api_types.TrialComponentArtifact(value, media_type=media_type)
+
+    def log_artifacts(self, directory, media_type=None):
+        """Upload all the files under the directory to s3 and store it as artifacts in this trial component. The file
+        name is used as the artifact name
+
+        Examples
+            .. code-block:: python
+
+                # log local artifact
+                my_tracker.log_artifact(directory='/local/path)
+
+        Args:
+            directory (str): The directory of the local files to upload.
+            media_type (str, optional): The MediaType (MIME type) of the file. If not specified, this library
+                will attempt to infer the media type from the file extension of ``file_path``.
+        """
+        for dir_file in os.listdir(directory):
+            file_path = join(directory, dir_file)
+            artifact_name = os.path.splitext(dir_file)[0]
+            self.log_artifact(file_path=file_path, name=artifact_name, media_type=media_type)
 
     def log_artifact(self, file_path, name=None, media_type=None):
         """Legacy overload method to prevent breaking existing code.
