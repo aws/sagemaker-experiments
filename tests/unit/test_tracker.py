@@ -292,6 +292,56 @@ def test_log_input_artifact(under_test):
     assert "text/plain" == under_test.trial_component.input_artifacts["foo.txt"].media_type
 
 
+def test_log_inputs_error(under_test):
+    for index in range(0, 30):
+        file_path = "foo" + str(index) + ".txt"
+        under_test.trial_component.input_artifacts[file_path] = {
+            "foo": api_types.TrialComponentArtifact(value="baz" + str(index), media_type="text/text")
+        }
+    with pytest.raises(ValueError):
+        under_test.log_input("foo.txt", "name", "whizz/bang")
+
+
+def test_log_outputs(under_test):
+    for index in range(0, 30):
+        file_path = "foo" + str(index) + ".txt"
+        under_test.trial_component.output_artifacts[file_path] = {
+            "foo": api_types.TrialComponentArtifact(value="baz" + str(index), media_type="text/text")
+        }
+    with pytest.raises(ValueError):
+        under_test.log_output("foo.txt", "name", "whizz/bang")
+
+
+def test_log_multiple_input_artifact(under_test):
+    for index in range(0, 30):
+        file_path = "foo" + str(index) + ".txt"
+        under_test._artifact_uploader.upload_artifact.return_value = (
+            "s3uri_value" + str(index),
+            "etag_value" + str(index),
+        )
+        under_test.log_input_artifact(file_path, "name" + str(index), "whizz/bang" + str(index))
+        under_test._artifact_uploader.upload_artifact.assert_called_with(file_path)
+
+    under_test._artifact_uploader.upload_artifact.return_value = ("s3uri_value", "etag_value")
+    with pytest.raises(ValueError):
+        under_test.log_input_artifact("foo.txt", "name", "whizz/bang")
+
+
+def test_log_multiple_output_artifact(under_test):
+    for index in range(0, 30):
+        file_path = "foo" + str(index) + ".txt"
+        under_test._artifact_uploader.upload_artifact.return_value = (
+            "s3uri_value" + str(index),
+            "etag_value" + str(index),
+        )
+        under_test.log_output_artifact(file_path, "name" + str(index), "whizz/bang" + str(index))
+        under_test._artifact_uploader.upload_artifact.assert_called_with(file_path)
+
+    under_test._artifact_uploader.upload_artifact.return_value = ("s3uri_value", "etag_value")
+    with pytest.raises(ValueError):
+        under_test.log_output_artifact("foo.txt", "name", "whizz/bang")
+
+
 def test_log_pr_curve(under_test):
 
     y_true = [0, 0, 1, 1]

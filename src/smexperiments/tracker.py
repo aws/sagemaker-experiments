@@ -252,6 +252,8 @@ class Tracker(object):
             value (str): The value.
             media_type (str, optional): The MediaType (MIME type) of the value
         """
+        if len(self.trial_component.input_artifacts) >= 30:
+            raise ValueError("Cannot add more than 30 input_artifacts under tracker trial_component.")
         self.trial_component.input_artifacts[name] = api_types.TrialComponentArtifact(value, media_type=media_type)
 
     def log_output(self, name, value, media_type=None):
@@ -270,6 +272,8 @@ class Tracker(object):
             value (str): The value.
             media_type (str, optional): The MediaType (MIME type) of the value.
         """
+        if len(self.trial_component.output_artifacts) >= 30:
+            raise ValueError("Cannot add more than 30 output_artifacts under tracker trial_component")
         self.trial_component.output_artifacts[name] = api_types.TrialComponentArtifact(value, media_type=media_type)
 
     def log_artifact(self, file_path, name=None, media_type=None):
@@ -303,6 +307,8 @@ class Tracker(object):
             media_type (str, optional): The MediaType (MIME type) of the file. If not specified, this library
                 will attempt to infer the media type from the file extension of ``file_path``.
         """
+        if len(self.trial_component.output_artifacts) >= 30:
+            raise ValueError("Cannot add more than 30 output_artifacts under tracker trial_component")
         media_type = media_type or _guess_media_type(file_path)
         name = name or _resolve_artifact_name(file_path)
         s3_uri, etag = self._artifact_uploader.upload_artifact(file_path)
@@ -326,6 +332,8 @@ class Tracker(object):
             media_type (str, optional): The MediaType (MIME type) of the file. If not specified, this library
                 will attempt to infer the media type from the file extension of ``file_path``.
         """
+        if len(self.trial_component.input_artifacts) >= 30:
+            raise ValueError("Cannot add more than 30 input_artifacts under tracker trial_component.")
         media_type = media_type or _guess_media_type(file_path)
         name = name or _resolve_artifact_name(file_path)
         s3_uri, etag = self._artifact_uploader.upload_artifact(file_path)
