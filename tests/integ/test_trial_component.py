@@ -112,6 +112,27 @@ def test_list_sort(trial_components, sagemaker_boto_client):
     assert trial_component_names  # sanity test
 
 
+def test_list_empty_trials(experiment_obj, trial_component_obj):
+    actual_value = trial_component_obj.list_trials()
+    assert len(list(actual_value)) == 0
+
+
+def test_list_trials(trial_obj, trial_component_obj, sagemaker_boto_client):
+    trial_obj.add_trial_component(trial_component_obj)
+    actual_value = list(trial_component_obj.list_trials())
+
+    assert len(actual_value) == 1
+    assert actual_value[0].trial_name == trial_obj.trial_name
+    trial_obj.remove_trial_component(trial_component_obj)
+
+    trial_components = list(
+        trial_component.TrialComponent.list(
+            sagemaker_boto_client=sagemaker_boto_client, trial_name=trial_obj.trial_name
+        )
+    )
+    assert 0 == len(trial_components)
+
+
 def test_list_trial_components_by_experiment(experiment_obj, trial_component_obj, sagemaker_boto_client):
     trial_obj = experiment_obj.create_trial()
     trial_obj.add_trial_component(trial_component_obj)

@@ -10,7 +10,7 @@
 # distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
-from smexperiments import trial_component, api_types
+from smexperiments import trial_component, api_types, trial
 
 import datetime
 import pytest
@@ -283,6 +283,31 @@ def test_delete_with_force_disassociate(sagemaker_boto_client):
     ]
     assert expected_calls == sagemaker_boto_client.disassociate_trial_component.mock_calls
     sagemaker_boto_client.delete_trial_component.assert_called_with(TrialComponentName="foo")
+
+
+def test_list_trials(sagemaker_boto_client):
+    sagemaker_boto_client.list_trials.return_value = {
+        "TrialSummaries": [
+            {
+                "TrialName": "trial-1",
+                "CreationTime": None,
+                "LastModifiedTime": None,
+            },
+            {
+                "TrialName": "trial-2",
+                "CreationTime": None,
+                "LastModifiedTime": None,
+            },
+        ]
+    }
+    obj = trial_component.TrialComponent(sagemaker_boto_client, trial_component_name="foo", discompplay_name="bar")
+
+    expected = [
+        api_types.TrialSummary(trial_name="trial-1", creation_time=None, last_modified_time=None),
+        api_types.TrialSummary(trial_name="trial-2", creation_time=None, last_modified_time=None),
+    ]
+    assert expected == list(obj.list_trials())
+    sagemaker_boto_client.list_trials.assert_called_with(TrialComponentName="foo")
 
 
 def test_boto_ignore():

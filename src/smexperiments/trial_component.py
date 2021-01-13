@@ -11,7 +11,7 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 """Contains the TrialComponent class."""
-from smexperiments import _base_types, api_types
+from smexperiments import _base_types, api_types, trial
 import time
 
 
@@ -130,11 +130,11 @@ class TrialComponent(_base_types.Record):
                     )
 
                 # Disassociate the trials and trial components
-                for trial in list_trials_response["TrialSummaries"]:
+                for per_trial in list_trials_response["TrialSummaries"]:
                     # to prevent DisassociateTrialComponent throttling
                     time.sleep(1.2)
                     self.sagemaker_boto_client.disassociate_trial_component(
-                        TrialName=trial["TrialName"], TrialComponentName=self.trial_component_name
+                        TrialName=per_trial["TrialName"], TrialComponentName=self.trial_component_name
                     )
 
                 if "NextToken" in list_trials_response:
@@ -143,6 +143,17 @@ class TrialComponent(_base_types.Record):
                     break
 
         return self._invoke_api(self._boto_delete_method, self._boto_delete_members)
+
+    def list_trials(self):
+        """
+        Load a list of trials that contains the same trial component name
+
+        Returns:
+            A list of trials that contains the same trial component name
+        """
+        return trial.Trial.list(
+            trial_component_name=self.trial_component_name, sagemaker_boto_client=self.sagemaker_boto_client
+        )
 
     @classmethod
     def load(cls, trial_component_name, sagemaker_boto_client=None):
