@@ -16,6 +16,7 @@ import time
 import uuid
 import boto3
 import sys
+import logging
 
 
 def name():
@@ -145,3 +146,20 @@ def wait_for_job(job_name, get_job, status_field):
                 sys.stdout.write(".")
                 sys.stdout.flush()
                 time.sleep(30)
+
+
+def wait_for_trial_component(sagemaker_client, training_job_name=None, trial_component_name=None):
+    # wait for trial component to be created
+    if training_job_name and not trial_component_name:
+        # assume tj
+        trial_component_name = training_job_name + "-aws-training-job"
+
+    # wait for the trial component to be created from the training job, usually < 5s
+    with timeout(minutes=15):
+        while True:
+            try:
+                sagemaker_client.describe_trial_component(TrialComponentName=trial_component_name)
+                break
+            except sagemaker_client.exceptions.ResourceNotFound:
+                logging.info("Trial component %s not created yet.", trial_component_name)
+                time.sleep(5)

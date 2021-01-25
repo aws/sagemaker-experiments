@@ -15,11 +15,12 @@ import logging
 
 import pytest
 
-from tests.helpers import name
+from tests.helpers import name, wait_for_trial_component
 from smexperiments import tracker, trial_component, _utils
 
 
 def test_load_trial_component(trial_component_obj, sagemaker_boto_client):
+    wait_for_trial_component(sagemaker_boto_client, trial_component_name=trial_component_obj.trial_component_name)
     tracker_obj = tracker.Tracker.load(
         trial_component_name=trial_component_obj.trial_component_name, sagemaker_boto_client=sagemaker_boto_client
     )
@@ -29,6 +30,7 @@ def test_load_trial_component(trial_component_obj, sagemaker_boto_client):
 
 @pytest.mark.docker
 def test_load_training_job(training_job_name, sagemaker_boto_client):
+    wait_for_trial_component(sagemaker_boto_client, training_job_name=training_job_name)
     tracker_obj = tracker.Tracker.load(training_job_name=training_job_name, sagemaker_boto_client=sagemaker_boto_client)
     assert tracker_obj
     assert tracker_obj.trial_component.trial_component_name == training_job_name + "-aws-training-job"
