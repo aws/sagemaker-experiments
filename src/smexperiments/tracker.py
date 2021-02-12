@@ -450,7 +450,7 @@ class Tracker(object):
 
         self._log_graph_artifact(title, data, "Table", output_artifact)
 
-    def _log_precision_recall(
+    def log_precision_recall(
         self,
         y_true,
         predicted_probabilities,
