@@ -349,7 +349,7 @@ def test_log_pr_curve(under_test):
 
     under_test._artifact_uploader.upload_object_artifact.return_value = ("s3uri_value", "etag_value")
 
-    under_test._log_precision_recall(y_true, y_scores, title="TestPRCurve")
+    under_test.log_precision_recall(y_true, y_scores, title="TestPRCurve")
 
     expected_data = {
         "type": "PrecisionRecallCurve",
