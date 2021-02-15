@@ -1,0 +1,36 @@
+{
+  "$id": "https://amazon.com/sagemaker.graph.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Confusion Matrix",
+  "type": "object",
+  "description": "Describes serialized confusion matrix data in json format.",
+  "properties": {
+    "type": {
+      "description": "Constant value that provides an indicator on how to interpret this data.",
+      "const": "ConfusionMatrix"
+    },
+    "version": {
+      "description": "Version of the schema",
+      "const": "0"
+    },
+    "title": {
+      "description": "Title of the plot",
+      "type": "string"
+    },
+    "confusionMatrix": {
+      "description": "The confusion matrix data.",
+      "type": "array",
+      "items": {
+        "type": "array"
+      }
+    },
+    "labels": {
+      "description": "Class labels.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}
