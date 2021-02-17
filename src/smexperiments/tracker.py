@@ -481,7 +481,7 @@ class Tracker(object):
                 Trial Component as an output artifact. If False will be an input artifact.
 
         Raises:
-            ValueError: If mismatch between y_true and predicted_probabilities.
+            ValueError: If length mismatch between y_true and predicted_probabilities.
         """
 
         if len(y_true) != len(predicted_probabilities):
@@ -542,7 +542,7 @@ class Tracker(object):
         """
 
         if len(y_true) != len(y_score):
-            raise ValueError("Mismatch between actual labels and predicted scores.")
+            raise ValueError("Length mismatch between actual labels and predicted scores.")
 
         get_module("sklearn")
         from sklearn.metrics import roc_curve, auc
@@ -560,6 +560,50 @@ class Tracker(object):
             "areaUnderCurve": auc,
         }
         self._log_graph_artifact(title, data, "ROCCurve", output_artifact)
+
+    def log_confusion_matrix(
+        self,
+        y_true,
+        y_pred,
+        title=None,
+        output_artifact=True,
+    ):
+        """Log a confusion matrix artifact which will be displayed in
+        studio.  Requires sklearn.
+
+        Note that this method must be run from a SageMaker context such as studio or training job
+        due to restrictions on the CreateArtifact API.
+
+        Examples
+            .. code-block:: python
+
+                y_true = [2, 0, 2, 2, 0, 1]
+                y_pred = [0, 0, 2, 2, 0, 2]
+
+                my_tracker.log_confusion_matrix(y_true, y_pred)
+
+
+        Args:
+            y_true (array): True labels. If labels are not binary then positive_label should be given.
+            y_pred (array): Predicted labels.
+            title (str, optional): Title of the graph, Defaults to none.
+            output_artifact (boolean, optional): Determines if the artifact is associated with the
+                Trial Component as an output artifact. If False will be an input artifact.
+
+        Raises:
+            ValueError: If length mismatch between y_true and y_pred.
+        """
+
+        if len(y_true) != len(y_pred):
+            raise ValueError("Length mismatch between actual labels and predicted labels.")
+
+        get_module("sklearn")
+        from sklearn.metrics import confusion_matrix
+
+        matrix = confusion_matrix(y_true, y_pred)
+
+        data = {"type": "ConfusionMatrix", "version": 0, "title": title, "confusionMatrix": matrix.tolist()}
+        self._log_graph_artifact(title, data, "ConfusionMatrix", output_artifact)
 
     def _log_graph_artifact(self, name, data, graph_type, output_artifact):
         """Logs an artifact by uploading data to S3, creating an artifact, and associating that

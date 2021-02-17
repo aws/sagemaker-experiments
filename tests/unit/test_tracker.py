@@ -368,6 +368,31 @@ def test_log_pr_curve(under_test):
     )
 
 
+def test_log_confusion_matrix(under_test):
+
+    y_true = [2, 0, 2, 2, 0, 1]
+    y_pred = [0, 0, 2, 2, 0, 2]
+
+    under_test._artifact_uploader.upload_object_artifact.return_value = ("s3uri_value", "etag_value")
+
+    under_test.log_confusion_matrix(y_true, y_pred, title="TestConfusionMatrix")
+
+    expected_data = {
+        "type": "ConfusionMatrix",
+        "version": 0,
+        "title": "TestConfusionMatrix",
+        "confusionMatrix": [[2, 0, 0], [0, 0, 1], [1, 0, 2]],
+    }
+
+    under_test._artifact_uploader.upload_object_artifact.assert_called_with(
+        "TestConfusionMatrix", expected_data, file_extension="json"
+    )
+
+    under_test._lineage_artifact_tracker.add_input_artifact(
+        "TestConfusionMatrix", "s3uri_value", "etag_value", "ConfusionMatrix"
+    )
+
+
 def test_resolve_artifact_name():
     file_names = {
         "a": "a",
