@@ -82,6 +82,8 @@ class Tracker(object):
     ):
         """Create a new ``Tracker`` by loading an existing trial component.
 
+        Note that `log_metric` will only work from a training job host.
+
         Examples:
             .. code-block:: python
 
@@ -142,7 +144,7 @@ class Tracker(object):
         else:
             raise ValueError('Could not load TrialComponent. Specify a trial_component_name or invoke "create"')
 
-        # if running in a SageMaker context write metrics to file
+        # metrics require the metrics agent running on training job hosts
         if not trial_component_name and tce.environment_type == _environment.EnvironmentType.SageMakerTrainingJob:
             metrics_writer = metrics.SageMakerFileMetricsWriter()
         else:
@@ -167,6 +169,8 @@ class Tracker(object):
         sagemaker_boto_client=None,
     ):
         """Create a new ``Tracker`` by creating a new trial component.
+
+        Note that `log_metric` will _not_ work when tracker is created this way.
 
         Examples
             .. code-block:: python
@@ -197,7 +201,10 @@ class Tracker(object):
             sagemaker_boto_client=sagemaker_boto_client,
         )
 
-        metrics_writer = metrics.SageMakerFileMetricsWriter()
+        # metrics require the metrics agent running on training job hosts and in which case the load
+        # method should be used because it loads the trial component associated with the currently
+        # running training job
+        metrics_writer = None
 
         return cls(
             tc,
@@ -364,7 +371,10 @@ class Tracker(object):
         self._lineage_artifact_tracker.add_input_artifact(name, s3_uri, etag, media_type)
 
     def log_metric(self, metric_name, value, timestamp=None, iteration_number=None):
-        """Record a scalar metric value for this TrialComponent to file, not SageMaker.
+        """Record a scalar metric value for this TrialComponent.
+
+        Note that metrics logged with this method will only appear in SageMaker when this method
+        is called from a training job host.
 
         Examples
             .. code-block:: python
