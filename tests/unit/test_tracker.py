@@ -151,12 +151,7 @@ def test_create(boto3_session, sagemaker_boto_client):
     )
     assert trial_component_name == tracker_created.trial_component.trial_component_name
 
-    assert tracker_created._metrics_writer is not None
-
-    tracker_created._metrics_writer = unittest.mock.Mock()
-    now = datetime.datetime.now()
-    tracker_created.log_metric("foo", 1.0, 1, now)
-    tracker_created._metrics_writer.log_metric.assert_called_with("foo", 1.0, 1, now)
+    assert tracker_created._metrics_writer is None
 
 
 @pytest.fixture
