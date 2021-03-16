@@ -341,10 +341,11 @@ def test_log_pr_curve(under_test):
 
     y_true = [0, 0, 1, 1]
     y_scores = [0.1, 0.4, 0.35, 0.8]
+    no_skill = 0.1
 
     under_test._artifact_uploader.upload_object_artifact.return_value = ("s3uri_value", "etag_value")
 
-    under_test.log_precision_recall(y_true, y_scores, title="TestPRCurve")
+    under_test.log_precision_recall(y_true, y_scores, title="TestPRCurve", no_skill=no_skill)
 
     expected_data = {
         "type": "PrecisionRecallCurve",
@@ -353,6 +354,7 @@ def test_log_pr_curve(under_test):
         "precision": [0.6666666666666666, 0.5, 1.0, 1.0],
         "recall": [1.0, 0.5, 0.5, 0.0],
         "averagePrecisionScore": 0.8333333333333333,
+        "noSkill": 0.1,
     }
     under_test._artifact_uploader.upload_object_artifact.assert_called_with(
         "TestPRCurve", expected_data, file_extension="json"

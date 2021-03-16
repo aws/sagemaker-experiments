@@ -467,6 +467,7 @@ class Tracker(object):
         positive_label=None,
         title=None,
         output_artifact=True,
+        no_skill=None,
     ):
         """Log a precision recall graph artifact which will be displayed in studio.
             Requires sklearn.  Not yet supported by studio.
@@ -479,8 +480,9 @@ class Tracker(object):
 
                 y_true = [0, 0, 1, 1]
                 y_scores = [0.1, 0.4, 0.35, 0.8]
+                no_skill = len(y_true[y_true==1]) / len(y_true)
 
-                my_tracker._log_precision_recall(y_true, y_scores)
+                my_tracker._log_precision_recall(y_true, y_scores, no_skill=no_skill)
 
         Args:
             y_true (array): True labels. If labels are not binary then positive_label should be given.
@@ -489,6 +491,9 @@ class Tracker(object):
             title (str, optional): Title of the graph, Defaults to none.
             output_artifact (boolean, optional): Determines if the artifact is associated with the
                 Trial Component as an output artifact. If False will be an input artifact.
+            no_skill (int): The precision threshold under which the classifier cannot discriminate
+                between the classes and would predict a random class or a constant class in
+                all cases.
 
         Raises:
             ValueError: If length mismatch between y_true and predicted_probabilities.
@@ -516,6 +521,7 @@ class Tracker(object):
             "precision": precision.tolist(),
             "recall": recall.tolist(),
             "averagePrecisionScore": ap,
+            "noSkill": no_skill,
         }
         self._log_graph_artifact(title, data, "PrecisionRecallCurve", output_artifact)
 
