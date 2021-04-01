@@ -588,6 +588,27 @@ def test_log_table(under_test):
     under_test._lineage_artifact_tracker.add_input_artifact("TestTable", "s3uri_value", "etag_value", "Table")
 
 
+def test_log_table_dataframe(under_test):
+
+    dataframe = pd.DataFrame({"x": [1, 2, 3], "y": [4, 5, 6]})
+
+    under_test._artifact_uploader.upload_object_artifact.return_value = ("s3uri_value", "etag_value")
+
+    under_test.log_table(title="TestTable", data_frame=dataframe)
+    expected_data = {
+        "type": "Table",
+        "version": 0,
+        "title": "TestTable",
+        "fields": [{"name": "x", "type": "number"}, {"name": "y", "type": "number"}],
+        "data": {"x": [1, 2, 3], "y": [4, 5, 6]},
+    }
+    under_test._artifact_uploader.upload_object_artifact.assert_called_with(
+        "TestTable", expected_data, file_extension="json"
+    )
+
+    under_test._lineage_artifact_tracker.add_input_artifact("TestTable", "s3uri_value", "etag_value", "Table")
+
+
 def test_log_roc_curve(under_test):
     y_true = [0, 0, 1, 1]
     y_scores = [0.1, 0.4, 0.35, 0.8]
