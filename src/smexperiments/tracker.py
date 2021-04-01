@@ -450,7 +450,7 @@ class Tracker(object):
                         'Table values should be list. i.e. {"x": [1,2,3]}, instead was ' + str(type(values[key]))
                     )
 
-        if data_frame:
+        if data_frame is not None:
             values = _ArtifactConverter.convert_data_frame_to_values(data_frame)
             fields = _ArtifactConverter.convert_data_frame_to_fields(data_frame)
         else:
