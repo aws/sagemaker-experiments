@@ -406,7 +406,7 @@ class Tracker(object):
                 raise
 
     def log_table(self, title=None, values=None, data_frame=None, output_artifact=True):
-        """Record a table of values that will be rendered in Studio.
+        """Record a table of values to an artifact. Rendering in studio is not currently supported.
 
         Note that this method must be run from a SageMaker context such as studio or training job
         due to restrictions on the CreateArtifact API.
@@ -470,7 +470,7 @@ class Tracker(object):
         no_skill=None,
     ):
         """Log a precision recall graph artifact which will be displayed in studio.
-            Requires sklearn.  Not yet supported by studio.
+            Requires sklearn.
 
         Note that this method must be run from a SageMaker context such as studio or training job
         due to restrictions on the CreateArtifact API.
