@@ -371,7 +371,10 @@ class Tracker(object):
         self._lineage_artifact_tracker.add_input_artifact(name, s3_uri, etag, media_type)
 
     def log_metric(self, metric_name, value, timestamp=None, iteration_number=None):
-        """Record a scalar metric value for this TrialComponent.
+        """Record a custom scalar metric value for this TrialComponent.
+
+        Note that this method is for manual custom metrics, for automatic metrics see the
+        `enable_sagemaker_metrics` parameter on the `estimator` class in the main SageMaker SDK.
 
         Note that metrics logged with this method will only appear in SageMaker when this method
         is called from a training job host.
