@@ -532,7 +532,7 @@ class Tracker(object):
         title=None,
         output_artifact=True,
     ):
-        """Log a receiver operating characteristic (ROC) artifact which will be displayed in
+        """Log a receiver operating characteristic (ROC curve) artifact which will be displayed in
         studio.  Requires sklearn.
 
         Note that this method must be run from a SageMaker context such as studio or training job
