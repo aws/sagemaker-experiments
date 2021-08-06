@@ -412,11 +412,7 @@ class Tracker(object):
                 raise
 
     def log_table(self, title=None, values=None, data_frame=None, output_artifact=True):
-        """Record a table of values to an artifact. Rendering in studio is not currently supported.
-
-        Note that this method must be run from a SageMaker context such as studio or training job
-        due to restrictions on the CreateArtifact API.
-
+        """Record a table of values to an artifact. Rendering in Studio is not currently supported.
 
         Examples
             .. code-block:: python
@@ -475,11 +471,12 @@ class Tracker(object):
         output_artifact=True,
         no_skill=None,
     ):
-        """Log a precision recall graph artifact which will be displayed in studio.
-            Requires sklearn.
+        """Log a precision recall graph artifact. If your job is created by a pipeline
+        execution you can view the artifact by selecting the corresponding step in the pipelines UI.
+        The Trial Component UI currently does not support rendering of the artifact.
+        See also `SageMaker Pipelines <https://aws.amazon.com/sagemaker/pipelines/>`_
 
-        Note that this method must be run from a SageMaker context such as studio or training job
-        due to restrictions on the CreateArtifact API.
+        Requires sklearn.
 
         Examples
             .. code-block:: python
@@ -538,11 +535,12 @@ class Tracker(object):
         title=None,
         output_artifact=True,
     ):
-        """Log a receiver operating characteristic (ROC curve) artifact which will be displayed in
-        studio.  Requires sklearn.
+        """Log a receiver operating characteristic (ROC curve) artifact. If your job is created by a pipeline
+        execution you can view the artifact by selecting the corresponding step in the pipelines UI.
+        The Trial Component UI currently does not support rendering of the artifact.
+        See also `SageMaker Pipelines <https://aws.amazon.com/sagemaker/pipelines/>`_
 
-        Note that this method must be run from a SageMaker context such as studio or training job
-        due to restrictions on the CreateArtifact API.
+        Requires sklearn.
 
         Examples
             .. code-block:: python
@@ -590,11 +588,12 @@ class Tracker(object):
         title=None,
         output_artifact=True,
     ):
-        """Log a confusion matrix artifact which will be displayed in
-        studio.  Requires sklearn.
+        """Log a confusion matrix artifact. If your job is created by a pipeline execution you can view the
+        artifact by selecting the corresponding step in the pipelines UI. The Trial Component UI
+        currently does not support rendering of the artifact.
+        See also `SageMaker Pipelines <https://aws.amazon.com/sagemaker/pipelines/>`_
 
-        Note that this method must be run from a SageMaker context such as studio or training job
-        due to restrictions on the CreateArtifact API.
+        Requires sklearn.
 
         Examples
             .. code-block:: python
@@ -837,7 +836,7 @@ class _LineageArtifact(object):
 
 
 class _ArtifactConverter(object):
-    """Converts data to easily consumed by studio."""
+    """Converts data to easily consumed by Studio."""
 
     @classmethod
     def convert_dict_to_fields(cls, values):
