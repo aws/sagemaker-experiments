@@ -109,7 +109,7 @@ Examples
 .. code-block:: python
 
     import boto3
-    import pickle, gzip, numpy, urllib.request, json
+    import pickle, gzip, numpy, json, os
     import io
     import numpy as np
     import sagemaker.amazon.common as smac
@@ -123,7 +123,8 @@ Examples
     container = get_image_uri(boto3.Session().region_name, 'linear-learner')
 
     # Load the dataset
-    urllib.request.urlretrieve("http://deeplearning.net/data/mnist/mnist.pkl.gz", "mnist.pkl.gz")
+    s3 = boto3.client("s3")
+    s3.download_file("sagemaker-sample-files", "datasets/image/MNIST/mnist.pkl.gz", "mnist.pkl.gz")
     with gzip.open('mnist.pkl.gz', 'rb') as f:
         train_set, valid_set, test_set = pickle.load(f, encoding='latin1')
 
