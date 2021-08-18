@@ -136,7 +136,7 @@ Examples
     buf.seek(0)
 
     key = 'recordio-pb-data'
-    bucket = '{YOUR-BUCKET}'
+    bucket = sagemaker.session.Session().default_bucket()
     prefix = 'sagemaker/DEMO-linear-mnist'
     boto3.resource('s3').Bucket(bucket).Object(os.path.join(prefix, 'train', key)).upload_fileobj(buf)
     s3_train_data = 's3://{}/{}/train/{}'.format(bucket, prefix, key)
