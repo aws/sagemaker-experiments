@@ -13,6 +13,7 @@
 import pytest
 
 import botocore
+from botocore.config import Config
 import base64
 import glob
 import uuid
@@ -72,10 +73,17 @@ def sagemaker_region(request):
 
 @pytest.fixture
 def sagemaker_boto_client(sagemaker_endpoint, sagemaker_region):
+    config = Config(retries={"max_attempts": 10, "mode": "adaptive"})
+
     if sagemaker_endpoint is None:
-        return boto3.client("sagemaker", region_name=sagemaker_region)
+        return boto3.client("sagemaker", region_name=sagemaker_region, config=config)
     else:
-        return boto3.client("sagemaker", region_name=sagemaker_region, endpoint_url=sagemaker_endpoint)
+        return boto3.client(
+            "sagemaker",
+            region_name=sagemaker_region,
+            endpoint_url=sagemaker_endpoint,
+            config=config,
+        )
 
 
 @pytest.fixture(scope="session")
@@ -96,7 +104,10 @@ def experiment_obj(sagemaker_boto_client):
     boto3.set_stream_logger("", logging.INFO)
     experiment_name = name()
     experiment_obj = experiment.Experiment.create(
-        experiment_name=experiment_name, description=description, sagemaker_boto_client=sagemaker_boto_client, tags=TAGS
+        experiment_name=experiment_name,
+        description=description,
+        sagemaker_boto_client=sagemaker_boto_client,
+        tags=TAGS,
     )
     yield experiment_obj
     time.sleep(0.5)
@@ -113,7 +124,9 @@ def complex_experiment_obj(sagemaker_boto_client):
     # create experiment
     experiment_obj_name = name()
     experiment_obj = experiment.Experiment.create(
-        experiment_name=experiment_obj_name, description=description, sagemaker_boto_client=sagemaker_boto_client
+        experiment_name=experiment_obj_name,
+        description=description,
+        sagemaker_boto_client=sagemaker_boto_client,
     )
 
     # create trials
@@ -151,7 +164,8 @@ def complex_experiment_obj(sagemaker_boto_client):
     # associate the trials with trial components
     for trial_obj in trial_objs:
         sagemaker_boto_client.associate_trial_component(
-            TrialName=trial_obj.trial_name, TrialComponentName=trial_component_obj.trial_component_name
+            TrialName=trial_obj.trial_name,
+            TrialComponentName=trial_component_obj.trial_component_name,
         )
         time.sleep(0.5)
     time.sleep(1.0)
@@ -220,7 +234,8 @@ def trial_component_with_force_disassociation_obj(trials, sagemaker_boto_client)
     )
     for trial in trials:
         sagemaker_boto_client.associate_trial_component(
-            TrialName=trial.trial_name, TrialComponentName=trial_component_obj.trial_component_name
+            TrialName=trial.trial_name,
+            TrialComponentName=trial_component_obj.trial_component_name,
         )
     yield trial_component_obj
     time.sleep(0.5)
@@ -249,7 +264,10 @@ def experiments(sagemaker_boto_client):
 
     for experiment_name in names():
         experiment_objs.append(
-            experiment.Experiment.create(experiment_name=experiment_name, sagemaker_boto_client=sagemaker_boto_client)
+            experiment.Experiment.create(
+                experiment_name=experiment_name,
+                sagemaker_boto_client=sagemaker_boto_client,
+            )
         )
         time.sleep(1)
 
@@ -262,7 +280,8 @@ def experiments(sagemaker_boto_client):
 def trial_components(sagemaker_boto_client):
     trial_component_objs = [
         trial_component.TrialComponent.create(
-            trial_component_name=trial_component_name, sagemaker_boto_client=sagemaker_boto_client
+            trial_component_name=trial_component_name,
+            sagemaker_boto_client=sagemaker_boto_client,
         )
         for trial_component_name in names()
     ]
@@ -275,7 +294,8 @@ def trial_components(sagemaker_boto_client):
 def trial_components_in_trial(sagemaker_boto_client, trial_obj):
     trial_components = [
         trial_component.TrialComponent.create(
-            trial_component_name=trial_component_name, sagemaker_boto_client=sagemaker_boto_client
+            trial_component_name=trial_component_name,
+            sagemaker_boto_client=sagemaker_boto_client,
         )
         for trial_component_name in names()
     ]
@@ -317,7 +337,10 @@ def training_role_arn(boto3_session):
         else:
             raise ex
 
-    iam_client.attach_role_policy(RoleName=role_name, PolicyArn="arn:aws:iam::aws:policy/AmazonSageMakerFullAccess")
+    iam_client.attach_role_policy(
+        RoleName=role_name,
+        PolicyArn="arn:aws:iam::aws:policy/AmazonSageMakerFullAccess",
+    )
     time.sleep(30)
     return response["Role"]["Arn"]
 
@@ -328,11 +351,15 @@ def bucket(boto3_session):
     sts_client = boto3_session.client("sts")
     account = sts_client.get_caller_identity()["Account"]
 
-    bucket_name = "sagemaker-experiments-integ-test-%s-%s" % (boto3_session.region_name, account)
+    bucket_name = "sagemaker-experiments-integ-test-%s-%s" % (
+        boto3_session.region_name,
+        account,
+    )
     try:
         if boto3_session.region_name != "us-east-1":
             s3_client.create_bucket(
-                Bucket=bucket_name, CreateBucketConfiguration={"LocationConstraint": boto3_session.region_name}
+                Bucket=bucket_name,
+                CreateBucketConfiguration={"LocationConstraint": boto3_session.region_name},
             )
         else:
             s3_client.create_bucket(Bucket=bucket_name)
@@ -361,7 +388,13 @@ def training_output_s3_uri(bucket):
 
 
 @pytest.fixture
-def training_job_name(sagemaker_boto_client, training_role_arn, docker_image, training_s3_uri, training_output_s3_uri):
+def training_job_name(
+    sagemaker_boto_client,
+    training_role_arn,
+    docker_image,
+    training_s3_uri,
+    training_output_s3_uri,
+):
     training_job_name = name()
     sagemaker_boto_client.create_training_job(
         TrainingJobName=training_job_name,
@@ -376,7 +409,11 @@ def training_job_name(sagemaker_boto_client, training_role_arn, docker_image, tr
             "TrainingInputMode": "File",
         },
         RoleArn=training_role_arn,
-        ResourceConfig={"InstanceType": "ml.m5.large", "InstanceCount": 1, "VolumeSizeInGB": 10},
+        ResourceConfig={
+            "InstanceType": "ml.m5.large",
+            "InstanceCount": 1,
+            "VolumeSizeInGB": 10,
+        },
         StoppingCondition={"MaxRuntimeInSeconds": 900},
         OutputDataConfig={"S3OutputPath": training_output_s3_uri},
     )
@@ -390,7 +427,11 @@ def processing_job_name(sagemaker_boto_client, training_role_arn, docker_image):
     sagemaker_boto_client.create_processing_job(
         ProcessingJobName=processing_job_name,
         ProcessingResources={
-            "ClusterConfig": {"InstanceCount": 1, "InstanceType": "ml.m5.large", "VolumeSizeInGB": 10}
+            "ClusterConfig": {
+                "InstanceCount": 1,
+                "InstanceType": "ml.m5.large",
+                "VolumeSizeInGB": 10,
+            }
         },
         AppSpecification={"ImageUri": docker_image},
         RoleArn=training_role_arn,
@@ -434,7 +475,10 @@ def docker_image(boto_model_file, sagemaker_endpoint):
     if boto_model_file is None:
         print("boto_model_file is None, using default model.")
     else:
-        shutil.copy(boto_model_file, os.path.join(docker_dir, "boto/sagemaker-experiments-2017-07-24.normal.json"))
+        shutil.copy(
+            boto_model_file,
+            os.path.join(docker_dir, "boto/sagemaker-experiments-2017-07-24.normal.json"),
+        )
 
     subprocess.check_call([sys.executable, "setup.py", "sdist"])
     [sdist_path] = glob.glob("dist/sagemaker-experiments*")
