@@ -17,7 +17,7 @@ import pytest
 
 from tests.helpers import name, wait_for_trial_component
 from smexperiments import tracker, trial_component, _utils
-
+from tests.helpers import retry
 
 def test_load_trial_component(trial_component_obj, sagemaker_boto_client):
     wait_for_trial_component(sagemaker_boto_client, trial_component_name=trial_component_obj.trial_component_name)
@@ -132,7 +132,6 @@ def test_create_default_bucket(boto3_session):
     finally:
         s3_client.delete_bucket(Bucket=bucket)
 
-
 def test_create_lineage_artifacts(trial_component_obj, bucket, tempdir, sagemaker_boto_client):
 
     prefix = name()
@@ -153,12 +152,15 @@ def test_create_lineage_artifacts(trial_component_obj, bucket, tempdir, sagemake
 
     response = sagemaker_boto_client.list_associations(SourceArn=trial_component_obj.trial_component_arn)
     associations = response["AssociationSummaries"]
-    assert len(associations) == 1
-    summary = associations[0]
-    logging.info(summary)
-    assert summary["SourceArn"] == trial_component_obj.trial_component_arn
-    assert summary["DestinationName"] == artifact_name
 
+    def validate():
+        assert len(associations) == 1
+        summary = associations[0]
+        logging.info(summary)
+        assert summary["SourceArn"] == trial_component_obj.trial_component_arn
+        assert summary["DestinationName"] == artifact_name
+
+    retry(validate, num_attempts=4)
 
 def test_log_table_artifact(trial_component_obj, bucket, sagemaker_boto_client):
 
@@ -177,8 +179,12 @@ def test_log_table_artifact(trial_component_obj, bucket, sagemaker_boto_client):
 
     response = sagemaker_boto_client.list_associations(SourceArn=trial_component_obj.trial_component_arn)
     associations = response["AssociationSummaries"]
-    assert len(associations) == 1
-    summary = associations[0]
-    logging.info(summary)
-    assert summary["SourceArn"] == trial_component_obj.trial_component_arn
-    assert summary["DestinationName"] == artifact_name
+
+    def validate():
+        assert len(associations) == 1
+        summary = associations[0]
+        logging.info(summary)
+        assert summary["SourceArn"] == trial_component_obj.trial_component_arn
+        assert summary["DestinationName"] == artifact_name
+
+    retry(validate, num_attempts=4)
