@@ -17,12 +17,17 @@ import pytest
 
 from tests.helpers import name, wait_for_trial_component
 from smexperiments import tracker, trial_component, _utils
+from tests.helpers import retry
 
 
 def test_load_trial_component(trial_component_obj, sagemaker_boto_client):
-    wait_for_trial_component(sagemaker_boto_client, trial_component_name=trial_component_obj.trial_component_name)
+    wait_for_trial_component(
+        sagemaker_boto_client,
+        trial_component_name=trial_component_obj.trial_component_name,
+    )
     tracker_obj = tracker.Tracker.load(
-        trial_component_name=trial_component_obj.trial_component_name, sagemaker_boto_client=sagemaker_boto_client
+        trial_component_name=trial_component_obj.trial_component_name,
+        sagemaker_boto_client=sagemaker_boto_client,
     )
     assert tracker_obj
     assert tracker_obj.trial_component.trial_component_name == trial_component_obj.trial_component_name
@@ -62,13 +67,15 @@ def test_create_display_name(sagemaker_boto_client):
 
 def test_log_simple(trial_component_obj, sagemaker_boto_client):
     with tracker.Tracker.load(
-        trial_component_obj.trial_component_name, sagemaker_boto_client=sagemaker_boto_client
+        trial_component_obj.trial_component_name,
+        sagemaker_boto_client=sagemaker_boto_client,
     ) as tracker_obj:
         tracker_obj.log_parameter("p1", 1.0)
         tracker_obj.log_parameter("p2", "p2-value")
         tracker_obj.log_parameters({"p3": 2.0, "p4": "p4-value"})
     loaded_obj = trial_component.TrialComponent.load(
-        trial_component_name=trial_component_obj.trial_component_name, sagemaker_boto_client=sagemaker_boto_client
+        trial_component_name=trial_component_obj.trial_component_name,
+        sagemaker_boto_client=sagemaker_boto_client,
     )
     expected_parameters = {"p1": 1.0, "p2": "p2-value", "p3": 2.0, "p4": "p4-value"}
     assert expected_parameters == loaded_obj.parameters
@@ -91,7 +98,8 @@ def test_log_artifact(trial_component_obj, bucket, tempdir, sagemaker_boto_clien
         tracker_obj.log_artifact(file_path, name=artifact_name)
 
     loaded = trial_component.TrialComponent.load(
-        trial_component_name=trial_component_obj.trial_component_name, sagemaker_boto_client=sagemaker_boto_client
+        trial_component_name=trial_component_obj.trial_component_name,
+        sagemaker_boto_client=sagemaker_boto_client,
     )
     assert "text/plain" == loaded.output_artifacts[artifact_name].media_type
     assert prefix in loaded.output_artifacts[artifact_name].value
@@ -115,7 +123,8 @@ def test_log_artifacts(trial_component_obj, bucket, tempdir, sagemaker_boto_clie
     ) as tracker_obj:
         tracker_obj.log_artifacts(tempdir)
     loaded = trial_component.TrialComponent.load(
-        trial_component_name=trial_component_obj.trial_component_name, sagemaker_boto_client=sagemaker_boto_client
+        trial_component_name=trial_component_obj.trial_component_name,
+        sagemaker_boto_client=sagemaker_boto_client,
     )
     assert "text/plain" == loaded.output_artifacts["foo"].media_type
     assert prefix in loaded.output_artifacts["foo"].value
@@ -153,11 +162,15 @@ def test_create_lineage_artifacts(trial_component_obj, bucket, tempdir, sagemake
 
     response = sagemaker_boto_client.list_associations(SourceArn=trial_component_obj.trial_component_arn)
     associations = response["AssociationSummaries"]
-    assert len(associations) == 1
-    summary = associations[0]
-    logging.info(summary)
-    assert summary["SourceArn"] == trial_component_obj.trial_component_arn
-    assert summary["DestinationName"] == artifact_name
+
+    def validate():
+        assert len(associations) == 1
+        summary = associations[0]
+        logging.info(summary)
+        assert summary["SourceArn"] == trial_component_obj.trial_component_arn
+        assert summary["DestinationName"] == artifact_name
+
+    retry(validate, num_attempts=4)
 
 
 def test_log_table_artifact(trial_component_obj, bucket, sagemaker_boto_client):
@@ -177,8 +190,12 @@ def test_log_table_artifact(trial_component_obj, bucket, sagemaker_boto_client):
 
     response = sagemaker_boto_client.list_associations(SourceArn=trial_component_obj.trial_component_arn)
     associations = response["AssociationSummaries"]
-    assert len(associations) == 1
-    summary = associations[0]
-    logging.info(summary)
-    assert summary["SourceArn"] == trial_component_obj.trial_component_arn
-    assert summary["DestinationName"] == artifact_name
+
+    def validate():
+        assert len(associations) == 1
+        summary = associations[0]
+        logging.info(summary)
+        assert summary["SourceArn"] == trial_component_obj.trial_component_arn
+        assert summary["DestinationName"] == artifact_name
+
+    retry(validate, num_attempts=4)

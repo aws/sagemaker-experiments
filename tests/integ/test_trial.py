@@ -15,6 +15,7 @@ import datetime
 
 from smexperiments import trial
 from smexperiments.search_expression import SearchExpression, Filter, Operator
+from tests.helpers import retry
 
 
 def test_create_delete(trial_obj):
@@ -39,7 +40,9 @@ def test_list(trials, sagemaker_boto_client):
     trial_names_listed = [
         s.trial_name
         for s in trial.Trial.list(
-            created_after=now - slack, created_before=now + slack, sagemaker_boto_client=sagemaker_boto_client
+            created_after=now - slack,
+            created_before=now + slack,
+            sagemaker_boto_client=sagemaker_boto_client,
         )
     ]
     for trial_obj in trials:
@@ -54,7 +57,8 @@ def test_list_with_trial_component(trials, trial_component_obj, sagemaker_boto_c
     trial_listed = [
         s.trial_name
         for s in trial.Trial.list(
-            trial_component_name=trial_component_obj.trial_component_name, sagemaker_boto_client=sagemaker_boto_client
+            trial_component_name=trial_component_obj.trial_component_name,
+            sagemaker_boto_client=sagemaker_boto_client,
         )
     ]
     assert len(trial_listed) == 1
@@ -93,7 +97,9 @@ def test_search(sagemaker_boto_client):
     search_filter = Filter(name="ExperimentName", operator=Operator.CONTAINS, value="smexperiments-integ-")
     search_expression = SearchExpression(filters=[search_filter])
     for s in trial.Trial.search(
-        search_expression=search_expression, max_results=10, sagemaker_boto_client=sagemaker_boto_client
+        search_expression=search_expression,
+        max_results=10,
+        sagemaker_boto_client=sagemaker_boto_client,
     ):
         trial_names_searched.append(s.trial_name)
 
@@ -103,11 +109,15 @@ def test_search(sagemaker_boto_client):
 
 def test_add_remove_trial_component(trial_obj, trial_component_obj):
     trial_obj.add_trial_component(trial_component_obj)
-    trial_components = list(trial_obj.list_trial_components())
-    assert 1 == len(trial_components)
-    trial_obj.remove_trial_component(trial_component_obj)
-    trial_components = list(trial_obj.list_trial_components())
-    assert 0 == len(trial_components)
+
+    def validate():
+        trial_components = list(trial_obj.list_trial_components())
+        assert 1 == len(trial_components)
+        trial_obj.remove_trial_component(trial_component_obj)
+        trial_components = list(trial_obj.list_trial_components())
+        assert 0 == len(trial_components)
+
+    retry(validate, num_attempts=4)
 
 
 def test_save(trial_obj, sagemaker_boto_client):
