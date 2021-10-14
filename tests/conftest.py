@@ -31,6 +31,7 @@ import docker
 
 from smexperiments import experiment, trial, trial_component
 from tests.helpers import name, names
+from tests.helpers import retry
 
 TAGS = [{"Key": "some-key", "Value": "some-value"}]
 
@@ -210,7 +211,7 @@ def trial_component_obj(sagemaker_boto_client):
     yield trial_component_obj
     time.sleep(0.5)
     delete_associations(trial_component_obj.trial_component_arn, sagemaker_boto_client)
-    trial_component_obj.delete()
+    retry(trial_component_obj.delete)
 
 
 def delete_associations(arn, sagemaker_boto_client):
