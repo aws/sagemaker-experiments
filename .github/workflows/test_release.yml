@@ -29,6 +29,8 @@ jobs:
         run: tox -e pylint
       - name: Docstyle
         run: tox -e docstyle
+      - name: Doc Generation
+        run: tox -e docs
 
   test:
     runs-on: ubuntu-latest
