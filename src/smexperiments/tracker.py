@@ -50,10 +50,10 @@ class Tracker(object):
 
     Note that parameters and input/output artifacts are saved to SageMaker directly via the
     UpdateTrialComponent operation. In contrast metrics (via `log_metric` method) are saved to a file, which is
-    then ingested into SageMaker via a metrics agent _which only runs on training job hosts_. As a result any metrics
+    then ingested into SageMaker via a metrics agent _which only runs on training job hosts. As a result any metrics
     logged in non-training job host environments will not be ingested into SageMaker.
 
-    Attributes:
+    Parameters:
         trial_component (TrialComponent): The trial component tracked.
     """
 

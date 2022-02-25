@@ -41,7 +41,7 @@ class Trial(_base_types.Record):
             my_trial.remove_trial_component(my_tracker)
             my_trial.delete()
 
-    Attributes:
+    Parameters:
         trial_name (str): The name of the trial.
         experiment_name (str): The name of the trial's experiment.
         tags (List[dict[str, str]]): A list of tags to associate with the trial.

@@ -40,7 +40,7 @@ class Experiment(_base_types.Record):
 
             my_experiment.delete_all(action="--force")
 
-    Attributes:
+    Parameters:
         experiment_name (str): The name of the experiment. The name must be unique within an account.
         description (str): A description of the experiment.
         tags (List[dict[str, str]]): A list of tags to associate with the experiment.
