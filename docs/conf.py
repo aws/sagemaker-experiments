@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.abspath(".."))
 # -- Project information -----------------------------------------------------
 
 project = "sagemaker-experiments"
-copyright = u"%s, Amazon" % datetime.now().year
+copyright = "%s, Amazon" % datetime.now().year
 author = "Amazon Web Services"
 version = get_distribution(project).version
 
