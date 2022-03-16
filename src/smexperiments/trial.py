@@ -30,14 +30,19 @@ class Trial(_base_types.Record):
             my_experiment = experiment.Experiment.create(experiment_name='AutoML')
             my_trial = trial.Trial.create('AutoML')
 
-            my_tracker = tracker.Tracker.create()
-            # log hyper parameter of learning rate
-            my_tracker.log_parameter('learning_rate', 0.01)
-            my_trial.add_trial_component(my_tracker)
+            # use `with` statement to ensure `my_tracker.close()` is called
+            with tracker.Tracker.create() as my_tracker:
+                # log hyper parameter of learning rate
+                my_tracker.log_parameter('learning_rate', 0.01)
 
+                # associate the trial component with the trial
+                my_trial.add_trial_component(my_tracker)
+
+            # list trial components within a trial
             for trial_component in my_trial.list_trial_components():
                 print(trial_component)
 
+            # cleanup trial
             my_trial.remove_trial_component(my_tracker)
             my_trial.delete()
 
