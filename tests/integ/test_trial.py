@@ -13,6 +13,8 @@
 
 import datetime
 
+import logging
+
 from smexperiments import trial
 from smexperiments.search_expression import SearchExpression, Filter, Operator
 from tests.helpers import retry
@@ -109,15 +111,24 @@ def test_search(sagemaker_boto_client):
 
 def test_add_remove_trial_component(trial_obj, trial_component_obj):
     trial_obj.add_trial_component(trial_component_obj)
+    logging.info(f"Added trial component {trial_component_obj.trial_component_name} to trial {trial_obj.trial_name}")
 
-    def validate():
+    def validate_add():
         trial_components = list(trial_obj.list_trial_components())
-        assert 1 == len(trial_components)
-        trial_obj.remove_trial_component(trial_component_obj)
-        trial_components = list(trial_obj.list_trial_components())
-        assert 0 == len(trial_components)
+        assert 1 == len(trial_components), "Expected trial component to be included in trials list of TC"
 
-    retry(validate, num_attempts=4)
+    retry(validate_add)
+
+    trial_obj.remove_trial_component(trial_component_obj)
+    logging.info(
+        f"Removed trial component {trial_component_obj.trial_component_name} from trial {trial_obj.trial_name}"
+    )
+
+    def validate_remove():
+        trial_components = list(trial_obj.list_trial_components())
+        assert 0 == len(trial_components), "Expected trial component to be removed from trials list of TC"
+
+    retry(validate_remove)
 
 
 def test_save(trial_obj, sagemaker_boto_client):
