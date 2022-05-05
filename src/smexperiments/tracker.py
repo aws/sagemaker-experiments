@@ -19,6 +19,8 @@ import urllib.request
 import logging
 import botocore
 import json
+from math import isnan, isinf
+from numbers import Number
 from smexperiments._utils import get_module
 from os.path import join
 
@@ -231,7 +233,8 @@ class Tracker(object):
             name (str): The name of the parameter
             value (str or numbers.Number): The value of the parameter
         """
-        self.trial_component.parameters[name] = value
+        if self._is_input_valid("parameter", name, value):
+            self.trial_component.parameters[name] = value
 
     def log_parameters(self, parameters):
         """Record a collection of parameter values for this trial component.
@@ -245,7 +248,10 @@ class Tracker(object):
         Args:
             parameters (dict[str, str or numbers.Number]): The parameters to record.
         """
-        self.trial_component.parameters.update(parameters)
+        filtered_parameters = {
+            key: value for (key, value) in parameters.items() if self._is_input_valid("parameter", key, value)
+        }
+        self.trial_component.parameters.update(filtered_parameters)
 
     def log_input(self, name, value, media_type=None):
         """Record a single input artifact for this trial component.
@@ -402,7 +408,8 @@ class Tracker(object):
             AttributeError: If the metrics writer is not initialized.
         """
         try:
-            self._metrics_writer.log_metric(metric_name, value, timestamp, iteration_number)
+            if self._is_input_valid("metric", metric_name, value):
+                self._metrics_writer.log_metric(metric_name, value, timestamp, iteration_number)
         except AttributeError:
             if not self._metrics_writer:
                 if not self._warned_on_metrics:
@@ -653,6 +660,12 @@ class Tracker(object):
             self._lineage_artifact_tracker.add_output_artifact(artifact_name, s3_uri, etag, graph_type)
         else:
             self._lineage_artifact_tracker.add_input_artifact(artifact_name, s3_uri, etag, graph_type)
+
+    def _is_input_valid(self, input_type, field_name, field_value):
+        if isinstance(field_value, Number) and (isnan(field_value) or isinf(field_value)):
+            logging.warning(f"Failed to log {input_type} {field_name}. Received invalid value: {field_value}.")
+            return False
+        return True
 
     def __enter__(self):
         """Updates the start time of the tracked trial component.
