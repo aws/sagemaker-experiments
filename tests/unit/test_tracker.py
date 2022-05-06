@@ -16,6 +16,8 @@ import shutil
 import tempfile
 import os
 import datetime
+from math import nan, inf
+import numpy as np
 from smexperiments import api_types, tracker, trial_component, _utils, _environment
 import pandas as pd
 
@@ -171,6 +173,11 @@ def test_log_parameter(under_test):
     assert under_test.trial_component.parameters["whizz"] == 1
 
 
+def test_log_parameter_skip_invalid_value(under_test):
+    under_test.log_parameter("key", nan)
+    assert "key" not in under_test.trial_component.parameters
+
+
 def test_enter(under_test):
     under_test.__enter__()
     assert isinstance(under_test.trial_component.start_time, datetime.datetime)
@@ -213,6 +220,11 @@ def test_log_parameters(under_test):
     assert under_test.trial_component.parameters == {"a": "b", "c": "d", "e": 5}
 
 
+def test_log_parameters_skip_invalid_values(under_test):
+    under_test.log_parameters({"a": "b", "c": "d", "e": 5, "f": nan})
+    assert under_test.trial_component.parameters == {"a": "b", "c": "d", "e": 5}
+
+
 def test_log_input(under_test):
     under_test.log_input("foo", "baz", "text/text")
     assert under_test.trial_component.input_artifacts == {
@@ -231,6 +243,11 @@ def test_log_metric(under_test):
     now = datetime.datetime.now()
     under_test.log_metric("foo", 1.0, 1, now)
     under_test._metrics_writer.log_metric.assert_called_with("foo", 1.0, 1, now)
+
+
+def test_log_metric_skip_invalid_value(under_test):
+    under_test.log_metric(None, nan, None, None)
+    assert not under_test._metrics_writer.log_metric.called
 
 
 def test_log_metric_attribute_error(under_test):
@@ -630,3 +647,19 @@ def test_log_roc_curve(under_test):
     )
 
     under_test._lineage_artifact_tracker.add_input_artifact("TestROCCurve", "s3uri_value", "etag_value", "ROCCurve")
+
+
+@pytest.mark.parametrize(
+    "metric_value",
+    [1.3, "nan", "inf", "-inf", None],
+)
+def test_is_input_valid(under_test, metric_value):
+    assert under_test._is_input_valid("metric", "Name", metric_value)
+
+
+@pytest.mark.parametrize(
+    "metric_value",
+    [nan, inf, -inf],
+)
+def test__is_input_valid_false(under_test, metric_value):
+    assert not under_test._is_input_valid("parameter", "Name", metric_value)
