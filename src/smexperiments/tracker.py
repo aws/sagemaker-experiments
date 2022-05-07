@@ -478,9 +478,9 @@ class Tracker(object):
         output_artifact=True,
         no_skill=None,
     ):
-        """Log a precision recall graph artifact. If your job is created by a pipeline
-        execution you can view the artifact by selecting the corresponding step in the pipelines UI.
-        The Trial Component UI currently does not support rendering of the artifact.
+        """Log a precision recall graph artifact. You can view the artifact in the charts tab of the
+        Trial Component UI. If your job is created by a pipeline execution you can view the artifact
+        by selecting the corresponding step in the pipelines UI.
         See also `SageMaker Pipelines <https://aws.amazon.com/sagemaker/pipelines/>`_
 
         Requires sklearn.
@@ -542,9 +542,9 @@ class Tracker(object):
         title=None,
         output_artifact=True,
     ):
-        """Log a receiver operating characteristic (ROC curve) artifact. If your job is created by a pipeline
-        execution you can view the artifact by selecting the corresponding step in the pipelines UI.
-        The Trial Component UI currently does not support rendering of the artifact.
+        """Log a receiver operating characteristic (ROC curve) artifact. You can view the artifact
+        in the charts tab of the Trial Component UI. If your job is created by a pipeline execution
+        you can view the artifact by selecting the corresponding step in the pipelines UI.
         See also `SageMaker Pipelines <https://aws.amazon.com/sagemaker/pipelines/>`_
 
         Requires sklearn.
@@ -595,9 +595,9 @@ class Tracker(object):
         title=None,
         output_artifact=True,
     ):
-        """Log a confusion matrix artifact. If your job is created by a pipeline execution you can view the
-        artifact by selecting the corresponding step in the pipelines UI. The Trial Component UI
-        currently does not support rendering of the artifact.
+        """Log a confusion matrix artifact. You can view the artifact in the charts tab of the
+        Trial Component UI. If your job is created by a pipeline execution you can view the
+        artifact by selecting the corresponding step in the pipelines UI.
         See also `SageMaker Pipelines <https://aws.amazon.com/sagemaker/pipelines/>`_
 
         Requires sklearn.
