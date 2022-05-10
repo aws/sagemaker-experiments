@@ -12,7 +12,7 @@
 # language governing permissions and limitations under the License.
 import os
 import random
-import time
+from datetime import datetime
 
 import boto3
 import botocore
@@ -44,7 +44,7 @@ def boto_session():
 def suffix():
     """Generate a random string of length 4"""
     alph = "abcdefghijklmnopqrstuvwxyz"
-    return "-".join([time.strftime("%Y-%m-%d-%H%M%S"), "".join(random.sample(alph, 4))])
+    return "-".join([datetime.utcnow().strftime("%Y-%m-%d-%H%M%S%f"), "".join(random.sample(alph, 4))])
 
 
 def name(prefix):
