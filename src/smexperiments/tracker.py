@@ -52,7 +52,7 @@ class Tracker(object):
 
     Note that parameters and input/output artifacts are saved to SageMaker directly via the
     UpdateTrialComponent operation. In contrast metrics (via `log_metric` method) are saved to a file, which is
-    then ingested into SageMaker via a metrics agent _which only runs on training job hosts. As a result any metrics
+    then ingested into SageMaker via a metrics agent which only runs on training job hosts. As a result any metrics
     logged in non-training job host environments will not be ingested into SageMaker.
 
     Parameters:
@@ -495,7 +495,7 @@ class Tracker(object):
                 y_scores = [0.1, 0.4, 0.35, 0.8]
                 no_skill = len(y_true[y_true==1]) / len(y_true)
 
-                my_tracker._log_precision_recall(y_true, y_scores, no_skill=no_skill)
+                my_tracker.log_precision_recall(y_true, y_scores, no_skill=no_skill)
 
         Args:
             y_true (array): True labels. If labels are not binary then positive_label should be given.
@@ -548,7 +548,7 @@ class Tracker(object):
         """Log a receiver operating characteristic (ROC curve) artifact. You can view the artifact
         in the charts tab of the Trial Component UI. If your job is created by a pipeline execution
         you can view the artifact by selecting the corresponding step in the pipelines UI.
-        See also `SageMaker Pipelines <https://aws.amazon.com/sagemaker/pipelines/>`_
+        See also `SageMaker Pipelines <https://aws.amazon.com/sagemaker/pipelines/>`.
 
         Requires sklearn.
 
@@ -615,7 +615,7 @@ class Tracker(object):
 
 
         Args:
-            y_true (array): True labels. If labels are not binary then positive_label should be given.
+            y_true (array): True labels.
             y_pred (array): Predicted labels.
             title (str, optional): Title of the graph, Defaults to none.
             output_artifact (boolean, optional): Determines if the artifact is associated with the
