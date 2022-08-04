@@ -167,6 +167,7 @@ class Tracker(object):
     @classmethod
     def create(
         cls,
+        base_trial_component_name="TrialComponent",
         display_name=None,
         artifact_bucket=None,
         artifact_prefix=None,
@@ -185,6 +186,7 @@ class Tracker(object):
                 my_tracker = tracker.Tracker.create()
 
         Args:
+            base_trial_component_name: (str,optional). The name of the trial component resource that will be appended with a timestamp. Defaults to "TrialComponent".
             display_name: (str, optional). The display name of the trial component to track.
             artifact_bucket: (str, optional) The name of the S3 bucket to store artifacts to.
             artifact_prefix: (str, optional) The prefix to write artifacts to within ``artifact_bucket``
@@ -201,7 +203,7 @@ class Tracker(object):
         sagemaker_boto_client = sagemaker_boto_client or _utils.sagemaker_client()
 
         tc = trial_component.TrialComponent.create(
-            trial_component_name=_utils.name("TrialComponent"),
+            trial_component_name=_utils.name(base_trial_component_name),
             display_name=display_name,
             sagemaker_boto_client=sagemaker_boto_client,
         )

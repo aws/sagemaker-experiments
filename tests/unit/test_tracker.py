@@ -149,11 +149,20 @@ def test_create(boto3_session, sagemaker_boto_client):
     trial_component_display_name = "foo-trial-component-display-name"
     sagemaker_boto_client.create_trial_component.return_value = {"TrialComponentName": trial_component_name}
     tracker_created = tracker.Tracker.create(
-        display_name=trial_component_display_name, sagemaker_boto_client=sagemaker_boto_client
+        base_trial_component_name="AlexName",
+        display_name=trial_component_display_name,
+        sagemaker_boto_client=sagemaker_boto_client,
     )
     assert trial_component_name == tracker_created.trial_component.trial_component_name
-
+    sagemaker_boto_client.create_trial_component.assert_called_with(
+        DisplayName="foo-trial-component-display-name", TrialComponentName=AnyStringWith("AlexName")
+    )
     assert tracker_created._metrics_writer is None
+
+
+class AnyStringWith(str):
+    def __eq__(self, other):
+        return self in other
 
 
 @pytest.fixture
