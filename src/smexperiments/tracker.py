@@ -186,7 +186,8 @@ class Tracker(object):
                 my_tracker = tracker.Tracker.create()
 
         Args:
-            base_trial_component_name: (str,optional). The name of the trial component resource that will be appended with a timestamp. Defaults to "TrialComponent".
+            base_trial_component_name: (str,optional). The name of the trial component resource that 
+                will be appended with a timestamp. Defaults to "TrialComponent".
             display_name: (str, optional). The display name of the trial component to track.
             artifact_bucket: (str, optional) The name of the S3 bucket to store artifacts to.
             artifact_prefix: (str, optional) The prefix to write artifacts to within ``artifact_bucket``
