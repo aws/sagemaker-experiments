@@ -89,10 +89,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Create Distribution
       run: python setup.py bdist_wheel
-    - name: Sign Release
-      run: |
-        echo "${{ secrets.PYPI_SIGN_PRIVATE_KEY }}" | gpg --batch --import --no-default-keyring --keyring ./sessionring.gpg
-        gpg --no-default-keyring --keyring ./sessionring.gpg --pinentry-mode loopback --passphrase ""${{ secrets.PYPI_SIGN_PASSPHRASE }}"" --detach-sign -ao /dev/null dist/*
     - name: Twine Check
       run: twine check dist/*
     - name: Publish to Test PyPi
