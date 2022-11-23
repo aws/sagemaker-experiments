@@ -78,7 +78,7 @@ class TrialComponentEnvironment(object):
         while time.time() - start < 300:
             summaries = list(
                 trial_component.TrialComponent.list(
-                    source_arn=self.source_arn, sagemaker_boto_client=sagemaker_boto_client
+                    source_arn=self.source_arn.lower(), sagemaker_boto_client=sagemaker_boto_client
                 )
             )
             if summaries:

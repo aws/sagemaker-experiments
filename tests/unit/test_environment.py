@@ -16,6 +16,9 @@ import shutil
 import tempfile
 import unittest
 
+# https://github.com/coala/coala-bears/issues/2862
+from unittest.mock import patch
+
 import pytest
 
 from smexperiments import _environment
@@ -36,7 +39,7 @@ def sagemaker_boto_client():
 @pytest.fixture
 def training_job_env():
     old_value = os.environ.get("TRAINING_JOB_ARN")
-    os.environ["TRAINING_JOB_ARN"] = "arn:1234"
+    os.environ["TRAINING_JOB_ARN"] = "arn:1234aBcDe"
     yield os.environ
     del os.environ["TRAINING_JOB_ARN"]
     if old_value:
@@ -46,17 +49,17 @@ def training_job_env():
 def test_processing_job_environment(tempdir):
     config_path = os.path.join(tempdir, "config.json")
     with open(config_path, "w") as f:
-        f.write(json.dumps({"ProcessingJobArn": "arn:1234"}))
+        f.write(json.dumps({"ProcessingJobArn": "arn:1234aBcDe"}))
     environment = _environment.TrialComponentEnvironment.load(processing_job_config_path=config_path)
 
     assert _environment.EnvironmentType.SageMakerProcessingJob == environment.environment_type
-    assert "arn:1234" == environment.source_arn
+    assert "arn:1234aBcDe" == environment.source_arn
 
 
 def test_training_job_environment(training_job_env):
     environment = _environment.TrialComponentEnvironment.load()
     assert _environment.EnvironmentType.SageMakerTrainingJob == environment.environment_type
-    assert "arn:1234" == environment.source_arn
+    assert "arn:1234aBcDe" == environment.source_arn
 
 
 def test_no_environment():
@@ -70,9 +73,11 @@ def test_resolve_trial_component(training_job_env, sagemaker_boto_client):
     }
     sagemaker_boto_client.describe_trial_component.return_value = {"TrialComponentName": trial_component_name}
     environment = _environment.TrialComponentEnvironment.load()
+
     tc = environment.get_trial_component(sagemaker_boto_client)
 
     assert trial_component_name == tc.trial_component_name
+    sagemaker_boto_client.list_trial_components.assert_called_with(SourceArn="arn:1234abcde")
     sagemaker_boto_client.describe_trial_component.assert_called_with(TrialComponentName=trial_component_name)
 
 
