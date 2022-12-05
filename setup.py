@@ -69,7 +69,7 @@ setup(
             "pytest-xdist",
             "docker",
             "pandas",
-            "sklearn",
+            "scikit-learn",
         ]
     },
 )
