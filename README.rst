@@ -199,7 +199,7 @@ To run the integration tests, the following prerequisites must be met:
 
 .. code-block:: bash
 
-    tox -e py37 -- --region cn-north-1
+    tox -e py39 -- --region cn-north-1
     
 **Docker Based Integration Tests**
 
@@ -229,10 +229,10 @@ Docker Setup
 .. code-block:: bash
 
     # run only docker based tests
-    tox -e py38 -- tests/integ -m 'docker'
+    tox -e py39 -- tests/integ -m 'docker'
     
     # exclude docker based tests
-    tox -e py38 -- tests/integ -m 'not docker'
+    tox -e py39 -- tests/integ -m 'not docker'
 
 
 

@@ -36,10 +36,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - name: Setup Python 3.6
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.6
       - name: Setup Python 3.7
         uses: actions/setup-python@v1
         with:
@@ -48,6 +44,10 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: 3.8
+      - name: Setup Python 3.9
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.9
       - name: Install Dependencies
         run: pip install tox
       # runs unit tests for each python version
@@ -58,7 +58,7 @@ jobs:
       - name: Integration Tests
       # pull requests are untrusted and do not have access to secrets needed for integ tests
         if: github.event_name != 'pull_request'
-        run: tox -e py36 -- tests/integ
+        run: tox -e py39 -- tests/integ
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

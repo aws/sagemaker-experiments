@@ -8,20 +8,21 @@ information to effectively respond to your bug report or contribution.
 
 ## Table of Contents
 
-* [Table of Contents](#table-of-contents)
-* [Reporting Bugs/Feature Requests](#reporting-bugsfeature-requests)
-* [Contributing via Pull Requests (PRs)](#contributing-via-pull-requests-prs)
-  * [Setting up Your Development Environment *[Optional, but Recommended]*](#setting-up-your-development-environment-optional-but-recommended)  
-  * [Pulling Down the Code](#pulling-down-the-code)
-  * [Running the Unit Tests](#running-the-unit-tests)
-  * [Running the Integration Tests](#running-the-integration-tests)
-  * [Making and Testing Your Change](#making-and-testing-your-change)
-  * [Committing Your Change](#committing-your-change)
-  * [Sending a Pull Request](#sending-a-pull-request)
-* [Finding Contributions to Work On](#finding-contributions-to-work-on)
-* [Code of Conduct](#code-of-conduct)
-* [Security Issue Notifications](#security-issue-notifications)
-* [Licensing](#licensing)
+- [Contributing Guidelines](#contributing-guidelines)
+  - [Table of Contents](#table-of-contents)
+  - [Reporting Bugs/Feature Requests](#reporting-bugsfeature-requests)
+  - [Contributing via Pull Requests](#contributing-via-pull-requests)
+    - [Setting Up Your Development Environment](#setting-up-your-development-environment)
+    - [Pulling Down the Code](#pulling-down-the-code)
+    - [Running the Unit Tests](#running-the-unit-tests)
+    - [Running the Integration Tests](#running-the-integration-tests)
+    - [Making and Testing Your Change](#making-and-testing-your-change)
+    - [Sending a Pull Request](#sending-a-pull-request)
+    - [Committing Your Change](#committing-your-change)
+  - [Finding contributions to work on](#finding-contributions-to-work-on)
+  - [Code of Conduct](#code-of-conduct)
+  - [Security issue notifications](#security-issue-notifications)
+  - [Licensing](#licensing)
 
 ## Reporting Bugs/Feature Requests
 
@@ -72,9 +73,9 @@ GitHub provides additional document on [forking a repository](https://help.githu
 1. cd into the sagemaker-experiments folder: `cd sagemaker-experiments` or `cd /environment/sagemaker-experiments`
 1. Run the following tox command and verify that all code checks and unit tests pass: `tox -- tests/unit`
 
-You can also run a single test with the following command: `tox -e py36 -- -s -vv <path_to_file><file_name>::<test_function_name>`  
+You can also run a single test with the following command: `tox -e py39 -- -s -vv <path_to_file><file_name>::<test_function_name>`  
   * Note that the coverage test will fail if you only run a single test, so make sure to surround the command with `export IGNORE_COVERAGE=-` and `unset IGNORE_COVERAGE`
-  * Example: `export IGNORE_COVERAGE=- ; tox -e py36 -- -s -vv tests/unit/test_experiment.py::test_processing_job_environment ; unset IGNORE_COVERAGE`
+  * Example: `export IGNORE_COVERAGE=- ; tox -e py39 -- -s -vv tests/unit/test_experiment.py::test_processing_job_environment ; unset IGNORE_COVERAGE`
 
 ### Running the Integration Tests
 
@@ -82,9 +83,9 @@ Our CI system runs integration tests (the ones in the `tests/integ` directory), 
 You should only worry about manually running any new integration tests that you write, or integration tests that test an area of code that you've modified.  
 
 1. Follow the instructions at [Set Up the AWS Command Line Interface (AWS CLI)](https://docs.aws.amazon.com/polly/latest/dg/setup-aws-cli.html).
-1. To run a test, specify the test file and method you want to run per the following command: `tox -e py36 -- -s -vv <path_to_file><file_name>::<test_function_name>`
+1. To run a test, specify the test file and method you want to run per the following command: `tox -e py39 -- -s -vv <path_to_file><file_name>::<test_function_name>`
    * Note that the coverage test will fail if you only run a single test, so make sure to surround the command with `export IGNORE_COVERAGE=-` and `unset IGNORE_COVERAGE`
-   * Example: `export IGNORE_COVERAGE=- ; tox -e py36 -- -s -vv tests/integ/test_tf_script_mode.py::test_mnist ; unset IGNORE_COVERAGE`
+   * Example: `export IGNORE_COVERAGE=- ; tox -e py39 -- -s -vv tests/integ/test_tf_script_mode.py::test_mnist ; unset IGNORE_COVERAGE`
 1. optionally run slow tests `tox -e slow-tests`
 
 ### Making and Testing Your Change
