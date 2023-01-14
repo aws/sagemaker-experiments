@@ -431,11 +431,11 @@ class Tracker(object):
                     "x": [1,2,3],
                     "y": [4,5,6]
                 }
-                my_tracker.log_table('SampleData',table_data)
+                my_tracker.log_table('SampleData', table_data)
 
-                # or log a data frame
+                # or log a DataFrame
                 df = pd.DataFrame(data=table_data)
-                my_tracker.log_table('SampleData',df)
+                my_tracker.log_table('SampleData', data_frame=df)
 
         Args:
             title (str, optional): Title of the table. Defaults to None.
