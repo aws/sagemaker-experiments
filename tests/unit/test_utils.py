@@ -16,15 +16,18 @@ def boto3_session():
 
 
 def test_sagemaker_client_endpoint_env_set():
-    current = os.environ.get("SAGEMAKER_ENDPOINT")
+    current_endpoint = os.environ.get("SAGEMAKER_ENDPOINT")
+    current_region = os.environ.get("AWS_REGION")
+
     os.environ["SAGEMAKER_ENDPOINT"] = "https://notexist.amazon.com"
+    os.environ["AWS_REGION"] = "arc-north-1"
 
     client = _utils.sagemaker_client()
 
     assert client._endpoint.host == "https://notexist.amazon.com"
 
-    if current is not None:
-        os.environ["SAGEMAKER_ENDPOINT"] = current
+    os.environ["SAGEMAKER_ENDPOINT"] = current_endpoint if current_endpoint is not None else ""
+    os.environ["AWS_REGION"] = current_region if current_region is not None else ""
 
 
 def test_get_or_create_default_bucket_bucket_already_owned(boto3_session):

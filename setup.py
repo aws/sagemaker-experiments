@@ -55,6 +55,8 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
     setup_requires=["setuptools_scm", "setuptools"],
     install_requires=required_packages,
@@ -62,7 +64,7 @@ setup(
         "test": [
             "tox==3.13.1",
             "flake8",
-            "pytest==4.4.1",
+            "pytest",
             "pytest-cov",
             "pytest-coverage",
             "pytest-rerunfailures",
