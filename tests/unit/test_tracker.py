@@ -364,7 +364,6 @@ def test_log_multiple_output_artifact(under_test):
 
 
 def test_log_pr_curve(under_test):
-
     y_true = [0, 0, 1, 1]
     y_scores = [0.1, 0.4, 0.35, 0.8]
     no_skill = 0.1
@@ -392,7 +391,6 @@ def test_log_pr_curve(under_test):
 
 
 def test_log_confusion_matrix(under_test):
-
     y_true = [2, 0, 2, 2, 0, 1]
     y_pred = [0, 0, 2, 2, 0, 2]
 
@@ -445,7 +443,6 @@ def test_artifact_uploader_init(artifact_uploader):
 
 
 def test_artifact_uploader_upload_artifact_file_not_exists(tempdir, artifact_uploader):
-
     not_exist_file = os.path.join(tempdir, "not.exists")
     with pytest.raises(ValueError):
         artifact_uploader.upload_artifact(not_exist_file)
@@ -591,7 +588,6 @@ def test_log_table_invalid_values(under_test):
 
 
 def test_log_table(under_test):
-
     values = {"x": [1, 2, 3], "y": [4, 5, 6]}
 
     under_test._artifact_uploader.upload_object_artifact.return_value = ("s3uri_value", "etag_value")
@@ -615,7 +611,6 @@ def test_log_table(under_test):
 
 
 def test_log_table_dataframe(under_test):
-
     dataframe = pd.DataFrame({"x": [1, 2, 3], "y": [4, 5, 6]})
 
     under_test._artifact_uploader.upload_object_artifact.return_value = ("s3uri_value", "etag_value")
