@@ -143,7 +143,6 @@ def test_create_default_bucket(boto3_session):
 
 
 def test_create_lineage_artifacts(trial_component_obj, bucket, tempdir, sagemaker_boto_client):
-
     prefix = name()
     file_contents = "test lineage artifact"
     file_path = os.path.join(tempdir, "bar.txt")
@@ -174,7 +173,6 @@ def test_create_lineage_artifacts(trial_component_obj, bucket, tempdir, sagemake
 
 
 def test_log_table_artifact(trial_component_obj, bucket, sagemaker_boto_client):
-
     prefix = name()
     artifact_name = "TestTableTitle"
 

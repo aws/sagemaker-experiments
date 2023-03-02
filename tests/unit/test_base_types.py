@@ -63,7 +63,6 @@ class DummyRecordSummary(_base_types.ApiObject):
 
 
 class DummyRecord(_base_types.Record):
-
     _boto_create_method = "create"
     _boto_update_method = "update"
     _boto_delete_method = "delete"

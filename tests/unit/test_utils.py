@@ -31,7 +31,6 @@ def test_sagemaker_client_endpoint_env_set():
 
 
 def test_get_or_create_default_bucket_bucket_already_owned(boto3_session):
-
     exception = botocore.exceptions.ClientError(
         error_response={"Error": {"Code": "BucketAlreadyOwnedByYou", "Message": "BucketAlreadyOwnedByYou"}},
         operation_name="CreateBucket",
@@ -46,7 +45,6 @@ def test_get_or_create_default_bucket_bucket_already_owned(boto3_session):
 
 
 def test_get_or_create_default_bucket_operation_aborted(boto3_session):
-
     exception = botocore.exceptions.ClientError(
         error_response={"Error": {"Code": "OperationAborted", "Message": "foo conflicting conditional operation bar"}},
         operation_name="CreateBucket",
