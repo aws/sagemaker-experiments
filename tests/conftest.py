@@ -319,9 +319,7 @@ def training_role_arn(boto3_session):
       "Effect": "Allow",
       "Principal": {
         "Service": [
-          "sagemaker.amazonaws.com",
-          "maeve.aws.internal",
-          "ease.aws.internal"
+          "sagemaker.amazonaws.com"
         ]
       },
       "Action": "sts:AssumeRole"
