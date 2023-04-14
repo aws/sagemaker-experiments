@@ -4,18 +4,12 @@
     :target: https://aws.amazon.com/sagemaker/
 
 ================================
-SageMaker Experiments Python SDK
+**NOTE:** Use the SageMaker `SDK <https://sagemaker.readthedocs.io/en/v2.125.0/experiments/sagemaker.experiments.html>`_ to use SageMaker Experiments. This repository will not be up to date with the latest product improvements. Link to `developer guide <https://docs.aws.amazon.com/sagemaker/latest/dg/experiments.html>`_. 
 ================================
 
-.. warning::
-    Use the SageMaker `SDK <https://sagemaker.readthedocs.io/en/v2.125.0/experiments/sagemaker.experiments.html>`_ to use SageMaker Experiments. This repository will not be up to date with the latest product improvements. Link to `developer guide <https://docs.aws.amazon.com/sagemaker/latest/dg/experiments.html>`_. 
-
-.. warning::
-    This is warning text. Use a warning for information the user must
-    understand to avoid negative consequences.
-
-    Warnings are formatted in the same way as notes. In the same way,
-    lines must be broken and indented under the warning tag.
+================================
+SageMaker Experiments Python SDK
+================================
 
 .. image:: https://img.shields.io/pypi/v/sagemaker-experiments.svg
     :target: https://pypi.python.org/pypi/sagemaker-experiments
