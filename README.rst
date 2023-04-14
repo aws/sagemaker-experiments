@@ -4,6 +4,10 @@
     :target: https://aws.amazon.com/sagemaker/
 
 ================================
+**NOTE:** This repository should no longer be used for SageMaker Experiments. Instead use the following [SDK](https://sagemaker.readthedocs.io/en/v2.125.0/experiments/sagemaker.experiments.html). Link to [developer guide](https://docs.aws.amazon.com/sagemaker/latest/dg/experiments.html). 
+================================
+
+================================
 SageMaker Experiments Python SDK
 ================================
 
