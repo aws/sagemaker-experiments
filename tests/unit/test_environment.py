@@ -77,7 +77,7 @@ def test_resolve_trial_component(training_job_env, sagemaker_boto_client):
     tc = environment.get_trial_component(sagemaker_boto_client)
 
     assert trial_component_name == tc.trial_component_name
-    sagemaker_boto_client.list_trial_components.assert_called_with(SourceArn="arn:1234abcde")
+    sagemaker_boto_client.list_trial_components.assert_called_with(SourceArn="arn:1234aBcDe")
     sagemaker_boto_client.describe_trial_component.assert_called_with(TrialComponentName=trial_component_name)
 
 
