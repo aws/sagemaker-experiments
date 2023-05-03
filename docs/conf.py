@@ -69,7 +69,7 @@ html_static_path = []
 htmlhelp_basename = "%sdoc" % project
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {"http://docs.python.org/": None}
+intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
 # autosummary
 autosummary_generate = True
