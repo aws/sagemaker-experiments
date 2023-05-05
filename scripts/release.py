@@ -38,13 +38,15 @@ def get_version_increment_type(last_version):
 
 
 def fetch_latest_and_verify(expected_version_tag):
-    check_output(["git", "fetch"])
+    check_output(["git", "fetch", "--all"])
     latest_version = get_current_version()
     if latest_version != expected_version_tag:
         raise ValueError(f"Expected {expected_version_tag} to be latest tag, but was {latest_version}")
 
 
 def get_current_version():
+    # ensure tags retrieved
+    check_output(["git", "fetch", "--all"])
     # get the last release tag
     stdout = check_output(["git", "describe", "--abbrev=0", "--tags"])
     stdout = stdout.decode("utf-8")
