@@ -37,7 +37,7 @@ SageMaker Experiments Python SDK
     :target: https://pypi.org/project/coverage/
     :alt: Kit format
 
-.. image:: https://img.shields.io/github/workflow/status/aws/sagemaker-experiments/Main
+.. image:: https://img.shields.io/github/actions/workflow/status/aws/sagemaker-experiments/test_release.yml?branch=main
     :target: https://github.com/aws/sagemaker-experiments/actions
     :alt: GitHub Workflow Status
 
