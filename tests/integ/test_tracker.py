@@ -17,7 +17,7 @@ import pytest
 
 from tests.helpers import name, wait_for_trial_component
 from smexperiments import tracker, trial_component, _utils
-from tests.helpers import retry
+from tests.helpers import retry, delete_artifact
 
 
 def test_load_trial_component(trial_component_obj, sagemaker_boto_client):
@@ -96,6 +96,7 @@ def test_log_artifact(trial_component_obj, bucket, tempdir, sagemaker_boto_clien
         sagemaker_boto_client=sagemaker_boto_client,
     ) as tracker_obj:
         tracker_obj.log_artifact(file_path, name=artifact_name)
+        artifacts = tracker_obj._lineage_artifact_tracker.artifacts
 
     loaded = trial_component.TrialComponent.load(
         trial_component_name=trial_component_obj.trial_component_name,
@@ -103,6 +104,13 @@ def test_log_artifact(trial_component_obj, bucket, tempdir, sagemaker_boto_clien
     )
     assert "text/plain" == loaded.output_artifacts[artifact_name].media_type
     assert prefix in loaded.output_artifacts[artifact_name].value
+
+    try:
+        delete_artifact(
+            sagemaker_boto_client, artifacts[0].artifact_arn, disassociate=True
+        )
+    except:
+        logging.info("Artifacts are not deleted properly.")
 
 
 def test_log_artifacts(trial_component_obj, bucket, tempdir, sagemaker_boto_client):
@@ -122,6 +130,7 @@ def test_log_artifacts(trial_component_obj, bucket, tempdir, sagemaker_boto_clie
         sagemaker_boto_client=sagemaker_boto_client,
     ) as tracker_obj:
         tracker_obj.log_artifacts(tempdir)
+        artifacts = tracker_obj._lineage_artifact_tracker.artifacts
     loaded = trial_component.TrialComponent.load(
         trial_component_name=trial_component_obj.trial_component_name,
         sagemaker_boto_client=sagemaker_boto_client,
@@ -130,6 +139,14 @@ def test_log_artifacts(trial_component_obj, bucket, tempdir, sagemaker_boto_clie
     assert prefix in loaded.output_artifacts["foo"].value
     assert "text/plain" == loaded.output_artifacts["bar"].media_type
     assert prefix in loaded.output_artifacts["bar"].value
+
+    try:
+        for artifact in artifacts:
+            delete_artifact(
+                sagemaker_boto_client, artifact.artifact_arn, disassociate=True
+            )
+    except:
+        logging.info("Artifacts are not deleted properly.")
 
 
 def test_create_default_bucket(boto3_session):
@@ -158,6 +175,7 @@ def test_create_lineage_artifacts(trial_component_obj, bucket, tempdir, sagemake
         sagemaker_boto_client=sagemaker_boto_client,
     ) as tracker_obj:
         tracker_obj.log_output_artifact(file_path, name=artifact_name)
+        artifacts = tracker_obj._lineage_artifact_tracker.artifacts
 
     response = sagemaker_boto_client.list_associations(SourceArn=trial_component_obj.trial_component_arn)
     associations = response["AssociationSummaries"]
@@ -170,6 +188,14 @@ def test_create_lineage_artifacts(trial_component_obj, bucket, tempdir, sagemake
         assert summary["DestinationName"] == artifact_name
 
     retry(validate, num_attempts=4)
+
+    try:
+        for artifact in artifacts:
+            delete_artifact(
+                sagemaker_boto_client, artifact.artifact_arn, disassociate=True
+            )
+    except:
+        logging.info("Artifacts are not deleted properly")
 
 
 def test_log_table_artifact(trial_component_obj, bucket, sagemaker_boto_client):
@@ -185,6 +211,7 @@ def test_log_table_artifact(trial_component_obj, bucket, sagemaker_boto_client):
         sagemaker_boto_client=sagemaker_boto_client,
     ) as tracker_obj:
         tracker_obj.log_table(title=artifact_name, values=values)
+        artifacts = tracker_obj._lineage_artifact_tracker.artifacts
 
     response = sagemaker_boto_client.list_associations(SourceArn=trial_component_obj.trial_component_arn)
     associations = response["AssociationSummaries"]
@@ -197,3 +224,10 @@ def test_log_table_artifact(trial_component_obj, bucket, sagemaker_boto_client):
         assert summary["DestinationName"] == artifact_name
 
     retry(validate, num_attempts=4)
+
+    try:
+        delete_artifact(
+            sagemaker_boto_client, artifacts[0].artifact_arn, disassociate=True
+        )
+    except:
+        logging.info("Artifacts are not deleted properly.")
