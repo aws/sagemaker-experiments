@@ -163,3 +163,36 @@ def wait_for_trial_component(sagemaker_client, training_job_name=None, trial_com
             except sagemaker_client.exceptions.ResourceNotFound:
                 logging.info("Trial component %s not created yet.", trial_component_name)
                 time.sleep(5)
+
+
+def delete_artifact(sagemaker_client, artifact_arn, disassociate: bool = False):
+    """Delete the artifact object.
+
+    Args:
+        disassociate (bool): When set to true, disassociate incoming and outgoing association.
+    """
+    if disassociate:
+        _disassociate(sagemaker_client, source_arn=artifact_arn)
+        _disassociate(sagemaker_client, destination_arn=artifact_arn)
+    sagemaker_client.delete_artifact(ArtifactArn=artifact_arn)
+
+
+def _disassociate(sagemaker_client, source_arn=None, destination_arn=None):
+    """Remove the association.
+
+    Remove incoming association when source_arn is provided, remove outgoing association when
+    destination_arn is provided.
+    """
+    params = {
+        "SourceArn": source_arn,
+        "DestinationArn": destination_arn,
+    }
+    not_none_params = {k: v for k, v in params.items() if v is not None}
+
+    # list_associations() returns a maximum of 10 associations by default. Test case would not exceed 10.
+    association_summaries = sagemaker_client.list_associations(**not_none_params)
+    for association_summary in association_summaries["AssociationSummaries"]:
+        sagemaker_client.delete_association(
+            SourceArn=association_summary["SourceArn"],
+            DestinationArn=association_summary["DestinationArn"],
+        )
