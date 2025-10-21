@@ -12,6 +12,9 @@ on:
     # every weekday at 17:00 UTC
     - cron: '0 17 * * 1-5'
 
+permissions:
+  contents: write
+
 jobs:
   lint:
     runs-on: ubuntu-latest
