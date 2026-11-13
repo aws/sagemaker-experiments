@@ -248,6 +248,30 @@ def test_log_output(under_test):
     }
 
 
+@pytest.mark.parametrize("direction", ["input", "output"])
+def test_replace_named_artifact_at_capacity(under_test, direction):
+    artifacts = getattr(under_test.trial_component, direction + "_artifacts")
+    artifacts.update({"file%d.txt" % index: api_types.TrialComponentArtifact("old") for index in range(30)})
+
+    getattr(under_test, "log_" + direction)("file0.txt", "new", "text/plain")
+
+    assert len(artifacts) == 30
+    assert artifacts["file0.txt"].value == "new"
+
+
+@pytest.mark.parametrize("direction", ["input", "output"])
+@pytest.mark.parametrize("name", [None, "file0.txt"])
+def test_replace_uploaded_artifact_at_capacity(under_test, direction, name):
+    artifacts = getattr(under_test.trial_component, direction + "_artifacts")
+    artifacts.update({"file%d.txt" % index: api_types.TrialComponentArtifact("old") for index in range(30)})
+    under_test._artifact_uploader.upload_artifact.return_value = ("s3://bucket/new", "etag")
+
+    getattr(under_test, "log_" + direction + "_artifact")("file0.txt", name, "text/plain")
+
+    assert len(artifacts) == 30
+    assert artifacts["file0.txt"].value == "s3://bucket/new"
+
+
 def test_log_metric(under_test):
     now = datetime.datetime.now()
     under_test.log_metric("foo", 1.0, 1, now)
